@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update table="sys_ws_operation">
+    <sys_ws_operation action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <consumes>application/json,application/xml,text/xml</consumes>
+        <consumes_customized>false</consumes_customized>
+        <default_operation_uri/>
+        <enforce_acl/>
+        <http_method>DELETE</http_method>
+        <name>Delete a record</name>
+        <operation_script><![CDATA[(function process(/*RESTAPIRequest*/ request, /*RESTAPIResponse*/ response) {
+
+	var path = request.pathParams;
+	var queryParams = request.queryParams;
+	
+	var restUrl = gs.getProperty('glide.servlet.uri') + 'api/now/table/' + path.table + '/' + path.sys_id;
+	var req = new sn_ws.RESTMessageV2();
+	var parser = new global.JSON();
+	
+	req.setEndpoint(restUrl);  
+	req.setHttpMethod('DELETE'); 
+	
+	req.setBasicAuth("api.user","W3ath3r@p1!");
+	req.setRequestHeader('Accept','application/json');
+	req.setRequestHeader('Content-Type','application/json');
+	
+	for (var property in queryParams) {
+		if (queryParams.hasOwnProperty(property)) {
+        	req.setQueryParameter(property, queryParams[property][0]);
+		}
+	}
+	
+	var res =  req.execute(); 
+	
+	return {};
+
+})(request, response);
+]]></operation_script>
+        <operation_uri>/api/x_wec_product/table/{table}/{sys_id}</operation_uri>
+        <produces>application/json,application/xml,text/xml</produces>
+        <produces_customized>false</produces_customized>
+        <relative_path>/{table}/{sys_id}</relative_path>
+        <request_example/>
+        <requires_acl_authorization>false</requires_acl_authorization>
+        <requires_authentication>true</requires_authentication>
+        <short_description/>
+        <sys_class_name>sys_ws_operation</sys_class_name>
+        <sys_created_by>andrey.zlatin@weather.com</sys_created_by>
+        <sys_created_on>2016-08-02 23:16:06</sys_created_on>
+        <sys_customer_update>true</sys_customer_update>
+        <sys_id>d33aee7c0f8daa0034457d4ce1050e44</sys_id>
+        <sys_mod_count>2</sys_mod_count>
+        <sys_name>Delete a record</sys_name>
+        <sys_package display_value="Product" source="x_wec_product">daa7dccd0f44220034457d4ce1050e47</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Product">daa7dccd0f44220034457d4ce1050e47</sys_scope>
+        <sys_update_name>sys_ws_operation_d33aee7c0f8daa0034457d4ce1050e44</sys_update_name>
+        <sys_updated_by>andrey.zlatin@weather.com</sys_updated_by>
+        <sys_updated_on>2016-08-08 13:43:26</sys_updated_on>
+        <web_service_definition display_value="Table API">365010a60ffce2006c3005cce1050e21</web_service_definition>
+        <web_service_version/>
+    </sys_ws_operation>
+</record_update>

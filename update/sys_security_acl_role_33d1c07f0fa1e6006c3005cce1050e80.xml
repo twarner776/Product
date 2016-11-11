@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update table="sys_security_acl_role">
+    <sys_security_acl_role action="INSERT_OR_UPDATE">
+        <sys_class_name>sys_security_acl_role</sys_class_name>
+        <sys_created_by>anton.sychikov.contractor@weather.com</sys_created_by>
+        <sys_created_on>2016-09-05 15:11:06</sys_created_on>
+        <sys_customer_update>true</sys_customer_update>
+        <sys_id>33d1c07f0fa1e6006c3005cce1050e80</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>x_wec_product_dependings_product.x_wec_product.user</sys_name>
+        <sys_package display_value="Product" source="x_wec_product">daa7dccd0f44220034457d4ce1050e47</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Product">daa7dccd0f44220034457d4ce1050e47</sys_scope>
+        <sys_security_acl display_value="x_wec_product_dependings_product">3fd1043f0fa1e6006c3005cce1050e93</sys_security_acl>
+        <sys_update_name>sys_security_acl_role_33d1c07f0fa1e6006c3005cce1050e80</sys_update_name>
+        <sys_updated_by>anton.sychikov.contractor@weather.com</sys_updated_by>
+        <sys_updated_on>2016-09-05 15:11:06</sys_updated_on>
+        <sys_user_role display_value="x_wec_product.user" name="x_wec_product.user">2aa79c010f84220034457d4ce1050e45</sys_user_role>
+        <transaction_id/>
+    </sys_security_acl_role>
+</record_update>

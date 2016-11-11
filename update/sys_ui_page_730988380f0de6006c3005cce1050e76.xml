@@ -1,0 +1,455 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update table="sys_ui_page">
+    <sys_ui_page action="INSERT_OR_UPDATE">
+        <category>general</category>
+        <client_script/>
+        <description/>
+        <direct>true</direct>
+        <endpoint>x_wec_product_toc-dahboard-tpl.do</endpoint>
+        <html><![CDATA[<?xml version="1.0" encoding="utf-8" ?>
+<j:jelly trim="false" xmlns:j="jelly:core" xmlns:g="glide" xmlns:j2="null" xmlns:g2="null">
+	<ol class="breadcrumb">
+		<li><a href="https://service.weather.com">Home</a></li>
+		<li><a href="/x_wec_product_box-app.do#/dashboard">My Apps</a></li>
+		<li class="active">TOC Dashboard</li>
+	</ol>
+	
+	<div class="row" ng-if="tdb.changeFreeze.length > 0">
+		<div class="col-sm-12">
+			<div class="alert alert-danger" role="alert" ng-repeat="item in tdb.changeFreeze">
+				<strong><i class="fa fa-ban" aria-hidden="true"></i></strong>&#160;&#160;Change Freeze in Effect from {{item.u_maintenance_start_time.display_value}} to {{item.u_maintenance_projected_end_time.display_value}}
+				<span class="pull-right">#{{item.number.display_value}}</span>
+			</div>
+		</div>
+	</div>
+	
+	<div class="row">
+		<div class="col-sm-12">
+
+			<div class="col-sm-3" ng-repeat="item in tdb.reminder track by $index">
+
+				<div class="alert alert-danger">
+					<a href="" class="close" data-dismiss="alert" aria-label="close" ng-click="tdb.reminderClose(item);">&#215;</a>
+					<strong><a href="/x_wec_communicatio_app.do#/notification/{{item.sys_id.value}}" target="_blank" class="text-danger">{{item.number.display_value}}</a></strong>&#160;{{item.u_title.display_value}}
+					<p>{{item.u_notification_type.display_value}}</p>
+					<p>{{item.reminderTime | date : 'yyyy-MM-dd hh:mm a'}}</p>
+					<span style="font-size: 10px;">This reminder will be removed if not confirmed in 24hrs of alerted time.</span>
+				</div>			
+			
+			</div>			
+		
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-sm-12">
+			<div class="panel panel-primary">
+				<div class="panel-heading twc-panel-heading"><span style="position: absolute; left: 22px;">Data refreshed every 30 seconds</span>TWC Overview <i class="fa fa-refresh fa-spin fa-1x fa-fw pull-right" ng-show="tdb.loadTickets"></i></div>
+			</div>			
+		</div>
+	</div>
+	<style>
+		
+		/* Specify styling for tooltip contents */
+		.tooltip.tooltipCustomClass .tooltip-inner {
+			max-width: 400px!important;
+			text-align: left;
+			word-wrap:break-word;
+			background-color: #f5f5f5;
+			color: #000;
+		    border: 1px solid rgba(0,0,0,.2);
+			opacity: 1;
+		}
+		.tooltip.tooltipCustomClass{
+			opacity: 1!important;
+		}
+		
+		.dummy {
+			margin-top: 100%;
+		}
+		.thumbnail {
+			position: absolute;
+			top: 15px;
+			bottom: 0;
+			left: 15px;
+			right: 15px;
+			cursor: pointer;
+			color: #737f8b;
+			box-shadow: 0 1rem 1em 0 rgba(189,195,199,0.6);
+			transition: 120ms ease-in-out;
+			padding: 0px;
+			margin-bottom: 5px;
+		}
+
+		.thumbnail:hover{
+		   transform: translateY(-5px);
+		   background-color: #bfbebe;
+		}
+		
+		.tickets_panel div.critical{
+			background-color:  #fb0202;
+			color: white;
+		}
+
+		.tickets_panel div.warning{
+			background-color: #fb9402;
+			color: white;
+		}
+
+		.tickets_panel div.info{
+			background-color: #022bfb;
+			color: white;
+		}
+
+		.font-size-1 h4{
+		   font-size: 1.5em;
+		   line-height: 2rem;
+		   letter-spacing: .01625rem;
+		
+		}
+
+		.font-size-2 h4{
+		   font-size: 1.2em;
+      	   line-height: 2rem;
+		   letter-spacing: .01625rem;
+		
+		}
+
+		.font-size-3 h4{
+		   font-size: 1em;
+    	   line-height: 1.3rem;
+		   letter-spacing: 0rem;
+		   margin-top: 1px;
+		   margin-bottom: 1px;		
+		}
+
+		.font-size-4 h4{
+		   font-size: 0.8em;
+    	   line-height: 1.3rem;
+		   letter-spacing: 0rem;
+		   margin-top: 1px;
+		   margin-bottom: 1px;		
+		}
+
+		.twc-circle-footer {
+			position: absolute;
+			bottom: 3px;
+			right: 3px;
+		}
+		
+        .pagination a, .pagination span{
+		   padding: 3px 6px!important;
+		}
+		
+		.abbr{
+			cursor: help;
+			border-bottom: 1px dotted #777;
+		}		
+		
+	</style>
+	<div class="row" ng-class="tdb.font">
+		<div class="col-sm-4" style="padding-right: 0px; padding-left: 0px;">
+			<div class="panel-heading twc-panel-heading"><span class="ticket-number">P1 - Critical Incidents</span></div>
+		</div>	
+		<div class="col-sm-4" style="padding-right: 0px; padding-left: 0px;">
+			<div class="panel-heading twc-panel-heading"><span class="ticket-number">P2 - High Incidents</span></div>
+		</div>	
+		<div class="col-sm-4" style="padding-right: 0px; padding-left: 0px;">
+			<div class="panel-heading twc-panel-heading"><span class="ticket-number">Opened Problems</span></div>
+		</div>	
+	</div>	
+	<div class="row" ng-class="tdb.font">
+		<div class="col-sm-4" style="padding-right: 0px; padding-left: 0px;">
+			
+			<div class="col-md-6 col-sm-12 col-xs-12 tickets" 
+				 ng-repeat="item in tdb.critical track by $index" ng-click="tdb.state.go('task', {id: item.t_sys_id.value});">
+				<div class="dummy"></div>
+				<div class="thumbnail purple">
+					<i class="fa fa-circle twc-circle-footer" aria-hidden="true" ng-style="tdb.getCircleStyle(item, 't_')"></i>
+					<div class="tickets_panel">
+						<div class="panel-heading twc-panel-heading critical"><span class="label label-primary pull-left" ng-show="{{tdb.isUpdated(item.t_sys_updated_on.value)}}">Updated</span><span class="ticket-number">{{item.t_number.display_value}}</span>
+							<i class="fa fa-info-circle pull-right" 
+								 uib-tooltip-html="tdb.getTooltip(item, 't_')"
+								 tooltip-placement="bottom-left"
+								 tooltip-append-to-body="true"
+								 tooltip-class="tooltipCustomClass"
+								 style="padding-right: 3px;margin-top: 3px; cursor: pointer;" aria-hidden="true"></i>
+						</div>
+						<div class="panel-body" style="padding: 2px 2px 2px 5px;">
+							<h4 ng-show="tdb.font !== 'font-size-4'">{{item.t_short_description.display_value | limitTo: 80}}{{item.t_short_description.display_value.length > 80 ? '...' : ''}}</h4>
+							<h4>{{item.t_assignment_group.display_value}}</h4>
+							<h4 style="font-style: italic;">{{item.t_assigned_to.display_value}}</h4>
+							<h4>R SLA Time: {{item.ts_business_time_left.display_value}}</h4>
+						</div>
+					</div>
+				</div>					
+			</div>
+
+			<div style="text-align: center; clear: both;" ng-show="tdb.criticalTotal > tdb.lessLimit">
+				<button type="button" class="btn btn-link btn-xs" ng-click="tdb.loadTask('critical', 'more');" ng-show="tdb.taskPromise['critical'].limit === tdb.lessLimit">Show more</button>
+				<button type="button" class="btn btn-link btn-xs" ng-click="tdb.loadTask('critical', 'less');" ng-show="tdb.taskPromise['critical'].limit === tdb.moreLimit">Show less</button>
+			</div>
+		</div>
+		<div class="col-sm-4" style="padding-right: 0px; padding-left: 0px;">
+			
+			<div class="col-md-6 col-sm-12 col-xs-12 tickets" 
+				 ng-repeat="item in tdb.high track by $index" ng-click="tdb.state.go('task', {id: item.t_sys_id.value});">
+				<div class="dummy"></div>
+				<div class="thumbnail purple">
+					<i class="fa fa-circle twc-circle-footer" aria-hidden="true" ng-style="tdb.getCircleStyle(item, 't_')"></i>
+					<div class="tickets_panel">
+						<div class="panel-heading twc-panel-heading warning"><span class="label label-primary pull-left" ng-show="{{tdb.isUpdated(item.t_sys_updated_on.value)}}">Updated</span><span class="ticket-number">{{item.t_number.display_value}}</span>
+							<i class="fa fa-info-circle pull-right" 
+								 uib-tooltip-html="tdb.getTooltip(item, 't_')"
+								 tooltip-placement="bottom"
+								 tooltip-append-to-body="true"
+								 tooltip-class="tooltipCustomClass"
+								 style="padding-right: 3px;margin-top: 3px; cursor: pointer;" aria-hidden="true"></i>
+						</div>
+						<div class="panel-body" style="padding: 2px 2px 2px 5px;">
+							<h4 ng-show="tdb.font !== 'font-size-4'">{{item.t_short_description.display_value | limitTo: 80}}{{item.t_short_description.display_value.length > 80 ? '...' : ''}}</h4>
+							<h4>{{item.t_assignment_group.display_value}}</h4>
+							<h4 style="font-style: italic;">{{item.t_assigned_to.display_value}}</h4>
+							<h4>R SLA Time: {{item.ts_business_time_left.display_value}}</h4>
+
+						</div>
+					</div>			
+				</div>					
+			</div>
+			
+			<div style="text-align: center; clear: both;" ng-show="tdb.highTotal > tdb.lessLimit">
+				<button type="button" class="btn btn-link btn-xs" ng-click="tdb.loadTask('high', 'more');" ng-show="tdb.taskPromise['high'].limit === tdb.lessLimit">Show more</button>
+				<button type="button" class="btn btn-link btn-xs" ng-click="tdb.loadTask('high', 'less');" ng-show="tdb.taskPromise['high'].limit === tdb.moreLimit">Show less</button>
+			</div>
+		</div>
+		<div class="col-sm-4" style="padding-right: 0px; padding-left: 0px;">
+			<div class="col-md-6 col-sm-12 col-xs-12 tickets" 
+				 ng-repeat="item in tdb.problem track by $index" ng-click="tdb.state.go('task', {id: item.sys_id.value});">
+				<div class="dummy"></div>
+				<div class="thumbnail purple">
+					<i class="fa fa-circle twc-circle-footer" aria-hidden="true" ng-style="tdb.getCircleStyle(item, '')"></i>
+					<div class="tickets_panel">
+						<div class="panel-heading twc-panel-heading info"><span class="label label-primary pull-left" ng-show="{{tdb.isUpdated(item.sys_updated_on.value)}}">Updated</span><span class="ticket-number">{{item.number.display_value}}</span>
+							<i class="fa fa-info-circle pull-right" 
+								 uib-tooltip-html="tdb.getTooltip(item, '')"
+								 tooltip-placement="bottom-right"
+								 tooltip-append-to-body="true"
+								 tooltip-class="tooltipCustomClass"
+								 style="padding-right: 3px;margin-top: 3px; cursor: pointer;" aria-hidden="true"></i>
+						</div>
+						<div class="panel-body" style="padding: 2px 2px 2px 5px;">
+							<h4 ng-show="tdb.font !== 'font-size-4'">{{item.short_description.display_value | limitTo: 80}}{{item.short_description.display_value.length > 80 ? '...' : ''}}</h4>
+							<h4><strong>{{item.state.display_value}}</strong></h4>
+							<h4>{{item.assignment_group.display_value}}</h4>
+							<h4 style="font-style: italic;">{{item.assigned_to.display_value}}</h4>
+							<h4>{{item.sys_updated_on.display_value}}</h4>	
+						</div>
+					</div>			
+				</div>					
+			</div>
+
+			<div style="text-align: center; clear: both;" ng-show="tdb.problemTotal > tdb.lessLimit">
+				<button type="button" class="btn btn-link btn-xs" ng-click="tdb.loadTask('problem', 'more');" ng-show="tdb.taskPromise['problem'].limit === tdb.lessLimit">Show more</button>
+				<button type="button" class="btn btn-link btn-xs" ng-click="tdb.loadTask('problem', 'less');" ng-show="tdb.taskPromise['problem'].limit === tdb.moreLimit">Show less</button>
+
+			</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-sm-12">
+			<div class="panel panel-primary">
+				<div class="panel-heading twc-panel-heading">
+					&#160;
+					<div class="btn-group" ng-init="tdb.middleTab = 'change'">
+						<a class="btn btn-primary btn-xs" ng-class="{'active': tdb.middleTab === 'change_2'}" ng-click="tdb.middleTab = 'change_2'">Closed in last 24 hours</a>
+						<a class="btn btn-primary btn-xs" ng-class="{'active': tdb.middleTab === 'change'}" ng-click="tdb.middleTab = 'change'">Today's Scheduled Changes</a>
+						<a class="btn btn-primary btn-xs" ng-class="{'active': tdb.middleTab === 'change_3'}" ng-click="tdb.middleTab = 'change_3'">Planned start date in the next 12 hours</a>
+					</div>
+					
+					<i class="fa fa-refresh fa-spin fa-1x fa-fw pull-right" ng-show="tdb.loadTickets"></i>
+				
+				</div>
+				<div class="panel-body" style="padding: 2px;">
+
+					<table class="table table-striped twc-dashboard-table-s" ng-show="tdb[tdb.middleTab].length > 0">
+						<thead>
+							<tr>
+								<th>Change #</th>
+								<th>CHG Type</th>
+								<th>Short Desc</th>
+								<th>Assigned to</th>
+								<th>Start time</th>
+								<th>End time</th>
+								<th>State</th>
+							</tr>
+						</thead>  
+						<tr ng-repeat="item in tdb[tdb.middleTab]">
+							<td><a ui-sref="task({id: item.sys_id.value})">{{item.number.display_value}}</a></td>
+							<td>{{item.type.display_value}}</td>
+							<td><div uib-tooltip="{{item.short_description.display_value}}">{{item.short_description.display_value | limitTo: 40}}{{item.short_description.display_value.length > 40 ? '...' : ''}}</div></td>
+							<td>{{item.assigned_to.display_value}}</td>
+							<td>{{item.start_date.display_value}}</td>
+							<td>{{item.end_date.display_value}}</td>
+							<td>{{item.state.display_value}}</td>
+
+						</tr>
+					</table>
+					<div class="alert alert-warning twc-alerts" role="alert" ng-show="tdb[tdb.middleTab].length == 0">
+						There are no Changes for the products you own or support. Please check later. 
+					</div>
+				  
+				  
+			  </div>
+			</div>			
+
+			
+		</div>
+	</div>
+	
+	<div class="row">
+		<div class="col-sm-12">
+			<div class="panel panel-decommissioned">
+				<div class="panel-heading twc-panel-heading">Decommissioned Items <i class="fa fa-refresh fa-spin fa-1x fa-fw" ng-show="tdb.decommissionedItemsTblLoading"></i></div>
+				<div class="panel-body" style="padding: 2px;">
+
+						  <table ng-table="tdb.decommissionedItemsTbl" class="table table-striped twc-dashboard-table-s" ng-show="tdb.decommissionedItemsTbl.data.length > 0">
+								<tr ng-repeat="row in $data track by row.sys_id.value">
+									<td data-title="'Name'"><a ui-sref="product({id: row.sys_id.value})">{{row.name.display_value}}</a></td>
+									<td data-title="'Owner'">{{row.owned_by.display_value}}</td>
+									<td data-title="'Assignment Group'">{{row.assignment_group.display_value}}</td>
+									<td data-title="'Last Updated'">{{row.sys_updated_on.display_value}}</td>
+								</tr>
+							</table>
+
+						  <div class="alert alert-warning twc-alerts" role="alert" ng-show="tdb.decommissionedItemsTbl.data.length == 0">
+							  There are no decommissioned Items to show at this time. Please check later.
+						  </div>
+						
+				  
+			  </div>
+			</div>			
+
+			
+		</div>
+	</div>	
+	
+	<div class="row">
+		<div class="col-sm-12">
+			<div class="panel panel-primary">
+				<div class="panel-heading twc-panel-heading">Scheduled Company Wide Communications <i class="fa fa-refresh fa-spin fa-1x fa-fw" ng-show="tdb.commTblLoading"></i></div>
+				<div class="panel-body" style="padding: 2px;">
+
+						  <table ng-table="tdb.commTbl" class="table table-striped twc-dashboard-table-s" ng-show="tdb.commTbl.data.length > 0">
+								<tr ng-repeat="row in $data track by row.sys_id.value">
+									<td data-title="'Number'"><a href="/x_wec_communicatio_app.do#/notification/{{row.sys_id.value}}" target="_blank">{{row.number.display_value}}</a></td>
+									<td data-title="'Notification Type'" style="width:12%;">{{row.u_notification_type.display_value}}</td>
+									<td data-title="'Title'">{{row.u_title.display_value}}</td>
+									<td data-title="'Time Sent'">{{row.u_scheduled_time.display_value}}</td>
+									<td data-title="'Sent to'">
+										<span class="abbr" uib-tooltip="{{row.u_send_to_users.display_value}}">Users: {{row.u_send_to_users.value?row.u_send_to_users.value.split(',').length:'-'}}</span>, 
+										<span class="abbr" uib-tooltip="{{row.u_send_to_groups.display_value}}">Groups: {{row.u_send_to_groups.value?row.u_send_to_groups.value.split(',').length:'-'}}</span>
+									</td>
+									<td data-title="'Created By'">{{row.sys_created_by.display_value}}</td>
+									<td data-title="'Status'">{{row.u_status.display_value}}</td>
+									
+								</tr>
+							</table>
+
+						  <div class="alert alert-warning twc-alerts" role="alert" ng-show="tdb.commTbl.data.length == 0">
+							  There are no Scheduled to show at this time. Please check later.
+						  </div>
+						
+				  
+			  </div>
+			</div>			
+
+			
+		</div>
+	</div>		
+	
+	<div class="row">
+		<div class="col-sm-12">
+			<div class="panel panel-primary">
+				<div class="panel-heading twc-panel-heading">TOC Arena</div>
+				<div class="panel-body" style="padding: 2px;">
+
+					<div class="row">
+					  <div class="col-sm-4">
+						<div class="panel-heading twc-panel-heading"><span class="ticket-number">Newly Added Items</span><i class="fa fa-refresh fa-spin fa-1x fa-fw" ng-show="tdb.productTblLoading"></i></div>  
+							
+						  <table ng-table="tdb.productTbl" class="table table-striped twc-dashboard-table-s" ng-show="tdb.productTbl.data.length > 0">
+								<tr ng-repeat="row in $data track by row.sys_id.value">
+									<td data-title="'Name'"><a ui-sref="product({id: row.sys_id.value})">{{row.name.display_value}}</a></td>
+									<td data-title="'Owner'">{{row.owned_by.display_value}}</td>
+									<td data-title="'Assignment Group'">{{row.assignment_group.display_value}}</td>
+									<td data-title="'Created on'">{{row.sys_created_on.display_value}}</td>
+								</tr>
+							</table>
+
+						  <div class="alert alert-warning twc-alerts" role="alert" ng-show="tdb.productTbl.data.length == 0">
+							  There are no Newly Added Items to show at this time. Please check later.
+						  </div>
+
+						  
+					  </div>
+					  <div class="col-sm-4">
+
+						<div class="panel-heading twc-panel-heading"><span class="ticket-number">TOC Requests</span><i class="fa fa-refresh fa-spin fa-1x fa-fw" ng-show="tdb.reqItemTblLoading"></i></div>  
+						<table ng-table="tdb.reqItemTbl" class="table table-striped twc-dashboard-table-s" ng-show="tdb.reqItemTbl.data.length > 0">
+							<tr ng-repeat="row in $data track by row.sys_id.value">
+								<td data-title="'Number'"><a ui-sref="request-item({id: row.sys_id.value})">{{row.number.display_value}}</a></td>
+								<td data-title="'Item'"><a ui-sref="cat-item({id: row.cat_item.value})">{{row.cat_item.display_value}}</a></td>
+								<td data-title="'Opened by'">{{row.opened_by.display_value}}</td>
+								<td data-title="'Created on'">{{row.sys_created_on.display_value}}</td>
+							</tr>
+						</table>
+						  <div class="alert alert-warning twc-alerts" role="alert" ng-show="tdb.reqItemTbl.data.length == 0">
+							  There are no active TOC Requests to show at this time. Please check later.
+						  </div>
+
+					  </div>
+					  <div class="col-sm-4">
+						<div class="panel-heading twc-panel-heading"><span class="ticket-number">TOC Tasks</span><i class="fa fa-refresh fa-spin fa-1x fa-fw" ng-show="tdb.scTaskTblLoading"></i></div>  
+						<table ng-table="tdb.scTaskTbl" class="table table-striped twc-dashboard-table-s" ng-show="tdb.scTaskTbl.data.length > 0">
+							<tr ng-repeat="row in $data track by row.sys_id.value">
+								<td data-title="'Number'"><a ui-sref="task({id: row.sys_id.value})">{{row.number.display_value}}</a></td>
+								<td data-title="'Short description'"><div uib-tooltip="{{row.short_description.display_value}}">{{row.short_description.display_value | limitTo: 40}}{{row.short_description.display_value > 40 ? '...' : ''}}</div></td>
+								<td data-title="'Opened by'">{{row.opened_by.display_value}}</td>
+								<td data-title="'Created on'">{{row.sys_created_on.display_value}}</td>
+							</tr>
+						</table>
+						  <div class="alert alert-warning twc-alerts" role="alert" ng-show="tdb.scTaskTbl.data.length == 0">
+							  There are no active TOC Tasks to show at this time. Please check later.
+						  </div>
+
+					  </div>
+				  
+				  </div>
+					
+						
+				  
+			  </div>
+			</div>			
+
+			
+		</div>
+	</div>
+
+</j:jelly>]]></html>
+        <name>toc-dahboard-tpl</name>
+        <processing_script/>
+        <sys_class_name>sys_ui_page</sys_class_name>
+        <sys_created_by>anton.sychikov.contractor@weather.com</sys_created_by>
+        <sys_created_on>2016-08-02 11:29:51</sys_created_on>
+        <sys_customer_update>true</sys_customer_update>
+        <sys_id>730988380f0de6006c3005cce1050e76</sys_id>
+        <sys_mod_count>241</sys_mod_count>
+        <sys_name>toc-dahboard-tpl</sys_name>
+        <sys_package display_value="Product" source="x_wec_product">daa7dccd0f44220034457d4ce1050e47</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Product">daa7dccd0f44220034457d4ce1050e47</sys_scope>
+        <sys_update_name>sys_ui_page_730988380f0de6006c3005cce1050e76</sys_update_name>
+        <sys_updated_by>anton.sychikov.contractor@weather.com</sys_updated_by>
+        <sys_updated_on>2016-11-02 09:15:32</sys_updated_on>
+    </sys_ui_page>
+</record_update>

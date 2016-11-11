@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update table="sys_ui_script">
+    <sys_ui_script action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <description/>
+        <global>false</global>
+        <name>x_wec_product.abandoned-items-ctrl</name>
+        <script><![CDATA[(function () {
+    'use strict';
+
+    angular
+        .module('twc-product')
+        .controller('AbandonedItemsCtrl', AbandonedItemsCtrl);
+
+    AbandonedItemsCtrl.$inject = ['$scope', '$window', '$state', '$stateParams', '$http', '$q','UserFactory', 'ProductFactory', 'NgTableParams', 'ReferenceBookFactory', 'userService'];
+
+    function AbandonedItemsCtrl($scope, $window, $state, $stateParams, $http, $q, UserFactory, ProductFactory, NgTableParams, ReferenceBookFactory, userService) {
+		
+        var ps = this;
+		ps.table = initTable();
+		ps.reloadTable = reloadTable;
+		ps.searchAssignmentGroupByName = searchAssignmentGroupByName;
+
+		$scope.$emit('side-bar-show-info', true);
+		
+		function initTable() {
+			return new NgTableParams({
+				count: 25
+			}, {
+				counts: [25, 50, 100, 200],
+				getData: function(params) {
+
+					ps.loader = true;
+					
+					var filters = params.filter(),
+						filtersArr = [];
+
+					filtersArr.push('ORDERBYp_name');
+					
+					if(filters.hasOwnProperty('p_name') && filters.p_name !== ""){
+						filtersArr.push('p_nameLIKE' + filters.p_name);
+					}
+					if(filters.hasOwnProperty('p_assignment_group') && filters.p_assignment_group !== ""){
+						filtersArr.push('p_assignment_group=' + filters.p_assignment_group);
+					}
+					
+					
+					filtersArr.push('d_user_id=' + userService.sys_id);
+					
+					return ProductFactory.abandonedItemsList({
+						sysparm_limit: params.count(),
+						sysparm_offset: (params.page() - 1) * params.count(),
+						sysparm_query: filtersArr.join('^'),
+						sysparm_display_value: true,
+						preloader: false
+					}).$promise.then(function(res) {
+						ps.loader = false;
+						params.total(res.headers['x-total-count']);
+						return res.data.result;
+					});
+				}
+			});
+			
+		}
+
+		function searchAssignmentGroupByName(name){
+            return ReferenceBookFactory.assignmentGroupSearch({sysparm_query: 'nameLIKE' + name, sysparm_limit: 20}).$promise.then(function(res){
+                return res.result;
+            });
+        }
+
+		function reloadTable(model, key){
+			if(!model){
+				var filter = {};
+				filter[key] = "";
+				angular.extend(ps.table.filter(), filter);				
+			}
+        }
+
+    }
+
+})();
+
+]]></script>
+        <script_name>abandoned-items-ctrl</script_name>
+        <sys_class_name>sys_ui_script</sys_class_name>
+        <sys_created_by>anton.sychikov.contractor@weather.com</sys_created_by>
+        <sys_created_on>2016-09-15 08:14:01</sys_created_on>
+        <sys_customer_update>true</sys_customer_update>
+        <sys_id>b4210e7a0fb12e006c3005cce1050e57</sys_id>
+        <sys_mod_count>3</sys_mod_count>
+        <sys_name>x_wec_product.abandoned-items-ctrl</sys_name>
+        <sys_package display_value="Product" source="x_wec_product">daa7dccd0f44220034457d4ce1050e47</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Product">daa7dccd0f44220034457d4ce1050e47</sys_scope>
+        <sys_update_name>sys_ui_script_b4210e7a0fb12e006c3005cce1050e57</sys_update_name>
+        <sys_updated_by>anton.sychikov.contractor@weather.com</sys_updated_by>
+        <sys_updated_on>2016-09-15 08:19:47</sys_updated_on>
+        <use_scoped_format>false</use_scoped_format>
+    </sys_ui_script>
+</record_update>

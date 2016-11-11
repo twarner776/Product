@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update table="sys_ui_page">
+    <sys_ui_page action="INSERT_OR_UPDATE">
+        <category>general</category>
+        <client_script/>
+        <description>Template for create user group</description>
+        <direct>true</direct>
+        <endpoint>x_wec_product_modal-create-sys-group-tpl.do</endpoint>
+        <html><![CDATA[<?xml version="1.0" encoding="utf-8" ?>
+<j:jelly trim="false" xmlns:j="jelly:core" xmlns:g="glide" xmlns:j2="null" xmlns:g2="null">
+	
+	<div class="modal-header">
+		<h3 class="modal-title">Create / edit group</h3>
+	</div>
+	<div class="modal-body">
+		<h4 ng-show="ug.mode != 'upsert'">
+			Find An Existing Group 
+			<button type="button" class="btn btn-primary btn-xs pull-right" ng-click="ug.model = {}; ug.mode = 'upsert';">Create new group</button>
+		
+		</h4>
+
+		<div ng-show="ug.mode == 'search'">
+			<table ng-table="ug.table" class="table table-striped twc-table">
+				<tr ng-repeat="row in $data track by $index">
+					<td data-title="'Name'" filter="{name: 'text'}"><a href="" ng-click="ug.tableItemSelect(row);">{{row.name.display_value}}</a></td>
+					<td data-title="'Action'"><a href="" ng-click="ug.loadGroupDetails(row);"><i class="fa fa-pencil" aria-hidden="true"></i></a></td>
+				</tr>
+			</table>		
+		
+		</div>
+		
+		<form class="twc-form" name="ug.groupForm" novalidate="true" autocomplete="off" ng-show="ug.mode == 'upsert'">
+			<div class="form-group form-group-sm required" ng-class="{'has-error': ug.isInvalid(ug.groupForm['name'])}">
+				<label class="control-label" uib-tooltip="The name of the assignment group">Assignment Group Name</label>
+				<input type="text" class="form-control" ng-model="ug.model.name.value" name="name" ng-required="true" ng-disabled="ug.isDisabledName()"/>
+			</div>
+
+			<div class="form-group form-group-sm required" ng-class="{'has-error': ug.isInvalid(ug.groupForm['manager'])}">
+				<label class="control-label" uib-tooltip="The manager of the assignment group">Manager</label>
+				<input type="text" class="form-control" ng-required="true" name="manager"
+					   placeholder="Manager of the Assignment Group"
+					   uib-typeahead="user as (user.name + ' (' + user.email + ')') for user in ug.searchUserByName($viewValue)"
+					   typeahead-on-select="ug.setModel($item, $model, $label, $event, 'manager')"
+					   typeahead-wait-ms="500"
+					   typeahead-editable="false"
+					   ng-model="ug.model.manager.display_value" />
+				
+			</div>
+			
+			<div class="form-group form-group-sm">
+				<label class="control-label">Description</label>
+				<textarea name="description" class="form-control" ng-model="ug.model.description.value"></textarea>
+			</div>
+
+
+			<div class="form-group form-group-sm required" ng-class="{'has-error': ug.isInvalid(ug.groupForm['groups'])}" ng-if="ug.isShowRoles()">
+				<label class="control-label" uib-tooltip="The name of the assignment group">Groups</label>
+                    <select class="form-control" 
+							multiple="multiple" 
+							ng-model="ug.model.groups"
+							ng-options="group as group.name for group in ug.userGroups"
+							ng-required="true"
+							name="groups"
+							size="3"></select>
+				
+			</div>
+			
+		</form> 			
+		<form class="form-horizontal twc-form" novalidate="true" autocomplete="off" ng-show="ug.mode == 'upsert'">
+
+			
+			<div class="row">
+				<div class="col-sm-5">
+					<label>Search Users</label>
+					<div class="input-group input-group-sm">
+					  <div class="input-group-addon"><i class="fa fa-search" aria-hidden="true"></i></div>
+					  <input type="text" class="form-control" ng-model="ug.userSearch" ng-model-options="{debounce: 1000}"/>
+					</div>
+				</div>
+				<div class="col-sm-2">
+				</div>
+				<div class="col-sm-5">
+						<label>Group Members List</label>
+						<p class="form-control-static">{{ug.model.name.display_value}}</p>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-sm-5">
+                    <select class="form-control input-sm" 
+							multiple="multiple" 
+							ng-model="ug.selectUsersCollection"
+							ng-options="user as user.name for user in ug.userCollection"
+							size="10"></select>
+				</div>
+				<div class="col-sm-2" style="text-align: center; margin-top: 50px;">
+					<div class="btn-group-vertical">
+					  <button type="button" class="btn btn-primary" ng-click="ug.addUser();"><i class="fa fa-chevron-right" aria-hidden="true"></i></button>
+					  <button type="button" class="btn btn-primary" ng-click="ug.removeUser();"><i class="fa fa-chevron-left" aria-hidden="true"></i></button>
+					</div>					
+				</div>
+				<div class="col-sm-5">
+						<select class="form-control input-sm" 
+								multiple="multiple" 
+								ng-model="ug.selectMemberCollection"
+								ng-options="user as user.name for user in ug.memberCollection"
+								size="10"></select>
+				</div>
+			</div>
+		</form>  			
+	</div>
+	<div class="modal-footer">
+		<button class="btn btn-default btn-sm" type="button" ng-click="ug.cancel()">Cancel</button>
+		<button class="btn btn-primary btn-sm" type="button" 
+				ng-disabled="ug.groupForm.$invalid"
+				ng-show="ug.mode != 'search'"
+				ng-class="{'btn-primary': ug.groupForm.$dirty, 'btn-default active': ug.groupForm.$pristine}"
+				ng-click="ug.ok()">{{ug.model.sys_id?'Save':'Create'}}</button>
+	</div>
+	
+</j:jelly>]]></html>
+        <name>modal-create-sys-group-tpl</name>
+        <processing_script/>
+        <sys_class_name>sys_ui_page</sys_class_name>
+        <sys_created_by>andrey.zlatin@weather.com</sys_created_by>
+        <sys_created_on>2016-07-12 13:40:41</sys_created_on>
+        <sys_customer_update>true</sys_customer_update>
+        <sys_id>663ddcce0f24260034457d4ce1050e7a</sys_id>
+        <sys_mod_count>67</sys_mod_count>
+        <sys_name>modal-create-sys-group-tpl</sys_name>
+        <sys_package display_value="Product" source="x_wec_product">daa7dccd0f44220034457d4ce1050e47</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Product">daa7dccd0f44220034457d4ce1050e47</sys_scope>
+        <sys_update_name>sys_ui_page_663ddcce0f24260034457d4ce1050e7a</sys_update_name>
+        <sys_updated_by>anton.sychikov.contractor@weather.com</sys_updated_by>
+        <sys_updated_on>2016-10-20 08:34:21</sys_updated_on>
+    </sys_ui_page>
+</record_update>

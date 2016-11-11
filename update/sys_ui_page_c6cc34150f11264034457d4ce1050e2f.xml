@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update table="sys_ui_page">
+    <sys_ui_page action="INSERT_OR_UPDATE">
+        <category>general</category>
+        <client_script/>
+        <description/>
+        <direct>true</direct>
+        <endpoint>x_wec_product_modal-dialog-tpl.do</endpoint>
+        <html><![CDATA[<?xml version="1.0" encoding="utf-8" ?>
+<j:jelly trim="false" xmlns:j="jelly:core" xmlns:g="glide" xmlns:j2="null" xmlns:g2="null">
+	<div class="modal-header">
+		<h3 class="modal-title">{{dlg.title}}</h3>
+	</div>
+	<div class="modal-body">
+
+		<p>{{dlg.body}}</p>
+		
+	</div>
+	
+	<div class="modal-footer">
+		<button class="btn btn-default btn-sm" type="button" ng-click="dlg.close()">Close</button>
+	</div>
+	
+</j:jelly>]]></html>
+        <name>modal-dialog-tpl</name>
+        <processing_script/>
+        <sys_class_name>sys_ui_page</sys_class_name>
+        <sys_created_by>anton.sychikov.contractor@weather.com</sys_created_by>
+        <sys_created_on>2016-08-16 14:49:32</sys_created_on>
+        <sys_customer_update>true</sys_customer_update>
+        <sys_id>c6cc34150f11264034457d4ce1050e2f</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>modal-dialog-tpl</sys_name>
+        <sys_package display_value="Product" source="x_wec_product">daa7dccd0f44220034457d4ce1050e47</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Product">daa7dccd0f44220034457d4ce1050e47</sys_scope>
+        <sys_update_name>sys_ui_page_c6cc34150f11264034457d4ce1050e2f</sys_update_name>
+        <sys_updated_by>anton.sychikov.contractor@weather.com</sys_updated_by>
+        <sys_updated_on>2016-08-16 14:49:32</sys_updated_on>
+    </sys_ui_page>
+</record_update>

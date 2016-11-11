@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update table="sys_ui_script">
+    <sys_ui_script action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <description/>
+        <global>false</global>
+        <name>x_wec_product.tasks-filter-ctrl</name>
+        <script><![CDATA[(function () {
+    'use strict';
+
+    angular
+        .module('twc-product')
+        .controller('TasksFilterCtrl', TasksFilterCtrl);
+
+    TasksFilterCtrl.$inject = ['$scope', '$window', '$state', '$stateParams', '$http', '$q', 'ProductFactory', 'TaskFactory', 'NgTableParams', 'ReferenceBookFactory', 'userService', 'groups'];
+
+    function TasksFilterCtrl($scope, $window, $state, $stateParams, $http, $q, ProductFactory, TaskFactory, NgTableParams, ReferenceBookFactory, userService, groups) {
+		
+        var tc = this;
+		
+		$scope.$emit('side-bar-show-info', true);
+		
+		tc.table = initTable();
+		tc.reloadTable = reloadTable;
+		tc.searchAssignmentGroupByName = searchAssignmentGroupByName;
+		tc.prioritys = getPriority();
+		
+		function initTable() {
+			return new NgTableParams({
+				count: 25
+			}, {
+				counts: [25, 50, 100, 200],
+				getData: function(params) {
+					
+					tc.loader = true;
+					
+					var filters = params.filter(),
+						filtersArr = [];
+
+					
+					if($stateParams.filter){
+						var _filter = JSON.parse(decodeURIComponent($stateParams.filter));
+						if(_filter.name){
+							filters['cmdb_ci'] = _filter.name;
+						}
+						if(_filter.priority){
+							filters['priority'] = _filter.priority.charAt(0);
+						}
+					}
+					
+					
+					filtersArr.push('ORDERBYnumber');
+					filtersArr.push('incident_stateNOT IN6,7');
+					
+					var group = [];
+					groups.result.forEach(function(item){
+						group.push('assignment_group=' + item.group.value);
+					});
+					
+					filtersArr.push(group.join('^OR'));
+					
+					if(filters.hasOwnProperty('number') && filters.number !== ""){
+						filtersArr.push('numberLIKE' + filters.number);
+					}
+					if(filters.hasOwnProperty('priority') && filters.priority !== ""){
+						filtersArr.push('priority=' + filters.priority);
+					}
+					if(filters.hasOwnProperty('cmdb_ci') && filters.cmdb_ci !== ""){
+						filtersArr.push('cmdb_ciLIKE' + filters.cmdb_ci);
+					}
+
+					if(filters.hasOwnProperty('dependent_id') && filters.dependent_id !== ""){
+						filtersArr.push('dependent_idLIKE' + filters.dependent_id);
+					}
+
+					
+					if(filters.hasOwnProperty('assignment_group') && filters.assignment_group !== ""){
+						filtersArr.push('assignment_group=' + filters.assignment_group);
+					}
+					if(filters.hasOwnProperty('short_description') && filters.short_description !== ""){
+						filtersArr.push('short_descriptionLIKE' + filters.short_description);
+					}
+					
+					return TaskFactory.fullListIncident({
+						sysparm_limit: params.count(),
+						sysparm_offset: (params.page() - 1) * params.count(),
+						sysparm_query: filtersArr.join('^'),
+						sysparm_display_value: 'all',
+						preloader: false
+					}).$promise.then(function(res) {
+						tc.loader = false;
+						params.total(res.headers['x-total-count']);
+						return res.data.result;
+					});
+				}
+			});
+			
+		}
+
+		function searchAssignmentGroupByName(name){
+            return ReferenceBookFactory.assignmentGroupSearch({sysparm_query: 'nameLIKE' + name, sysparm_limit: 20}).$promise.then(function(res){
+                return res.result;
+            });
+        }
+
+		function reloadTable(model, key){
+			if(!model){
+				var filter = {};
+				filter[key] = "";
+				angular.extend(tc.table.filter(), filter);				
+			}
+        }
+		
+		function getPriority(){
+			return [{id: 1, title: '1 - Critical'}, {id: 2, title: '2 - High'}, {id: 3, title: '3 - Moderate'}, {id: 4, title: '4 - Low'}, {id: 5, title: '5 - Minimal'}];
+        }
+		
+		
+    }
+
+})();
+
+]]></script>
+        <script_name>tasks-filter-ctrl</script_name>
+        <sys_class_name>sys_ui_script</sys_class_name>
+        <sys_created_by>anton.sychikov.contractor@weather.com</sys_created_by>
+        <sys_created_on>2016-09-16 12:29:19</sys_created_on>
+        <sys_customer_update>true</sys_customer_update>
+        <sys_id>f3754cd70f71224034457d4ce1050e27</sys_id>
+        <sys_mod_count>9</sys_mod_count>
+        <sys_name>x_wec_product.tasks-filter-ctrl</sys_name>
+        <sys_package display_value="Product" source="x_wec_product">daa7dccd0f44220034457d4ce1050e47</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Product">daa7dccd0f44220034457d4ce1050e47</sys_scope>
+        <sys_update_name>sys_ui_script_f3754cd70f71224034457d4ce1050e27</sys_update_name>
+        <sys_updated_by>anton.sychikov.contractor@weather.com</sys_updated_by>
+        <sys_updated_on>2016-09-19 09:42:52</sys_updated_on>
+        <use_scoped_format>false</use_scoped_format>
+    </sys_ui_script>
+</record_update>

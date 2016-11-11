@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update sys_domain="global" table="sys_app_application">
+    <sys_app_application action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <category display_value="Custom Applications">e0355b31ef303000a61d5a3615c0fb78</category>
+        <description/>
+        <device_type>browser</device_type>
+        <hint/>
+        <name>9-box</name>
+        <order>100</order>
+        <roles>x_wec_product.user</roles>
+        <sys_class_name>sys_app_application</sys_class_name>
+        <sys_created_by>andrey.zlatin@weather.com</sys_created_by>
+        <sys_created_on>2016-08-10 08:11:44</sys_created_on>
+        <sys_customer_update>true</sys_customer_update>
+        <sys_domain>global</sys_domain>
+        <sys_id>3e8868170fc92e006c3005cce1050ec8</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>9-box</sys_name>
+        <sys_overrides/>
+        <sys_package display_value="Product" source="x_wec_product">daa7dccd0f44220034457d4ce1050e47</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Product">daa7dccd0f44220034457d4ce1050e47</sys_scope>
+        <sys_update_name>sys_app_application_3e8868170fc92e006c3005cce1050ec8</sys_update_name>
+        <sys_updated_by>andrey.zlatin@weather.com</sys_updated_by>
+        <sys_updated_on>2016-08-10 08:11:44</sys_updated_on>
+        <title>9-box</title>
+        <view_name/>
+    </sys_app_application>
+</record_update>

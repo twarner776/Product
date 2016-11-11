@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update table="sys_ui_page">
+    <sys_ui_page action="INSERT_OR_UPDATE">
+        <category>general</category>
+        <client_script/>
+        <description/>
+        <direct>true</direct>
+        <endpoint>x_wec_product_modal-info-product-tpl.do</endpoint>
+        <html><![CDATA[<?xml version="1.0" encoding="utf-8" ?>
+<j:jelly trim="false" xmlns:j="jelly:core" xmlns:g="glide" xmlns:j2="null" xmlns:g2="null">
+<div class="modal-header">
+    <h3 class="modal-title">{{info.title}}</h3>
+</div>
+<div class="modal-body">
+    <p>More information about filling out this form:</p>
+    <p>Each item has an product owner and an overall assignment group that supports that item.</p>
+    <p>Business groups refer to the managing department of that item.</p>
+    <p>Business services are the services provided by groups. For more information regarding groups and services, please&#160;<a href="https://drive.google.com/open?id=0BwHdkxACgekCR0RWdm4zdTZzeWM" target="_blank">click here&#160;<i class="fa fa-external-link fa_custom"></i></a>
+    </p>
+    <p>Please indicate the current state of the item (Operational, Non-Operational, etc.)</p>
+    <p>For physical items, please select "On Prem" in the "Type" field</p>
+    <p><strong>IMPORTANT</strong>- The "Class" field indicates in which category your item should reside. Products - Are a main source or product which provide several applications to the business. For more information regarding hierarchy, please&#160;<a href="https://drive.google.com/open?id=0BwHdkxACgekCR0RWdm4zdTZzeWM" target="_blank">click here&#160;<i class="fa fa-external-link fa_custom"></i></a>
+    </p>
+    <p>By selecting the "Client Facing" checkbox, notates that the item directly affects our customers.</p>
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-default btn-sm" ng-click="info.ok()">Close</button>
+</div>
+
+</j:jelly>]]></html>
+        <name>modal-info-product-tpl</name>
+        <processing_script/>
+        <sys_class_name>sys_ui_page</sys_class_name>
+        <sys_created_by>anton.sychikov.contractor@weather.com</sys_created_by>
+        <sys_created_on>2016-08-12 14:07:54</sys_created_on>
+        <sys_customer_update>true</sys_customer_update>
+        <sys_id>21ec004c0f15ae006c3005cce1050e5d</sys_id>
+        <sys_mod_count>7</sys_mod_count>
+        <sys_name>modal-info-product-tpl</sys_name>
+        <sys_package display_value="Product" source="x_wec_product">daa7dccd0f44220034457d4ce1050e47</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Product">daa7dccd0f44220034457d4ce1050e47</sys_scope>
+        <sys_update_name>sys_ui_page_21ec004c0f15ae006c3005cce1050e5d</sys_update_name>
+        <sys_updated_by>anton.sychikov.contractor@weather.com</sys_updated_by>
+        <sys_updated_on>2016-08-16 10:11:53</sys_updated_on>
+    </sys_ui_page>
+</record_update>

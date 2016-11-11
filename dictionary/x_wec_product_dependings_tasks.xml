@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<database>
+    <element label="Dependings tasks" max_length="40" name="x_wec_product_dependings_tasks" sizeclass="6464" type="collection">
+        <element label="Task Id" max_length="255" name="task_id" type="string"/>
+        <element label="User Id" max_length="255" name="user_id" type="string"/>
+    </element>
+</database>

@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update table="sys_ui_page">
+    <sys_ui_page action="INSERT_OR_UPDATE">
+        <category>general</category>
+        <client_script/>
+        <description>Side panel template</description>
+        <direct>true</direct>
+        <endpoint>x_wec_product_side-panel-tpl.do</endpoint>
+        <html><![CDATA[<?xml version="1.0" encoding="utf-8" ?>
+<j:jelly trim="false" xmlns:j="jelly:core" xmlns:g="glide" xmlns:j2="null" xmlns:g2="null">
+
+<depending ng-if="sp.showInfo" view="side"></depending>
+	
+<div class="panel panel-default">
+  <div class="panel-heading twc-panel-heading">My Item Activities</div>
+	
+  <div class="twc-icons-side">
+	  <ul class="twc-icons-list">
+		  <li uib-tooltip="Incidents on products you own or assigned to your group" tooltip-append-to-body="true">
+			<span style="float: right; color: red; font-weight: bold" ng-if="sp.product.incident > 0">{{sp.product.incident}}</span>
+			<span style="float: right;" ng-show="sp.productCountsLoading"><i class="fa fa-refresh fa-spin fa-1x fa-fw"></i></span>  
+			<a ui-sref="incidents"><i class="fa fa-wrench fa-2x slide-icon" aria-hidden="true"></i></a>
+			<span>Incident</span>  
+		  </li>
+		  <li uib-tooltip="Problems on products you own or assigned to your group" tooltip-append-to-body="true">
+			<span style="float: right; color: red; font-weight: bold" ng-if="sp.product.problem > 0">{{sp.product.problem}}</span>  
+			<span style="float: right;" ng-show="sp.productCountsLoading"><i class="fa fa-refresh fa-spin fa-1x fa-fw"></i></span>    
+			<a ui-sref="problems"><i class="fa fa-exclamation-triangle fa-2x slide-icon" aria-hidden="true"></i></a>
+			<span>Problem</span>  
+		  </li>
+		  <li uib-tooltip="Changes on products you own or assigned to you or your group" tooltip-append-to-body="true">
+			<span style="float: right; color: red; font-weight: bold" ng-if="sp.product.change_request > 0">{{sp.product.change_request}}</span>  
+			<span style="float: right;" ng-show="sp.productCountsLoading"><i class="fa fa-refresh fa-spin fa-1x fa-fw"></i></span>    
+			<a ui-sref="change_requests"><i class="fa fa-cogs fa-2x slide-icon" aria-hidden="true"></i></a>
+			<span>Change</span>  
+		  </li>
+	  </ul>
+	  <h3 style="text-align: center;" uib-tooltip="Items you own or are assigned to your groups" tooltip-placement="bottom">{{sp.productsEnrolled}}&#160;<small> Enrolled Items</small></h3>
+  </div>
+</div>
+	
+
+<div class="panel panel-default">
+  <div class="panel-heading twc-panel-heading">Manage My Arena</div>
+
+	<div class="list-group font13">
+	  <a ui-sref="product({id: null})" class="list-group-item">Enroll or Update an Item</a>
+	  <a ui-sref="products" class="list-group-item">Manage My Products</a>
+	  <a ui-sref="applications" class="list-group-item">Manage My Applications</a>
+	  <a ui-sref="subscriptions" class="list-group-item">Manage My Subscriptions</a>
+	  <a ui-sref="my_groups" class="list-group-item" ng-if="sp.groupEdit" ng-cloak="true">Manage My Groups</a>
+	  <a ui-sref="abandoned_items" class="list-group-item" ng-if="sp.abandonedItems" ng-cloak="true">Abandoned items <span class="badge alert-danger"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i></span></a>
+	  <a ui-sref="decommissions" class="list-group-item">Decommission an Item</a>
+	  <a href="/x_wec_product_report-app.do" class="list-group-item">Report Center</a>
+	</div>
+	
+</div>
+	
+<div class="panel-heading twc-panel-heading"><span class="ticket-number">Out of Date Knowledge Base Articles</span><i class="fa fa-refresh fa-spin fa-1x fa-fw" ng-show="sp.knowledgeLoad"></i></div>  	
+<table class="table table-striped twc-dashboard-table" ng-show="sp.knowledge.length > 0">
+	<tr ng-repeat="item in sp.knowledge">
+		<td><span style="display: block;"><a ui-sref="knowledge({id: item.sys_id})">{{item.short_description}}</a></span><span>Updated on: {{item.sys_updated_on}}</span></td>
+	</tr>
+</table>
+<div class="alert alert-warning twc-alerts" role="alert" ng-show="sp.knowledge.length == 0" style="text-align: center;">
+	No records to display
+</div>
+	
+	
+</j:jelly>]]></html>
+        <name>side-panel-tpl</name>
+        <processing_script/>
+        <sys_class_name>sys_ui_page</sys_class_name>
+        <sys_created_by>andrey.zlatin@weather.com</sys_created_by>
+        <sys_created_on>2016-07-08 14:05:36</sys_created_on>
+        <sys_customer_update>true</sys_customer_update>
+        <sys_id>f80dbfa40fec62006c3005cce1050e81</sys_id>
+        <sys_mod_count>92</sys_mod_count>
+        <sys_name>side-panel-tpl</sys_name>
+        <sys_package display_value="Product" source="x_wec_product">daa7dccd0f44220034457d4ce1050e47</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Product">daa7dccd0f44220034457d4ce1050e47</sys_scope>
+        <sys_update_name>sys_ui_page_f80dbfa40fec62006c3005cce1050e81</sys_update_name>
+        <sys_updated_by>anton.sychikov.contractor@weather.com</sys_updated_by>
+        <sys_updated_on>2016-10-05 09:44:55</sys_updated_on>
+    </sys_ui_page>
+</record_update>

@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update table="sys_ui_page">
+    <sys_ui_page action="INSERT_OR_UPDATE">
+        <category>general</category>
+        <client_script/>
+        <description/>
+        <direct>true</direct>
+        <endpoint>x_wec_product_depending-tpl.do</endpoint>
+        <html><![CDATA[<?xml version="1.0" encoding="utf-8" ?>
+<j:jelly trim="false" xmlns:j="jelly:core" xmlns:g="glide" xmlns:j2="null" xmlns:g2="null">
+	<div class="row" ng-class="dp.font" ng-if="dp.view == 'dashboard'">
+		<div class="col-sm-12">
+			<div class="panel panel-info">
+				<div class="panel-heading twc-panel-heading"><span style="position: absolute; left: 22px;">Data refreshed every 30 seconds</span>EVENTS IMPACTING MY PRODUCTS AND APPLICATIONS <i class="fa fa-refresh fa-spin fa-1x fa-fw pull-right" ng-show="dp.loading"></i></div>
+			</div>			
+		</div>
+	</div>
+	
+	<div class="row" ng-if="dp.view == 'dashboard'" ng-class="dp.font" style="padding-bottom: 10px;">
+		<style>
+
+			/* Specify styling for tooltip contents */
+			.tooltip.tooltipCustomClass .tooltip-inner {
+				max-width: 400px!important;
+				text-align: left;
+				word-wrap:break-word;
+				background-color: #f5f5f5;
+				color: #000;
+				border: 1px solid rgba(0,0,0,.2);
+				opacity: 1;
+			}
+			.tooltip.tooltipCustomClass{
+				opacity: 1!important;
+			}
+
+			.dummy {
+				margin-top: 100%;
+			}
+			.thumbnail {
+				position: absolute;
+				top: 15px;
+				bottom: 0;
+				left: 15px;
+				right: 15px;
+				cursor: pointer;
+				color: #737f8b;
+				box-shadow: 0 1rem 1em 0 rgba(189,195,199,0.6);
+				transition: 120ms ease-in-out;
+				padding: 0px;
+				margin-bottom: 5px;
+			}
+
+			.thumbnail:hover{
+			   transform: translateY(-5px);
+			   background-color: #bfbebe;
+			}
+
+			.tickets_panel div.critical{
+				background-color:  #fb0202;
+				color: white;
+			}
+
+			.tickets_panel div.warning{
+				background-color: #fb9402;
+				color: white;
+			}
+
+			.tickets_panel div.info{
+				background-color: #022bfb;
+				color: white;
+			}
+
+			.font-size-1 h4{
+			   font-size: 1.5em;
+			   line-height: 2rem;
+			   letter-spacing: .01625rem;
+
+			}
+
+			.font-size-2 h4{
+			   font-size: 1.2em;
+			   line-height: 2rem;
+			   letter-spacing: .01625rem;
+
+			}
+
+			.font-size-3 h4{
+			   font-size: 1em;
+			   line-height: 1.3rem;
+			   letter-spacing: 0rem;
+			   margin-top: 1px;
+			   margin-bottom: 1px;		
+			}
+
+			.font-size-4 h4{
+			   font-size: 0.8em;
+			   line-height: 1.3rem;
+			   letter-spacing: 0rem;
+			   margin-top: 1px;
+			   margin-bottom: 1px;		
+			}
+
+			.twc-circle-footer {
+				position: absolute;
+				bottom: 3px;
+				right: 3px;
+			}
+
+			.pagination a, .pagination span{
+			   padding: 3px 6px!important;
+			}		
+		</style>
+		
+		<div class="col-sm-12">
+			<div class="alert alert-success twc-side-nav-alert" role="alert" ng-if="dp.tile.length == 0" ng-show="!dp.loading"><a ui-sref="dashboard">All Systems You Depend On Are Operating At 100%</a></div>
+			<div class="col-md-2 col-sm-3 col-xs-3 tickets" 
+				 ng-repeat="item in dp.tile track by $index" ng-click="item.t_sys_class_name.value == 'operational_status'?dp.state.go('product', {id: item.t_sys_id.value}):dp.open(item.t_sys_id.value)">
+				<div class="dummy"></div>
+				<div class="thumbnail purple" uib-tooltip="{{item.d_type.value=='up'?'Upstream':'Downstream'}}, {{item.d_ci_type.display_value.split('::')[item.d_type.value=='up'?1:0]}}">
+					<i class="fa twc-circle-footer" aria-hidden="true" ng-class="{'fa-level-up': item.d_type.value=='up', 'fa-level-down': item.d_type.value=='down'}"></i>
+					<div class="tickets_panel" ng-if="item.t_sys_class_name.value !== 'operational_status'">
+						<div class="panel-heading twc-panel-heading critical" ng-class="{critical: item.t_sys_class_name.value === 'incident', warning: item.t_sys_class_name.value === 'problem', info: item.t_sys_class_name.value === 'change_request'}"><span class="ticket-number">{{item.t_number.display_value}}</span>
+							<i class="fa fa-info-circle pull-right" 
+							   uib-tooltip-html="dp.getTooltip(item, 't_')"
+							   tooltip-placement="bottom-left"
+							   tooltip-append-to-body="true"
+							   tooltip-class="tooltipCustomClass"
+							   style="padding-right: 3px;margin-top: 3px; cursor: pointer;" aria-hidden="true"></i>
+							<i class="fa fa-envelope-o pull-left" aria-hidden="true" 
+							   style="padding-left: 3px;margin-top: 3px; cursor: pointer;"
+							   ng-click="dp.userSubscriptions({isNew:true}, item.t_cmdb_ci.value, true); $event.preventDefault();$event.stopPropagation();" 
+							   tooltip-placement="bottom" uib-tooltip="Subscribe to notifications on this product"></i>
+						</div>
+						<div class="panel-body" style="padding: 2px 2px 2px 5px;">
+							<h4>{{item.t_short_description.display_value | limitTo: 80}}{{item.t_short_description.display_value.length > 80 ? '...' : ''}}</h4>
+							<h4>{{item.t_assignment_group.display_value}}</h4>
+							<h4 style="font-style: italic;">{{item.t_assigned_to.display_value}}</h4>
+							<h4><a ui-sref="product({id: item.t_cmdb_ci.value})">{{item.t_cmdb_ci.display_value}}</a></h4>
+							<h4>{{item.t_sys_updated_on.display_value}}</h4>
+						</div>
+					</div>
+
+					<div class="tickets_panel" ng-if="item.t_sys_class_name.value == 'operational_status'">
+						<div class="panel-heading twc-panel-heading critical" ng-class="{operational_status: item.t_sys_class_name.value === 'operational_status'}">
+							<span class="ticket-number">Decommissioned</span>
+						</div>
+						<div class="panel-body" style="padding: 2px 2px 2px 5px;">
+							<h4>{{item.t_name.display_value}}</h4>
+							<h4>{{item.t_assignment_group.display_value}}</h4>
+							<h4 style="font-style: italic;">{{item.t_owned_by.display_value}}</h4>
+							<h4>{{item.t_sys_updated_on.display_value}}</h4>
+						</div>
+					</div>
+					
+				</div>					
+			</div>
+		
+		</div>
+
+	</div>
+	
+	<div ng-if="dp.view == 'side'">
+		<div class="alert alert-success twc-side-nav-alert" role="alert" ng-if="dp.allTask == 0" ng-show="!dp.loading"><a ui-sref="dashboard">All Systems You Depend On Are Operating At 100%</a></div>
+		<div class="alert alert-danger twc-side-nav-alert" role="alert" ng-if="dp.allTask > 0" ng-show="!dp.loading"><a ui-sref="dashboard">You have {{dp.allTask}} events impacting your items</a></div>
+	</div>
+	
+</j:jelly>]]></html>
+        <name>depending-tpl</name>
+        <processing_script/>
+        <sys_class_name>sys_ui_page</sys_class_name>
+        <sys_created_by>anton.sychikov.contractor@weather.com</sys_created_by>
+        <sys_created_on>2016-09-05 10:51:22</sys_created_on>
+        <sys_customer_update>true</sys_customer_update>
+        <sys_id>ca560b6f0f21e6006c3005cce1050e73</sys_id>
+        <sys_mod_count>72</sys_mod_count>
+        <sys_name>depending-tpl</sys_name>
+        <sys_package display_value="Product" source="x_wec_product">daa7dccd0f44220034457d4ce1050e47</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Product">daa7dccd0f44220034457d4ce1050e47</sys_scope>
+        <sys_update_name>sys_ui_page_ca560b6f0f21e6006c3005cce1050e73</sys_update_name>
+        <sys_updated_by>anton.sychikov.contractor@weather.com</sys_updated_by>
+        <sys_updated_on>2016-10-17 12:19:52</sys_updated_on>
+    </sys_ui_page>
+</record_update>

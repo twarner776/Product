@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update sys_domain="global" table="sys_filter">
+    <sys_filter action="INSERT_OR_UPDATE">
+        <filter table="sp_container">nameSTARTSWITH^nameISNOTEMPTY^EQ<item endquery="false" field="name" goto="false" newquery="false" operator="STARTSWITH" or="false" value=""/>
+            <item endquery="false" field="name" goto="false" newquery="false" operator="ISNOTEMPTY" or="false" value=""/>
+            <item endquery="true" field="" goto="false" newquery="false" operator="=" or="false" value=""/>
+        </filter>
+        <group/>
+        <last_used>2016-09-06 09:19:44</last_used>
+        <mobile>true</mobile>
+        <roles/>
+        <sys_class_name>sys_filter</sys_class_name>
+        <sys_created_by>oleg.voropayev.contractor@weather.com</sys_created_by>
+        <sys_created_on>2016-09-06 09:19:41</sys_created_on>
+        <sys_customer_update>false</sys_customer_update>
+        <sys_domain>global</sys_domain>
+        <sys_id>f10b73bf0f29e6006c3005cce1050ed9</sys_id>
+        <sys_mod_count>1</sys_mod_count>
+        <sys_name>mobile</sys_name>
+        <sys_package display_value="Product" source="x_wec_product">daa7dccd0f44220034457d4ce1050e47</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Product">daa7dccd0f44220034457d4ce1050e47</sys_scope>
+        <sys_update_name>sys_filter_f10b73bf0f29e6006c3005cce1050ed9</sys_update_name>
+        <sys_updated_by>oleg.voropayev.contractor@weather.com</sys_updated_by>
+        <sys_updated_on>2016-09-06 09:19:44</sys_updated_on>
+        <table>sp_container</table>
+        <title>mobile</title>
+        <user display_value="Oleg Voropayev">95e5e0f70ff0a6006c3005cce1050eed</user>
+    </sys_filter>
+</record_update>

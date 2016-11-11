@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update>
+    <sys_ui_list parent="" relationship="" sys_domain="global" table="x_wec_product_9box_items" version="2" view="">
+        <sys_ui_list_element action="INSERT_OR_UPDATE">
+            <average_value>false</average_value>
+            <element>9_box_logo</element>
+            <list_id display_value="x_wec_product_9box_items" element="NULL" name="x_wec_product_9box_items" parent="NULL" relationship="NULL" sys_domain="global" view="Default view">f5faa05b0fc92e006c3005cce1050e9b</list_id>
+            <max_value>false</max_value>
+            <min_value>false</min_value>
+            <position>0</position>
+            <sum>false</sum>
+            <sys_created_by>andrey.zlatin@weather.com</sys_created_by>
+            <sys_created_on>2016-08-10 08:22:18</sys_created_on>
+            <sys_id>f9faa05b0fc92e006c3005cce1050e9b</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_updated_by>andrey.zlatin@weather.com</sys_updated_by>
+            <sys_updated_on>2016-08-10 08:22:18</sys_updated_on>
+        </sys_ui_list_element>
+        <sys_ui_list_element action="INSERT_OR_UPDATE">
+            <average_value>false</average_value>
+            <element>active</element>
+            <list_id display_value="x_wec_product_9box_items" element="NULL" name="x_wec_product_9box_items" parent="NULL" relationship="NULL" sys_domain="global" view="Default view">f5faa05b0fc92e006c3005cce1050e9b</list_id>
+            <max_value>false</max_value>
+            <min_value>false</min_value>
+            <position>1</position>
+            <sum>false</sum>
+            <sys_created_by>andrey.zlatin@weather.com</sys_created_by>
+            <sys_created_on>2016-08-10 08:22:18</sys_created_on>
+            <sys_id>7dfaa05b0fc92e006c3005cce1050e9b</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_updated_by>andrey.zlatin@weather.com</sys_updated_by>
+            <sys_updated_on>2016-08-10 08:22:18</sys_updated_on>
+        </sys_ui_list_element>
+        <sys_ui_list_element action="INSERT_OR_UPDATE">
+            <average_value>false</average_value>
+            <element>dashboard_logo</element>
+            <list_id display_value="x_wec_product_9box_items" element="NULL" name="x_wec_product_9box_items" parent="NULL" relationship="NULL" sys_domain="global" view="Default view">f5faa05b0fc92e006c3005cce1050e9b</list_id>
+            <max_value>false</max_value>
+            <min_value>false</min_value>
+            <position>2</position>
+            <sum>false</sum>
+            <sys_created_by>andrey.zlatin@weather.com</sys_created_by>
+            <sys_created_on>2016-08-10 08:22:18</sys_created_on>
+            <sys_id>fdfaa05b0fc92e006c3005cce1050e9b</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_updated_by>andrey.zlatin@weather.com</sys_updated_by>
+            <sys_updated_on>2016-08-10 08:22:18</sys_updated_on>
+        </sys_ui_list_element>
+        <sys_ui_list_element action="INSERT_OR_UPDATE">
+            <average_value>false</average_value>
+            <element>u_open_new_tab</element>
+            <list_id display_value="x_wec_product_9box_items" element="NULL" name="x_wec_product_9box_items" parent="NULL" relationship="NULL" sys_domain="global" view="Default view">f5faa05b0fc92e006c3005cce1050e9b</list_id>
+            <max_value>false</max_value>
+            <min_value>false</min_value>
+            <position>3</position>
+            <sum>false</sum>
+            <sys_created_by>andrey.zlatin@weather.com</sys_created_by>
+            <sys_created_on>2016-08-10 08:22:18</sys_created_on>
+            <sys_id>71faa05b0fc92e006c3005cce1050e9c</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_updated_by>andrey.zlatin@weather.com</sys_updated_by>
+            <sys_updated_on>2016-08-10 08:22:18</sys_updated_on>
+        </sys_ui_list_element>
+        <sys_ui_list_element action="INSERT_OR_UPDATE">
+            <average_value>false</average_value>
+            <element>u_priority</element>
+            <list_id display_value="x_wec_product_9box_items" element="NULL" name="x_wec_product_9box_items" parent="NULL" relationship="NULL" sys_domain="global" view="Default view">f5faa05b0fc92e006c3005cce1050e9b</list_id>
+            <max_value>false</max_value>
+            <min_value>false</min_value>
+            <position>4</position>
+            <sum>false</sum>
+            <sys_created_by>andrey.zlatin@weather.com</sys_created_by>
+            <sys_created_on>2016-08-10 08:22:18</sys_created_on>
+            <sys_id>f1faa05b0fc92e006c3005cce1050e9c</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_updated_by>andrey.zlatin@weather.com</sys_updated_by>
+            <sys_updated_on>2016-08-10 08:22:18</sys_updated_on>
+        </sys_ui_list_element>
+        <sys_ui_list_element action="INSERT_OR_UPDATE">
+            <average_value>false</average_value>
+            <element>u_section</element>
+            <list_id display_value="x_wec_product_9box_items" element="NULL" name="x_wec_product_9box_items" parent="NULL" relationship="NULL" sys_domain="global" view="Default view">f5faa05b0fc92e006c3005cce1050e9b</list_id>
+            <max_value>false</max_value>
+            <min_value>false</min_value>
+            <position>5</position>
+            <sum>false</sum>
+            <sys_created_by>andrey.zlatin@weather.com</sys_created_by>
+            <sys_created_on>2016-08-10 08:22:18</sys_created_on>
+            <sys_id>75faa05b0fc92e006c3005cce1050e9c</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_updated_by>andrey.zlatin@weather.com</sys_updated_by>
+            <sys_updated_on>2016-08-10 08:22:18</sys_updated_on>
+        </sys_ui_list_element>
+        <sys_ui_list_element action="INSERT_OR_UPDATE">
+            <average_value>false</average_value>
+            <element>u_title</element>
+            <list_id display_value="x_wec_product_9box_items" element="NULL" name="x_wec_product_9box_items" parent="NULL" relationship="NULL" sys_domain="global" view="Default view">f5faa05b0fc92e006c3005cce1050e9b</list_id>
+            <max_value>false</max_value>
+            <min_value>false</min_value>
+            <position>6</position>
+            <sum>false</sum>
+            <sys_created_by>andrey.zlatin@weather.com</sys_created_by>
+            <sys_created_on>2016-08-10 08:22:18</sys_created_on>
+            <sys_id>f5faa05b0fc92e006c3005cce1050e9c</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_updated_by>andrey.zlatin@weather.com</sys_updated_by>
+            <sys_updated_on>2016-08-10 08:22:18</sys_updated_on>
+        </sys_ui_list_element>
+        <sys_ui_list_element action="INSERT_OR_UPDATE">
+            <average_value>false</average_value>
+            <element>u_url</element>
+            <list_id display_value="x_wec_product_9box_items" element="NULL" name="x_wec_product_9box_items" parent="NULL" relationship="NULL" sys_domain="global" view="Default view">f5faa05b0fc92e006c3005cce1050e9b</list_id>
+            <max_value>false</max_value>
+            <min_value>false</min_value>
+            <position>7</position>
+            <sum>false</sum>
+            <sys_created_by>andrey.zlatin@weather.com</sys_created_by>
+            <sys_created_on>2016-08-10 08:22:18</sys_created_on>
+            <sys_id>79faa05b0fc92e006c3005cce1050e9c</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_updated_by>andrey.zlatin@weather.com</sys_updated_by>
+            <sys_updated_on>2016-08-10 08:22:18</sys_updated_on>
+        </sys_ui_list_element>
+        <sys_ui_list action="INSERT_OR_UPDATE">
+            <average_value>false</average_value>
+            <element/>
+            <max_value>false</max_value>
+            <min_value>false</min_value>
+            <name>x_wec_product_9box_items</name>
+            <parent/>
+            <position/>
+            <relationship/>
+            <sum>false</sum>
+            <sys_class_name>sys_ui_list</sys_class_name>
+            <sys_created_by>andrey.zlatin@weather.com</sys_created_by>
+            <sys_created_on>2016-08-10 08:22:18</sys_created_on>
+            <sys_customer_update>true</sys_customer_update>
+            <sys_domain>global</sys_domain>
+            <sys_id>f5faa05b0fc92e006c3005cce1050e9b</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_name>x_wec_product_9box_items</sys_name>
+            <sys_package display_value="Product" source="x_wec_product">daa7dccd0f44220034457d4ce1050e47</sys_package>
+            <sys_policy/>
+            <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+            <sys_scope display_value="Product">daa7dccd0f44220034457d4ce1050e47</sys_scope>
+            <sys_update_name>sys_ui_list_x_wec_product_9box_items_null</sys_update_name>
+            <sys_updated_by>andrey.zlatin@weather.com</sys_updated_by>
+            <sys_updated_on>2016-08-10 08:22:18</sys_updated_on>
+            <sys_user/>
+            <view display_value="Default view" name="NULL">Default view</view>
+            <view_name/>
+        </sys_ui_list>
+    </sys_ui_list>
+</record_update>

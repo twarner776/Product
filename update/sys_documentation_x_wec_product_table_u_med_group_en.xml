@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update>
+    <sys_documentation element="u_med_group" label="Medium Assignment Group (P3, P2)" language="en" table="x_wec_product_table">
+        <sys_documentation action="INSERT_OR_UPDATE">
+            <element>u_med_group</element>
+            <help/>
+            <hint/>
+            <label>Medium Assignment Group (P3, P2)</label>
+            <language>en</language>
+            <name>x_wec_product_table</name>
+            <plural>Medium Assignment Group (P3, P2)</plural>
+            <sys_class_name>sys_documentation</sys_class_name>
+            <sys_created_by>jason.lindsey@weather.com</sys_created_by>
+            <sys_created_on>2016-06-20 17:49:42</sys_created_on>
+            <sys_customer_update>false</sys_customer_update>
+            <sys_id>40c300830f04e20034457d4ce1050e03</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_name>Medium Assignment Group (P3, P2)</sys_name>
+            <sys_package display_value="Product" source="x_wec_product">daa7dccd0f44220034457d4ce1050e47</sys_package>
+            <sys_policy/>
+            <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+            <sys_scope display_value="Product">daa7dccd0f44220034457d4ce1050e47</sys_scope>
+            <sys_update_name>sys_documentation_x_wec_product_table_u_med_group_en</sys_update_name>
+            <sys_updated_by>jason.lindsey@weather.com</sys_updated_by>
+            <sys_updated_on>2016-06-20 17:49:42</sys_updated_on>
+            <url/>
+            <url_target/>
+        </sys_documentation>
+    </sys_documentation>
+</record_update>

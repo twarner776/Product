@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update table="sys_ws_operation">
+    <sys_ws_operation action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <consumes>application/json,application/xml,text/xml</consumes>
+        <consumes_customized>false</consumes_customized>
+        <default_operation_uri/>
+        <enforce_acl/>
+        <http_method>GET</http_method>
+        <name>Subscriptions migration</name>
+        <operation_script><![CDATA[(function process(/*RESTAPIRequest*/ request, /*RESTAPIResponse*/ response) {
+
+	var products = new GlideRecord('x_wec_product_table');
+	
+	products.query();
+	while (products.next()) {
+		
+		var product = products.getValue('sys_id');
+		var user = products.getValue('owned_by');
+		var assignGroup = products.getValue('assignment_group');
+		
+		if(assignGroup){
+			
+			var groupSubs = new GlideRecord('x_wec_group_subscr_group_subscriptions_table');
+			groupSubs.addEncodedQuery('u_group_sub=' + assignGroup);
+			groupSubs.query();
+			
+			if (groupSubs.next()) {
+				groupSubs.setValue("u_low_email", "true");
+				groupSubs.setValue("u_medium_email", "true");
+				groupSubs.setValue("u_high_email", "true");
+				groupSubs.setValue("u_problem_email", "true");
+				groupSubs.update();
+			}else{
+				var gr = new GlideRecord('x_wec_group_subscr_group_subscriptions_table');
+				gr.initialize(); 
+				gr.setValue("u_low_email", "true");
+				gr.setValue("u_medium_email", "true");
+				gr.setValue("u_high_email", "true");
+				gr.setValue("u_problem_email", "true");
+				gr.setValue("u_group_sub", assignGroup);
+				gr.insert();
+			}		
+			
+		}
+		
+		if(user){
+			var userObj = new GlideRecord('sys_user');
+			userObj.get(user);
+			
+			var phone = userObj.getValue('phone');
+			
+			var userSubs = new GlideRecord('x_wec_product_subs_product_subscriptions_table');
+			userSubs.addEncodedQuery('u_product_sub=' + product);
+			userSubs.addEncodedQuery('u_name_sub=' + user);
+			userSubs.query();
+			if (userSubs.next()) {
+				userSubs.setValue("u_high_sms", "true");
+				userSubs.update();
+			}else{
+				var ur = new GlideRecord('x_wec_product_subs_product_subscriptions_table');
+				ur.initialize(); 
+				ur.setValue("u_high_sms", "true");
+				ur.setValue("u_name_sub_mobile_phone", phone);
+				ur.setValue("u_name_sub", user);
+				ur.setValue("u_product_sub", product);
+
+				ur.insert();
+				
+			}
+			
+			
+		}
+		
+		
+	}
+
+	return {
+		status: 'ok'
+	}
+	
+    
+
+})(request, response);]]></operation_script>
+        <operation_uri>/api/x_wec_product/table/subscriptions_migration</operation_uri>
+        <produces>application/json,application/xml,text/xml</produces>
+        <produces_customized>false</produces_customized>
+        <relative_path>/subscriptions_migration</relative_path>
+        <request_example/>
+        <requires_acl_authorization>false</requires_acl_authorization>
+        <requires_authentication>true</requires_authentication>
+        <short_description/>
+        <sys_class_name>sys_ws_operation</sys_class_name>
+        <sys_created_by>anton.sychikov.contractor@weather.com</sys_created_by>
+        <sys_created_on>2016-09-12 09:02:32</sys_created_on>
+        <sys_customer_update>true</sys_customer_update>
+        <sys_id>8d6d6eb10f716e0034457d4ce1050ee6</sys_id>
+        <sys_mod_count>25</sys_mod_count>
+        <sys_name>Subscriptions migration</sys_name>
+        <sys_package display_value="Product" source="x_wec_product">daa7dccd0f44220034457d4ce1050e47</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Product">daa7dccd0f44220034457d4ce1050e47</sys_scope>
+        <sys_update_name>sys_ws_operation_8d6d6eb10f716e0034457d4ce1050ee6</sys_update_name>
+        <sys_updated_by>anton.sychikov.contractor@weather.com</sys_updated_by>
+        <sys_updated_on>2016-09-19 08:45:35</sys_updated_on>
+        <web_service_definition display_value="Table API">365010a60ffce2006c3005cce1050e21</web_service_definition>
+        <web_service_version/>
+    </sys_ws_operation>
+</record_update>

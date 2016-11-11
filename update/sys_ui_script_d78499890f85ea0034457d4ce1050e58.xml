@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update table="sys_ui_script">
+    <sys_ui_script action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <description>Angular main leadership app config</description>
+        <global>false</global>
+        <name>x_wec_product.leadership-app</name>
+        <script><![CDATA[(function () {
+    'use strict';
+
+angular
+    .module('twc-product', [
+        'ngResource',
+        'ngAnimate',
+        'ngSanitize',
+		'ngTable',
+        'blockUI',
+        'ui.bootstrap',
+		'ui.router',
+		'highcharts-ng',
+		'toastr'
+    ])
+
+	.config(['$stateProvider', '$urlRouterProvider',  function($stateProvider, $urlRouterProvider) {
+		
+		$urlRouterProvider.when('', '/dashboard');
+		$stateProvider
+		
+		.state('dashboard', {
+            url: '/dashboard',
+			controller: 'LeadershipDashboardCtrl',
+			controllerAs: 'ldb',
+            templateUrl: 'x_wec_product_leadership-dahboard-tpl.do'
+        })
+		.state('incidents', {
+            url: '/incidents?filter',
+			controller: 'LeadershipTasksCtrl',
+			controllerAs: 'tic',
+            templateUrl: 'x_wec_product_leadership-tasks-tpl.do',
+			data: {
+				config: {
+					label: 'Incidents',
+					column: {priority: true, sys_updated_on: true, assignment_group: true},
+					orderBy: 'priority',
+					method: 'fullList',
+					criterion: 'sys_class_name=incident^assignment_group.manager=#user_id#^OR#my_users#^active=true^state!=7^state!=6'
+				}
+			},
+			params: {
+				filter: null
+			},
+			resolve:{
+				users: function (UserFactory, userService){
+					return UserFactory.search({sysparm_query: 'manager=' + userService.sys_id}).$promise;
+				}
+			}
+			
+        })
+		.state('change_requests', {
+            url: '/change_requests?filter',
+			controller: 'LeadershipTasksCtrl',
+			controllerAs: 'tic',
+            templateUrl: 'x_wec_product_leadership-tasks-tpl.do',
+			data: {
+				config: {
+					label: 'Change Requests',
+					column: {priority: true, sys_updated_on: true, assignment_group: true},
+					orderBy: 'priority',
+					method: 'fullList',
+					criterion: 'sys_class_name=change_request^assigned_to.manager=#user_id#^active=true^state=1'
+				}
+			},
+			params: {
+				filter: null
+			},
+			resolve:{
+				users: function (UserFactory, userService){
+					return UserFactory.search({sysparm_query: 'manager=' + userService.sys_id}).$promise;
+				}
+			}
+			
+        })
+		.state('problems', {
+            url: '/problems?filter',
+			controller: 'LeadershipTasksCtrl',
+			controllerAs: 'tic',
+            templateUrl: 'x_wec_product_leadership-tasks-tpl.do',
+			data: {
+				config: {
+					label: 'Problems',
+					column: {priority: true, sys_updated_on: true, assignment_group: true},
+					orderBy: 'priority',
+					method: 'fullList',
+					criterion: 'sys_class_name=problem^assignment_group.manager=#user_id#^OR#my_users#^active=true^state!=7^state!=6'
+				}
+			},
+			params: {
+				filter: null
+			},
+			resolve:{
+				users: function (UserFactory, userService){
+					return UserFactory.search({sysparm_query: 'manager=' + userService.sys_id}).$promise;
+				}
+			}
+			
+        }).state('task', {
+			url: '/task/:id',
+			controller: 'TaskCtrl',
+			controllerAs: 't',
+			templateUrl: 'x_wec_product_task-tpl.do'
+		});
+
+
+		
+	}])
+
+    .provider('userService', function () {
+		var options = {};
+		this.config = function (opt) {
+			angular.extend(options, opt);
+		};
+		this.$get = [function () {
+			if (!options) {
+				throw new Error('Config options must be configured');
+			}
+			return options;
+		}];
+	})
+
+    .config(['blockUIConfig', function(blockUIConfig) {
+        blockUIConfig.delay = 400;
+		
+        blockUIConfig.requestFilter = function(config) {
+			
+			if(config.params && config.params.hasOwnProperty('preloader')){
+				return false;
+			}
+        };
+		
+    }])
+
+	.run(function ($http, $templateCache) { 
+
+		$http.defaults.headers.common['X-UserToken'] = userToken; 
+	
+	});
+
+	
+	
+	$.ajaxSetup({headers: {"X-UserToken": userToken}});
+	$.get('/api/now/table/sys_user/' + userId, function (userData) {
+		
+		$.get('/api/x_wec_product/table/sys_user_has_role?sysparm_query=user%3D' + userId, function (userRole) {
+
+			angular.module('twc-product').config(['userServiceProvider', function (userServiceProvider) {
+
+				userData.result['roles'] = userRole.result;
+				
+				userServiceProvider.config(userData.result);
+
+			}]);
+
+			angular.bootstrap(document, ['twc-product']);
+
+		});
+		
+    });
+	
+})();
+
+
+]]></script>
+        <script_name>leadership-app</script_name>
+        <sys_class_name>sys_ui_script</sys_class_name>
+        <sys_created_by>anton.sychikov.contractor@weather.com</sys_created_by>
+        <sys_created_on>2016-08-03 11:39:14</sys_created_on>
+        <sys_customer_update>true</sys_customer_update>
+        <sys_id>d78499890f85ea0034457d4ce1050e58</sys_id>
+        <sys_mod_count>29</sys_mod_count>
+        <sys_name>x_wec_product.leadership-app</sys_name>
+        <sys_package display_value="Product" source="x_wec_product">daa7dccd0f44220034457d4ce1050e47</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Product">daa7dccd0f44220034457d4ce1050e47</sys_scope>
+        <sys_update_name>sys_ui_script_d78499890f85ea0034457d4ce1050e58</sys_update_name>
+        <sys_updated_by>anton.sychikov.contractor@weather.com</sys_updated_by>
+        <sys_updated_on>2016-09-19 14:49:21</sys_updated_on>
+        <use_scoped_format>false</use_scoped_format>
+    </sys_ui_script>
+</record_update>

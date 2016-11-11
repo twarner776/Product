@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update table="sys_ui_page">
+    <sys_ui_page action="INSERT_OR_UPDATE">
+        <category>general</category>
+        <client_script/>
+        <description>Group Notifications tab</description>
+        <direct>true</direct>
+        <endpoint>x_wec_product_product-tab-4-tpl.do</endpoint>
+        <html><![CDATA[<?xml version="1.0" encoding="utf-8" ?>
+<j:jelly trim="false" xmlns:j="jelly:core" xmlns:g="glide" xmlns:j2="null" xmlns:g2="null">
+	<h4>{{pr.product.assignment_group.display_value ? pr.product.assignment_group.display_value + ' support notifications' : ' Support Notifications'}} </h4>
+	<p>Assignment groups will automatically receive emails when tickets are assigned. Use the below to establish any additional notifications the group should receive if an event were to occur&#160;<i class="fa fa-info-circle" aria-hidden="true" style="cursor: pointer; color: #1b809e" ng-click="pr.openInfo({template: 'notifications', title: 'Support Notifications'})"></i></p>
+	<form class="form-horizontal twc-form" name="pr.productNotificationsForm" novalidate="true" autocomplete="off">
+		<div class="row">
+			<div class="col-sm-12">
+				<div class="form-group">
+					<label class="col-sm-2 control-label">Assignment Group</label>
+					<div class="col-sm-10">
+						<p class="form-control-static">{{pr.product.assignment_group.display_value}}</p>
+					</div>
+				</div>				
+			</div>
+		</div>
+		<div class="row">
+
+			<div class="col-sm-4">
+			
+				<div class="form-group form-group-sm">
+					<label class="col-sm-6 control-label">Minor Event&#160;(P4, P5)</label>
+					<div class="col-sm-6">
+						<label class="checkbox-inline">
+							<input type="checkbox"  ng-true-value="'true'" ng-false-value="'false'" ng-model="pr.notifications.u_low_email" disabled="disabled" ng-if="pr.canEdit()"/> 
+							<i class="fa" aria-hidden="true" ng-class="{'fa-square-o' : pr.notifications.u_low_email === 'false', 'fa-check-square-o': pr.notifications.u_low_email === 'true'}" ng-show="!pr.canEdit()"></i>
+							eMail
+						</label>
+						<label class="checkbox-inline">
+							<input type="checkbox"  ng-true-value="'true'" ng-false-value="'false'" ng-model="pr.notifications.u_low_sms" ng-if="pr.canEdit()" />
+							<i class="fa fa-square-o" aria-hidden="true" ng-class="{'fa-square-o' : pr.notifications.u_low_sms === 'false', 'fa-check-square-o': pr.notifications.u_low_sms === 'true'}" ng-show="!pr.canEdit()"></i>
+							SMS
+						</label>						
+					</div>
+				</div>				
+
+				<div class="form-group form-group-sm">
+					<label class="col-sm-6 control-label">Degraded Performance&#160;(P2, P3)</label>
+					<div class="col-sm-6">
+						<label class="checkbox-inline">
+							<input type="checkbox"  ng-true-value="'true'" ng-false-value="'false'" ng-model="pr.notifications.u_medium_email" disabled="disabled" ng-if="pr.canEdit()"/> 
+							<i class="fa" aria-hidden="true" ng-class="{'fa-square-o' : pr.notifications.u_medium_email === 'false', 'fa-check-square-o': pr.notifications.u_medium_email === 'true'}" ng-show="!pr.canEdit()"></i>
+
+							eMail
+						</label>
+						<label class="checkbox-inline">
+							<input type="checkbox"  ng-true-value="'true'" ng-false-value="'false'" ng-model="pr.notifications.u_medium_sms" ng-if="pr.canEdit()"/> 
+							<i class="fa" aria-hidden="true" ng-class="{'fa-square-o' : pr.notifications.u_medium_sms === 'false', 'fa-check-square-o': pr.notifications.u_medium_sms === 'true'}" ng-show="!pr.canEdit()"></i>
+							SMS
+						</label>						
+					</div>
+				</div>				
+				
+				<div class="form-group form-group-sm">
+					<label class="col-sm-6 control-label">Outage / Major Event&#160;(P1)</label>
+					<div class="col-sm-6">
+						<label class="checkbox-inline">
+							<input type="checkbox"  ng-true-value="'true'" ng-false-value="'false'" ng-model="pr.notifications.u_high_email" disabled="disabled" ng-if="pr.canEdit()" /> 
+							<i class="fa" aria-hidden="true" ng-class="{'fa-square-o' : pr.notifications.u_high_email === 'false', 'fa-check-square-o': pr.notifications.u_high_email === 'true'}" ng-show="!pr.canEdit()"></i>
+							eMail
+						</label>
+						<label class="checkbox-inline">
+							<input type="checkbox"  ng-true-value="'true'" ng-false-value="'false'" ng-model="pr.notifications.u_high_sms"  ng-if="pr.canEdit()"/> 
+							<i class="fa" aria-hidden="true" ng-class="{'fa-square-o' : pr.notifications.u_high_sms === 'false', 'fa-check-square-o': pr.notifications.u_high_sms === 'true'}" ng-show="!pr.canEdit()"></i>
+							SMS
+						</label>						
+					</div>
+				</div>				
+			
+				<div class="form-group form-group-sm">
+					<label class="col-sm-6 control-label">Problem Notifications</label>
+					<div class="col-sm-6">
+						<label class="checkbox-inline">
+							<input type="checkbox"  ng-true-value="'true'" ng-false-value="'false'" ng-model="pr.notifications.u_problem_email" disabled="disabled" ng-if="pr.canEdit()"/> 
+							<i class="fa" aria-hidden="true" ng-class="{'fa-square-o' : pr.notifications.u_problem_email === 'false', 'fa-check-square-o': pr.notifications.u_problem_email === 'true'}" ng-show="!pr.canEdit()"></i>
+							eMail
+						</label>
+						<label class="checkbox-inline">
+							<input type="checkbox"  ng-true-value="'true'" ng-false-value="'false'" ng-model="pr.notifications.u_problem_sms" ng-if="pr.canEdit()"/> 
+							<i class="fa" aria-hidden="true" ng-class="{'fa-square-o' : pr.notifications.u_problem_sms === 'false', 'fa-check-square-o': pr.notifications.u_problem_sms === 'true'}" ng-show="!pr.canEdit()"></i>
+							SMS
+						</label>						
+					</div>
+				</div>				
+
+			</div>
+
+			
+		</div>
+	</form>
+	<div class="row" ng-show="pr.canEdit()">
+		<div class="col-sm-offset-2 col-sm-10">
+			<div class="form-group">
+				<button type="submit" 
+						ng-disabled="pr.productNotificationsForm.$invalid"
+						ng-click="pr.upsertNotifications()"
+						ng-class="{'btn-primary': pr.productNotificationsForm.$dirty, 'btn-default active': pr.productNotificationsForm.$pristine}"
+						class="btn btn-sm">Save</button>
+				
+					  <button type="submit" 
+						  ng-click="pr.tabActive = 3"
+						  ng-show="pr.existProduct.sys_id.value" 	
+						  ng-class="{'btn-info': pr.productNotificationsForm.$pristine, 'btn-default active': pr.productNotificationsForm.$dirty}"
+						  class="btn btn-sm" style="margin-left: 5px;">Next</button>
+				
+
+				<button type="button" 
+						class="btn btn-default btn-sm pull-right" ng-click="pr.state.go('dashboard')">Cancel</button>
+			</div>				
+		</div>
+
+	</div>
+		
+	
+</j:jelly>]]></html>
+        <name>product-tab-4-tpl</name>
+        <processing_script/>
+        <sys_class_name>sys_ui_page</sys_class_name>
+        <sys_created_by>andrey.zlatin@weather.com</sys_created_by>
+        <sys_created_on>2016-07-25 08:21:05</sys_created_on>
+        <sys_customer_update>true</sys_customer_update>
+        <sys_id>5021560a0ff0e2006c3005cce1050eb2</sys_id>
+        <sys_mod_count>33</sys_mod_count>
+        <sys_name>product-tab-4-tpl</sys_name>
+        <sys_package display_value="Product" source="x_wec_product">daa7dccd0f44220034457d4ce1050e47</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Product">daa7dccd0f44220034457d4ce1050e47</sys_scope>
+        <sys_update_name>sys_ui_page_5021560a0ff0e2006c3005cce1050eb2</sys_update_name>
+        <sys_updated_by>anton.sychikov.contractor@weather.com</sys_updated_by>
+        <sys_updated_on>2016-10-04 11:10:29</sys_updated_on>
+    </sys_ui_page>
+</record_update>

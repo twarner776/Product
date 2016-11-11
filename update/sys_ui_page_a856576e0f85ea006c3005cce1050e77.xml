@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update table="sys_ui_page">
+    <sys_ui_page action="INSERT_OR_UPDATE">
+        <category>general</category>
+        <client_script/>
+        <description/>
+        <direct>true</direct>
+        <endpoint>x_wec_product_box-app.do</endpoint>
+        <html><![CDATA[<?xml version="1.0" encoding="utf-8" ?>
+<j:jelly trim="false" xmlns:j="jelly:core" xmlns:g="glide" xmlns:j2="null" xmlns:g2="null">
+<g:evaluate object="true">
+    var session = gs.getSession();
+	var token = session.getSessionToken();
+</g:evaluate>
+	
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="shortcut icon" href="TWCICON.png" />
+	<script>
+		var userId = '${gs.getUserID()}';
+		var userToken = "$[token]";
+		var instanceUrl = '${gs.getProperty('glide.servlet.uri')}';
+		var instanceName = '${gs.getProperty('instance_name')}';
+	</script>
+	  
+	<script language="javascript" src="x_wec_product.box-init.jsdbx" />
+	
+	  
+    <title>Dashboard app page</title>
+
+  </head>
+
+  <body>
+	
+	  <nav-bar></nav-bar>
+	  
+	<div id="wrapper">
+
+        <!-- Page Content -->
+        <div id="page-content-wrapper">
+            <div class="container-fluid">
+				<div ui-view=""></div>
+            </div>
+        </div>
+        <!-- /#page-content-wrapper -->
+
+    </div>
+    <!-- /#wrapper -->	  
+		
+  </body>
+</html>
+
+	
+	
+</j:jelly>]]></html>
+        <name>box-app</name>
+        <processing_script/>
+        <sys_class_name>sys_ui_page</sys_class_name>
+        <sys_created_by>anton.sychikov.contractor@weather.com</sys_created_by>
+        <sys_created_on>2016-08-08 12:57:18</sys_created_on>
+        <sys_customer_update>true</sys_customer_update>
+        <sys_id>a856576e0f85ea006c3005cce1050e77</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>box-app</sys_name>
+        <sys_package display_value="Product" source="x_wec_product">daa7dccd0f44220034457d4ce1050e47</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Product">daa7dccd0f44220034457d4ce1050e47</sys_scope>
+        <sys_update_name>sys_ui_page_a856576e0f85ea006c3005cce1050e77</sys_update_name>
+        <sys_updated_by>anton.sychikov.contractor@weather.com</sys_updated_by>
+        <sys_updated_on>2016-08-08 12:57:18</sys_updated_on>
+    </sys_ui_page>
+</record_update>

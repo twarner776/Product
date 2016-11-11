@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update table="sys_ui_script">
+    <sys_ui_script action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <description/>
+        <global>false</global>
+        <name>x_wec_product.report-app</name>
+        <script><![CDATA[(function () {
+    'use strict';
+
+angular
+    .module('twc-product', [
+        'ngResource',
+        'ngAnimate',
+        'ngSanitize',
+		'ngTable',
+        'blockUI',
+        'ui.bootstrap',
+		'ui.router'
+    ])
+
+	.config(['$stateProvider', '$urlRouterProvider',  function($stateProvider, $urlRouterProvider) {
+		
+		$urlRouterProvider.when('', '/dashboard');
+		$stateProvider
+		.state('dashboard', {
+            url: '/dashboard',
+            templateUrl: 'x_wec_product_report-dahboard-tpl.do',
+			controller: function($scope, $http, ReportsFactory){
+				var vm = this, groups = [];
+				
+				vm.reports = ReportsFactory.getGroups(); 
+
+				$http.get('/api/x_wec_product/table/x_wec_product_report_center').success(function(res) {
+					
+					var gr = _.chain(res.result).groupBy("group").value();
+					_.forOwn(gr, function(v, k) {
+							groups.push({
+								title: k,
+								reports: v 
+							})
+					});
+					
+					vm.groups = groups;
+					
+				});				
+				
+			},
+			controllerAs: 'vm',
+			
+        })
+		.state('report', {
+            url: '/report/:id',
+            templateUrl: 'x_wec_product_report-iframe-tpl.do',
+			controller: function($scope, $stateParams, $http, $sce){
+				var t = this;
+				
+				$http.get('/api/x_wec_product/table/x_wec_product_report_center', {
+					params: {
+						sysparm_query: 'report_id=' + $stateParams.id
+					}
+				}).success(function(res) {
+					
+					t.report = res.result[0];
+					t.url = $sce.trustAsResourceUrl('/sys_report_display.do?sysparm_report_id=' + t.report.report_id);
+					
+				});				
+				
+			},
+			controllerAs: 't',
+			
+        });
+
+		
+	}])
+
+	.factory('ReportsFactory', function ($sce) {
+		
+		var groups = [];
+	
+		var incidendReports = {
+			id: 'incidendReports',
+			title: 'Incident Reports',
+			reports: [
+				{id: '0ad14a120fb5ea006c3005cce1050eea', title: 'All Incidents by State (Last 6 Months)', url: $sce.trustAsResourceUrl('/sys_report_display.do?sysparm_report_id=0ad14a120fb5ea006c3005cce1050eea')},
+				{id: 'e33286520fb5ea006c3005cce1050e0c', title: 'Assigned To My Team', url: $sce.trustAsResourceUrl('/sys_report_display.do?sysparm_report_id=e33286520fb5ea006c3005cce1050e0c')},
+				{id: '84628e520fb5ea006c3005cce1050eb5', title: 'Assigned To My Team (Product Missing)', url: $sce.trustAsResourceUrl('/sys_report_display.do?sysparm_report_id=84628e520fb5ea006c3005cce1050eb5')},
+				{id: '1b5506160fb5ea006c3005cce1050e8d', title: 'Open Incidents By Priority By Product (Heatmap)', url: $sce.trustAsResourceUrl('/sys_report_display.do?sysparm_report_id=1b5506160fb5ea006c3005cce1050e8d')},
+				{id: 'e30642560fb5ea006c3005cce1050ef5', title: 'Incident Breakdown By Assigned To By Product', url: $sce.trustAsResourceUrl('/sys_report_display.do?sysparm_report_id=e30642560fb5ea006c3005cce1050ef5')},
+				{id: '2286c6960fb5ea006c3005cce1050e75', title: 'Critical Open Incidents (My Groups)', url: $sce.trustAsResourceUrl('/sys_report_display.do?sysparm_report_id=2286c6960fb5ea006c3005cce1050e75')},
+				{id: 'e8d7c2d60fb5ea006c3005cce1050efa', title: 'Closed Incident Trend By Product (My Groups)', url: $sce.trustAsResourceUrl('/sys_report_display.do?sysparm_report_id=e8d7c2d60fb5ea006c3005cce1050efa')},
+			]
+		};
+
+		var problemReports = {
+			id: 'problemReports',
+			title: 'Problem Reports',
+			reports: [
+				{id: '85d34061d7030200eaae68150e61030f', title: 'Open Problems', url: $sce.trustAsResourceUrl('/sys_report_display.do?sysparm_report_id=85d34061d7030200eaae68150e61030f')},
+				{id: '12e345b1d7030200eaae68150e610323', title: 'Open Problems older than 30 Days', url: $sce.trustAsResourceUrl('/sys_report_display.do?sysparm_report_id=12e345b1d7030200eaae68150e610323')},
+				{id: 'e7160461d7030200eaae68150e610379', title: 'Problems not updated for 7 days', url: $sce.trustAsResourceUrl('/sys_report_display.do?sysparm_report_id=e7160461d7030200eaae68150e610379')},
+				{id: '37c9421a0fb5ea006c3005cce1050e54', title: 'Problems by State (My Groups)', url: $sce.trustAsResourceUrl('/sys_report_display.do?sysparm_report_id=37c9421a0fb5ea006c3005cce1050e54')},
+				{id: '8c9b461a0fb5ea006c3005cce1050e26', title: 'My Products\' Problems', url: $sce.trustAsResourceUrl('/sys_report_display.do?sysparm_report_id=8c9b461a0fb5ea006c3005cce1050e26')},
+			]
+		};
+		
+		var changeReports = {
+			id: 'changeReports',
+			title: 'Change Reports',
+			reports: [
+				{id: '7c14311e0f75ea006c3005cce1050e38', title: 'Change Requests Submitted on My Products', url: $sce.trustAsResourceUrl('/sys_report_display.do?sysparm_report_id=7c14311e0f75ea006c3005cce1050e38')},
+				{id: '4875b140c611227b0182454ee743c7d7', title: 'Change Calendar', url: $sce.trustAsResourceUrl('/sys_report_display.do?sysparm_report_id=4875b140c611227b0182454ee743c7d7')},
+				{id: 'cb18bd5e0f75ea006c3005cce1050e98', title: 'Change Types Trended by Month', url: $sce.trustAsResourceUrl('/sys_report_display.do?sysparm_report_id=cb18bd5e0f75ea006c3005cce1050e98')},
+				{id: 'a1849841c611227b01646de563508c09', title: 'Upcoming Change Requests', url: $sce.trustAsResourceUrl('/sys_report_display.do?sysparm_report_id=a1849841c611227b01646de563508c09')},
+			]
+		};
+
+		var knowledgeReports = {
+			id: 'knowledgeReports',
+			title: 'Knowledge Base Reportss',
+			reports: [
+				{id: 'd18c025a0fb5ea006c3005cce1050ec1', title: 'Knowledge Articles On My Products', url: $sce.trustAsResourceUrl('/sys_report_display.do?sysparm_report_id=d18c025a0fb5ea006c3005cce1050ec1')},
+			]
+		};
+	
+		
+		groups.push(incidendReports);
+		groups.push(problemReports);
+		groups.push(changeReports);
+		groups.push(knowledgeReports);
+	
+		return {
+			getGroups: function(){
+				return groups;
+			}
+		};
+	
+	})
+
+    .provider('userService', function () {
+		var options = {};
+		this.config = function (opt) {
+			angular.extend(options, opt);
+		};
+		this.$get = [function () {
+			if (!options) {
+				throw new Error('Config options must be configured');
+			}
+			return options;
+		}];
+	})
+
+    .config(['blockUIConfig', function(blockUIConfig) {
+        blockUIConfig.delay = 400;
+		
+        blockUIConfig.requestFilter = function(config) {
+			
+			if(config.params && config.params.hasOwnProperty('preloader')){
+				return false;
+			}
+        };
+		
+    }])
+
+	
+	.run(function ($http, $templateCache) { 
+
+		$http.defaults.headers.common['X-UserToken'] = userToken; 
+	
+	});
+
+	
+	$.ajaxSetup({headers: {"X-UserToken": userToken}});
+	$.get('/api/now/table/sys_user/' + userId, function (userData) {
+		
+		$.get('/api/x_wec_product/table/sys_user_has_role?sysparm_query=user%3D' + userId, function (userRole) {
+
+			angular.module('twc-product').config(['userServiceProvider', function (userServiceProvider) {
+
+				userData.result['roles'] = userRole.result;
+				
+				userServiceProvider.config(userData.result);
+
+			}]);
+
+			angular.bootstrap(document, ['twc-product']);
+
+		});
+		
+    });
+
+})();
+
+
+]]></script>
+        <script_name>report-app</script_name>
+        <sys_class_name>sys_ui_script</sys_class_name>
+        <sys_created_by>anton.sychikov.contractor@weather.com</sys_created_by>
+        <sys_created_on>2016-09-14 07:57:04</sys_created_on>
+        <sys_customer_update>true</sys_customer_update>
+        <sys_id>ccf338ae0ff5ae0034457d4ce1050e34</sys_id>
+        <sys_mod_count>29</sys_mod_count>
+        <sys_name>x_wec_product.report-app</sys_name>
+        <sys_package display_value="Product" source="x_wec_product">daa7dccd0f44220034457d4ce1050e47</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Product">daa7dccd0f44220034457d4ce1050e47</sys_scope>
+        <sys_update_name>sys_ui_script_ccf338ae0ff5ae0034457d4ce1050e34</sys_update_name>
+        <sys_updated_by>anton.sychikov.contractor@weather.com</sys_updated_by>
+        <sys_updated_on>2016-09-19 14:49:30</sys_updated_on>
+        <use_scoped_format>false</use_scoped_format>
+    </sys_ui_script>
+</record_update>

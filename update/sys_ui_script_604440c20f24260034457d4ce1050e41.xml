@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update table="sys_ui_script">
+    <sys_ui_script action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <description>Utils</description>
+        <global>false</global>
+        <name>x_wec_product.UtilService</name>
+        <script><![CDATA[(function () {
+    'use strict';
+
+    angular
+        .module('twc-product')
+        .factory('UtilService', UtilService);
+
+    UtilService.$inject = ['$filter'];
+
+    function UtilService($filter) {
+		return {
+			timeToDuration: function(model, field){
+
+				if(model[field] && model[field].value){
+				
+					var time = new Date(model[field].value).getTime(), 
+						startTime = new Date('1970-01-01 00:00:00').getTime(),
+						diff = time - startTime;
+
+					var days = Math.floor(diff / 1000 / 60 / (60 * 24));
+					var diffDate = new Date(diff);
+					diffDate.setHours(diffDate.getHours() + (diffDate.getTimezoneOffset() / 60));
+					model[field + '_hours'] = diffDate.getHours() + (24 * days);
+					model[field + '_minutes'] = diffDate.getMinutes();
+
+				}else{
+					model[field + '_hours'] = 0;
+					model[field + '_minutes'] = 0;
+					
+				}
+
+			},
+			durationToTime: function(model, field){
+				var date = new Date('1970-01-01 00:00:00');
+				date.setTime(date.getTime() + (((model[field + '_hours'] * 60) + model[field + '_minutes']) * 60) * 1000);
+				
+				return $filter('date')(date, 'yyyy-MM-dd HH:mm:ss');
+				
+			}
+		}
+    }
+
+})();]]></script>
+        <script_name>UtilService</script_name>
+        <sys_class_name>sys_ui_script</sys_class_name>
+        <sys_created_by>andrey.zlatin@weather.com</sys_created_by>
+        <sys_created_on>2016-07-12 11:57:52</sys_created_on>
+        <sys_customer_update>true</sys_customer_update>
+        <sys_id>604440c20f24260034457d4ce1050e41</sys_id>
+        <sys_mod_count>18</sys_mod_count>
+        <sys_name>x_wec_product.UtilService</sys_name>
+        <sys_package display_value="Product" source="x_wec_product">daa7dccd0f44220034457d4ce1050e47</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Product">daa7dccd0f44220034457d4ce1050e47</sys_scope>
+        <sys_update_name>sys_ui_script_604440c20f24260034457d4ce1050e41</sys_update_name>
+        <sys_updated_by>anton.sychikov.contractor@weather.com</sys_updated_by>
+        <sys_updated_on>2016-08-23 09:39:29</sys_updated_on>
+        <use_scoped_format>false</use_scoped_format>
+    </sys_ui_script>
+</record_update>

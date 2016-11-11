@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update table="sys_ui_script">
+    <sys_ui_script action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <description/>
+        <global>false</global>
+        <name>x_wec_product.depending-directive</name>
+        <script><![CDATA[(function () {
+    'use strict';
+
+    angular
+        .module('twc-product')
+        .directive('depending', Depending)
+        .controller('DependingCtrl', DependingCtrl);
+
+    DependingCtrl.$inject = ['$scope', '$state', '$q', '$timeout', '$filter', 'DashboardFactory', 'ProductFactory', 'userService', 'GroupFactory', 'RelationshipsFactory', 'TaskFactory', 'RelationshipsService'];
+
+    function Depending() {
+        var directive = {
+            bindToController: true,
+            transclude: true,
+            controller: 'DependingCtrl',
+            controllerAs: 'dp',
+            restrict: 'EA',
+            templateUrl: 'x_wec_product_depending-tpl.do',
+            scope: {
+                view: '@view'
+            }
+			
+        };
+        return directive;
+    }
+
+    function DependingCtrl($scope, $state, $q, $timeout, $filter, DashboardFactory, ProductFactory, userService, GroupFactory, RelationshipsFactory, TaskFactory, RelationshipsService) {
+        var dp = this;
+		
+		dp.state = $state;
+		dp.getTooltip = getTooltip;
+		dp.open = open;
+		dp.userSubscriptions = RelationshipsService.userSubscriptions;
+		
+		$(window).resize(function() {
+			$scope.$apply(function () {
+				recalculateFont();
+			});
+		});
+		
+		if(dp.view === 'side'){
+			dp.allTask = 0;
+
+			getStats();
+		}else{
+			dp.allTask = 0;
+			getTile();
+		}
+		
+		function getStats(){
+			dp.loading = true;
+			TaskFactory.dependingsProductRelation({user: userService.sys_id, preloader: false}).$promise.then(function(res){
+				
+				var request = [];
+				request.push(TaskFactory.dependingsProductViewStat({sysparm_query: 't_sys_class_name=incident^t_priority=1^ORt_priority=2^t_active=true^t_state!=6^d_type=up^t_stateNOT IN3,4,7,8^d_user_id=' + userService.sys_id + '^d_owned_by!=' + userService.sys_id, sysparm_group_by: 'd_type', sysparm_count: true, preloader: false}).$promise);
+				
+				request.push(TaskFactory.dependingsProductViewStat({sysparm_query: 't_sys_class_name=problem^t_state=1^d_type=up^d_user_id=' + userService.sys_id + '^d_owned_by!=' + userService.sys_id, sysparm_group_by: 'd_type', sysparm_count: true, preloader: false}).$promise);
+				
+				request.push(TaskFactory.dependingsChangeViewStat({sysparm_query: 't_state=1^t_type=Exception^ORt_type=Emergency^d_type=up^d_user_id=' + userService.sys_id + '^d_owned_by!=' + userService.sys_id, sysparm_group_by: 'd_type', sysparm_count: true, preloader: false}).$promise);
+				
+				request.push(TaskFactory.dependingsProductTableStat({sysparm_query: 'd_operational_status=2^d_product_updated_onBETWEENjavascript:gs.daysAgoStart(14)@javascript:gs.daysAgoEnd(0)^d_type=up^d_user_id=' + userService.sys_id, sysparm_group_by: 'd_type', sysparm_count: true, preloader: false}).$promise);
+				
+				return $q.all(request); 
+			}).then(function(res){
+				dp.loading = false;
+				
+				res[0].result.forEach(function(item){
+
+					dp.allTask += parseInt(item.stats.count);
+
+				});
+				res[1].result.forEach(function(item){
+
+					dp.allTask += parseInt(item.stats.count);
+
+				});
+				
+				res[2].result.forEach(function(item){
+
+					dp.allTask += parseInt(item.stats.count);
+
+				});
+
+				res[3].result.forEach(function(item){
+
+					dp.allTask += parseInt(item.stats.count);
+
+				});
+				
+					
+			});		  
+		}; 
+
+		
+		function getTile(){
+			dp.loading = true;
+			dp.tile = [];
+			
+			TaskFactory.dependingsProductRelation({user: userService.sys_id, preloader: false}).$promise.then(function(res){
+				
+				var request = [];
+				request.push(TaskFactory.dependingsProductView({sysparm_query: 't_sys_class_name=incident^t_priority=1^ORt_priority=2^t_active=true^t_state!=6^d_type=up^t_stateNOT IN3,4,7,8^d_user_id=' + userService.sys_id + '^d_owned_by!=' + userService.sys_id, sysparm_display_value: 'all', preloader: false}).$promise);
+				
+				request.push(TaskFactory.dependingsProductView({sysparm_query: 't_sys_class_name=problem^t_state=1^d_type=up^d_user_id=' + userService.sys_id + '^d_owned_by!=' + userService.sys_id, sysparm_display_value: 'all', preloader: false}).$promise);
+				
+				request.push(TaskFactory.dependingsChangeView({sysparm_query: 't_state=1^t_type=Exception^ORt_type=Emergency^d_type=up^d_user_id=' + userService.sys_id + '^d_owned_by!=' + userService.sys_id, sysparm_display_value: 'all', preloader: false}).$promise);
+
+				request.push(TaskFactory.dependingsProductTable({sysparm_query: 'd_operational_status=2^d_product_updated_onBETWEENjavascript:gs.daysAgoStart(14)@javascript:gs.daysAgoEnd(0)^d_type=up^d_user_id=' + userService.sys_id, sysparm_display_value: 'all', preloader: false}).$promise);
+
+				return $q.all(request); 
+			}).then(function(res){
+				dp.loading = false;
+				
+				add(res[0].result);
+				add(res[1].result);
+				add(res[2].result);
+				
+				res[3].result.forEach(function(item){
+					item.t_sys_class_name.value = 'operational_status';
+				});
+				add(res[3].result);
+				
+				$timeout(function () {
+					recalculateFont();
+				}, 0);
+				
+				
+				function add(items, up, down){
+					items.forEach(function(item){
+						dp.tile.push(item);
+					});
+					
+				}
+			});		  
+		}; 
+		
+		function recalculateFont(){
+			
+			var ticketWidth = $('.thumbnail').width();
+			if(ticketWidth >= 280){
+				dp.font = 'font-size-1';
+			}else if(ticketWidth <= 280 && ticketWidth >= 235){
+				dp.font = 'font-size-2';
+			}else if(ticketWidth <= 235 && ticketWidth >= 180){
+				dp.font = 'font-size-3';
+			}else if(ticketWidth <= 180 && ticketWidth >= 100){
+				dp.font = 'font-size-4';
+			}
+			
+		}
+		
+		function getTooltip(item, prefix){
+			return '<strong><span style="display: block;">Number: </strong>'+item[prefix + 'number'].display_value+'</span><br/>' +
+			'<strong><span>Opened By: </strong>'+item[prefix + 'opened_by'].display_value+'</span><br/>' +
+			'<strong><span>Opened: </strong>'+item[prefix + 'opened_at'].display_value+'</span><br/>' +
+			'<strong><span>State: </strong>'+item[prefix + 'state'].display_value+'</span><br/>' +
+			'<strong><span>Priority: </strong>'+item[prefix + 'priority'].display_value+'</span><br/>' +
+			'<strong><span>Short Description: </strong>'+item[prefix + 'short_description'].display_value+'</span><br/><br/>' +
+			'<strong><span>Description: </strong>'+$filter('limitTo')(item[prefix + 'description'].display_value, 500) + (item[prefix + 'description'].display_value.length > 500 ? ' ...' : '') +'</span><br/><br/>' +
+			'<strong><span>Assignment Group: </strong>'+item[prefix + 'assignment_group'].display_value+'</span><br/><br/>' +
+			'<strong><span>Assigned To: </strong>'+item[prefix + 'assigned_to'].display_value+'</span><br/><br/>' +
+			'<strong><span>Work Notes: </strong>'+$filter('limitTo')(item[prefix + 'work_notes'].display_value, 500) + (item[prefix + 'work_notes'].display_value.length > 500 ? ' ...' : '')+'</span><br/>' +
+			'<strong><span>Last updated time: </strong>'+item[prefix + 'sys_updated_on'].display_value+'</span>';
+		}
+		
+		
+		function open(id){
+			window.open('/task.do?sys_id=' + id + '&sysparm_record_target=incident&sysparm_record_row=1&sysparm_record_rows=1&sysparm_record_list=ORDERBYDESCsys_created_on', 'Task', 'location=1,status=1,scrollbars=1, resizable=1, directories=1, toolbar=1, titlebar=1, width=800, height=600');
+		}
+		
+
+    }
+
+})();
+
+]]></script>
+        <script_name>depending-directive</script_name>
+        <sys_class_name>sys_ui_script</sys_class_name>
+        <sys_created_by>anton.sychikov.contractor@weather.com</sys_created_by>
+        <sys_created_on>2016-09-05 10:50:43</sys_created_on>
+        <sys_customer_update>true</sys_customer_update>
+        <sys_id>8ab5c36f0f21e6006c3005cce1050ece</sys_id>
+        <sys_mod_count>58</sys_mod_count>
+        <sys_name>x_wec_product.depending-directive</sys_name>
+        <sys_package display_value="Product" source="x_wec_product">daa7dccd0f44220034457d4ce1050e47</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Product">daa7dccd0f44220034457d4ce1050e47</sys_scope>
+        <sys_update_name>sys_ui_script_8ab5c36f0f21e6006c3005cce1050ece</sys_update_name>
+        <sys_updated_by>anton.sychikov.contractor@weather.com</sys_updated_by>
+        <sys_updated_on>2016-10-17 10:29:51</sys_updated_on>
+        <use_scoped_format>false</use_scoped_format>
+    </sys_ui_script>
+</record_update>

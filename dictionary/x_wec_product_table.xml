@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<database>
+    <element attributes="live_feed=true" extends="cmdb_ci" label="Product" max_length="40" name="x_wec_product_table" type="collection">
+        <element choice="1" choice_field="sys_class_name" label="Class" max_length="32" name="class" type="choice">
+            <choice>
+                <element label="Application" sequence="0" value="application"/>
+                <element label="Product" sequence="1" value="product"/>
+            </choice>
+        </element>
+        <element attributes="edge_encryption_enabled=true" label="Product Owner.Department" max_length="40" name="owned_by_department" type="string"/>
+        <element attributes="edge_encryption_enabled=true" label="Business Owner.Organizational Unit" max_length="40" name="owned_by_u_organizational_unit" type="string"/>
+        <element attributes="edge_encryption_enabled=true" label="Product Owner.Organizational Unit" max_length="40" name="owned_by_u_org_unit_description" type="string"/>
+        <element label="First Point of Contact" max_length="32" name="u_application_primary" reference="sys_user" reference_qual="active=true^sys_class_name=sys_user^EQ" reference_qual_condition="active=true^sys_class_name=sys_user^EQ" type="reference"/>
+        <element label="Second Point of Contact" max_length="32" name="u_application_secondary" reference="sys_user" reference_qual="active=true^sys_class_name=sys_user^EQ" reference_qual_condition="active=true^sys_class_name=sys_user^EQ" type="reference"/>
+        <element hint="A business unit or organization that owns business services" label="Business Group" max_length="32" name="u_business_group" reference="cmdb_ci_group" type="reference" use_dependent_field="true"/>
+        <element hint="This is the upstream business service for the product" label="Business Service" max_length="32" name="u_business_service" reference="cmdb_ci_service" type="reference"/>
+        <element label="Client Facing" max_length="40" name="u_client_facing" type="boolean"/>
+        <element attributes="edge_encryption_enabled=true" choice="1" label="Enrolled by" max_length="40" name="u_enrolled_by" type="string">
+            <choice>
+                <element label="User" sequence="0" value="User"/>
+                <element label="TOC Member" sequence="1" value="TOC Member"/>
+            </choice>
+        </element>
+        <element label="High Assignment Group (P1)" max_length="32" name="u_high_group" reference="sys_user_group" type="reference"/>
+        <element label="Infrastructure On-Call hardware/device" max_length="32" name="u_infrastructure_oncall" reference="sys_user" reference_qual="active=true^sys_class_name=sys_user^EQ" reference_qual_condition="active=true^sys_class_name=sys_user^EQ" type="reference"/>
+        <element label="Incident time for Infrastructure On-Call" max_length="40" name="u_infrastructure_time" type="glide_duration"/>
+        <element attributes="edge_encryption_enabled=true" label="Line of Business" max_length="40" name="u_line_of_business" type="string"/>
+        <element label="Low Assignment Group (P5, P4)" max_length="32" name="u_low_group" reference="sys_user_group" type="reference"/>
+        <element label="Medium Assignment Group (P3, P2)" max_length="32" name="u_med_group" reference="sys_user_group" type="reference"/>
+        <element label="Escalate to Second Point after:" max_length="40" name="u_primary_time" type="glide_duration"/>
+        <element attributes="edge_encryption_enabled=true" choice="1" hint="SAAS or On prem" label="Product Type" mandatory="true" max_length="40" name="u_product_type" type="string">
+            <choice>
+                <element label="API" sequence="0" value="API"/>
+                <element label="On Prem" sequence="1" value="On Prem"/>
+                <element label="Package" sequence="2" value="Package"/>
+                <element label="SAAS" sequence="3" value="SAAS"/>
+            </choice>
+        </element>
+        <element label="Escalate to Product Owner after:" max_length="40" name="u_secondary_time" type="glide_duration"/>
+        <element label="Incident time for Second Escalation" max_length="40" name="u_second_escalation_time" type="glide_duration"/>
+        <element label="Second Point of Escalation" max_length="32" name="u_second_point" reference="sys_user" reference_qual="active=true^sys_class_name=sys_user^EQ" reference_qual_condition="active=true^sys_class_name=sys_user^EQ" type="reference"/>
+        <element label="Incident time for Third Escalation" max_length="40" name="u_third_escalation_time" type="glide_duration"/>
+        <element label="Third Point of Escalation" max_length="32" name="u_third_point" reference="sys_user" reference_qual="active=true^sys_class_name=sys_user^EQ" reference_qual_condition="active=true^sys_class_name=sys_user^EQ" type="reference"/>
+        <element attributes="edge_encryption_enabled=true" label="TOC Imp INFO" max_length="1000" name="u_toc_escalation" type="string"/>
+        <index name="index">
+            <element name="u_business_group"/>
+        </index>
+        <index name="index2">
+            <element name="u_low_group"/>
+        </index>
+        <index name="index3">
+            <element name="u_application_secondary"/>
+        </index>
+        <index name="index4">
+            <element name="u_business_service"/>
+        </index>
+        <index name="index5">
+            <element name="u_infrastructure_oncall"/>
+        </index>
+        <index name="index6">
+            <element name="u_high_group"/>
+        </index>
+        <index name="index7">
+            <element name="u_third_point"/>
+        </index>
+        <index name="index8">
+            <element name="u_application_primary"/>
+        </index>
+        <index name="index9">
+            <element name="u_second_point"/>
+        </index>
+        <index name="index10">
+            <element name="u_med_group"/>
+        </index>
+    </element>
+</database>

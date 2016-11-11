@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update table="sys_ui_page">
+    <sys_ui_page action="INSERT_OR_UPDATE">
+        <category>general</category>
+        <client_script/>
+        <description>Subscriptions template</description>
+        <direct>true</direct>
+        <endpoint>x_wec_product_subscriptions-tpl.do</endpoint>
+        <html><![CDATA[<?xml version="1.0" encoding="utf-8" ?>
+<j:jelly trim="false" xmlns:j="jelly:core" xmlns:g="glide" xmlns:j2="null" xmlns:g2="null">
+	
+	<ol class="breadcrumb">
+		<li><a href="https://service.weather.com">Home</a></li>
+		<li><a href="/x_wec_product_box-app.do#/dashboard">My Apps</a></li>
+		<li><a ui-sref="dashboard">Dashboard</a></li>
+		<li class="active">Subscriptions</li>
+	</ol>
+	
+	<h1 class="page-header twc-header">Manage My Subscriptions <i class="fa fa-refresh fa-spin fa-1x fa-fw" ng-show="ss.loader"></i></h1>
+	
+	<div class="row" ng-show="ss.subscriptionsTable.data.length > 0">
+		<div class="col-sm-12">
+			<div class="alert alert-info" role="alert">Below are all of the Products and Applications in our database that you have subscribed to receive notifications when events occur. To update a notification, or to create a new subscription, click the Update Existing Subscriptions and make any necessary changes.</div>
+		</div>
+	</div>
+	
+	
+	<form class="form-inline twc-form" name="ss.productSubscriptionsForm" novalidate="true" autocomplete="off">
+		<div class="form-group form-group-sm" style="padding-right: 10px;">
+			<label class="control-label">Email:&#160;</label>
+			<input type="email" class="form-control" ng-model="ss.user.email" disabled="true" />
+		</div>				
+		<div class="form-group form-group-sm required" ng-class="{'has-error': ss.isInvalid(ss.productSubscriptionsForm['u_name_sub_mobile_phone'])}">
+			<label class="control-label">Mobile Phone:&#160;</label>
+			<input type="text" class="form-control" ng-model="ss.user.mobile_phone" name="u_name_sub_mobile_phone" ng-required="true"/>
+		</div>				
+	</form>
+	<hr ng-show="!ss.createNew"/>
+	<div class="row" ng-show="!ss.createNew">
+		<div class="col-sm-12">
+				<table ng-table="ss.subscriptionsTable" class="table table-striped twc-table">
+					<tr ng-repeat="row in $data track by row.sys_id.value">
+						<td data-title="'Name'"><a ui-sref="product({id: row.u_product_sub.value})">{{row.u_product_sub.display_value}}</a></td>
+						<td data-title="'Minor Event'">
+							<label class="checkbox-inline">
+								<input type="checkbox"  ng-true-value="'true'" ng-false-value="'false'" ng-model="row.u_low_email.value" /> eMail
+							</label>
+							<label class="checkbox-inline">
+								<input type="checkbox"  ng-true-value="'true'" ng-false-value="'false'" ng-model="row.u_low_sms.value" /> SMS
+							</label>						
+						</td>
+						<td data-title="'Degraded Performance'">
+							<label class="checkbox-inline">
+								<input type="checkbox"  ng-true-value="'true'" ng-false-value="'false'" ng-model="row.u_medium_email.value"/> eMail
+							</label>
+							<label class="checkbox-inline">
+								<input type="checkbox"  ng-true-value="'true'" ng-false-value="'false'" ng-model="row.u_medium_sms.value" /> SMS
+							</label>						
+						</td>
+						<td data-title="'Outage / Major Event'">
+							<label class="checkbox-inline">
+								<input type="checkbox"  ng-true-value="'true'" ng-false-value="'false'" ng-model="row.u_high_email.value" /> eMail
+							</label>
+							<label class="checkbox-inline">
+								<input type="checkbox"  ng-true-value="'true'" ng-false-value="'false'" ng-model="row.u_high_sms.value" ng-disabled="ss.productOwned[row.u_product_sub.value]"/> SMS
+							</label>						
+						</td>
+						<td data-title="'Problem Notifications'">
+							<label class="checkbox-inline">
+								<input type="checkbox"  ng-true-value="'true'" ng-false-value="'false'" ng-model="row.u_problem_email.value" /> eMail
+							</label>
+							<label class="checkbox-inline">
+								<input type="checkbox"  ng-true-value="'true'" ng-false-value="'false'" ng-model="row.u_problem_sms.value" /> SMS
+							</label>						
+						</td>
+						<td data-title="'Change Notifications'">
+							<label class="checkbox-inline">
+								<input type="checkbox"  ng-true-value="'true'" ng-false-value="'false'" ng-model="row.u_change_email.value" /> eMail
+							</label>
+							<label class="checkbox-inline">
+								<input type="checkbox"  ng-true-value="'true'" ng-false-value="'false'" ng-model="row.u_change_sms.value" /> SMS
+							</label>						
+						</td>
+						<td style="text-align: right;">
+							<div class="btn-group btn-group-xs" role="group">
+								<button type="button" class="btn btn-warning" title="Delete item" ng-click="ss.deleteSubscriptions(row)"><i class="fa fa-trash" aria-hidden="true"></i></button>
+							</div>
+							
+						</td>
+					</tr>
+				</table>
+			
+		</div>
+	</div>
+	<div class="row" ng-show="!ss.createNew">
+		<div class="col-sm-12">
+			<div class="form-group">
+				<button type="submit" 
+						ng-click="ss.updateSubscriptions()"
+						ng-disabled="ss.productSubscriptionsForm.$invalid"
+						class="btn btn-sm btn-primary">Save</button>
+				
+				<button type="button"
+						ng-click="ss.createNew = true"
+						class="btn btn-sm btn-primary" style="margin-left: 5px;"><i class="fa fa-plus" aria-hidden="true"></i>&#160; Create a New Subscription</button>
+			</div>				
+		</div>
+
+	</div>
+	<hr ng-show="ss.createNew"/>
+	<div class="row" ng-show="ss.createNew">
+		<div class="col-md-12">
+			<div class="table-responsive">
+				
+				<button type="button" class="btn btn-primary btn-xs" ng-click="ss.showMassChecked()" ng-disabled="ss.checkboxes.getCheckedItems().length == 0"><i class="fa fa-check-square-o"></i></button>
+				
+				<table ng-table="ss.productsTable" class="table table-striped twc-table">
+					<tr ng-repeat="row in $data track by row.sys_id">
+						<td header="'headerCheckbox.html'">
+							<input type="checkbox" ng-model="ss.checkboxes.items[row.sys_id]"/>
+						</td>
+						<td data-title="'Name'" filter="{name: 'text'}"><a ui-sref="product({id: row.sys_id})">{{row.name}}</a></td>
+						<td data-title="'Assignment group'" filter="{assignment_group: 'search-assignment-group-sub'}">{{row.assignment_group.display_value}}</td>
+						<td data-title="'Class'" filter="{sys_class_name: 'select'}" filter-data="ss.classFilters">{{row.sys_class_name}}</td>
+						<td data-title="'Minor Event'">
+							<div class="checkbox twcTableCheckbox">
+								<label>
+									<input type="checkbox" ng-model="row.u_low_email" ng-change="ss.changeRow(row);"/> eMail
+								</label>
+							</div>
+							<div class="checkbox twcTableCheckbox">
+								<label>
+									<input type="checkbox" ng-model="row.u_low_sms" ng-change="ss.changeRow(row);"/> SMS
+								</label>						
+							</div>	
+						</td>
+						<td data-title="'Degraded Performance'">
+							<div class="checkbox twcTableCheckbox">
+								<label>
+									<input type="checkbox" ng-model="row.u_medium_email" ng-change="ss.changeRow(row);"/> eMail
+								</label>
+							</div>	
+							<div class="checkbox twcTableCheckbox">
+								<label>
+									<input type="checkbox" ng-model="row.u_medium_sms" ng-change="ss.changeRow(row);"/> SMS
+								</label>						
+							</div>	
+						</td>
+						<td data-title="'Outage / Major Event'">
+							<div class="checkbox twcTableCheckbox">
+								<label>
+									<input type="checkbox" ng-model="row.u_high_email" ng-change="ss.changeRow(row);"/> eMail
+								</label>
+
+							</div>	
+							<div class="checkbox twcTableCheckbox" >
+								<label>
+									<input type="checkbox" ng-model="row.u_high_sms" ng-change="ss.changeRow(row);"/> SMS
+								</label>						
+							</div>	
+						</td>
+						<td data-title="'Problem Notifications'">
+							<div class="checkbox twcTableCheckbox">
+								<label>
+									<!-- AZ changes 08/24. new fields for problem notifications-->
+									<input type="checkbox" ng-model="row.u_problem_email" ng-change="ss.changeRow(row);"/> eMail
+								</label>
+							</div>	
+							<div class="checkbox twcTableCheckbox">
+								<label>
+									<input type="checkbox" ng-model="row.u_problem_sms" ng-change="ss.changeRow(row);"/> SMS
+								</label>						
+							</div>	
+						</td>
+						<!-- AZ changes 08/24. adding fields for change notifications-->
+						<td data-title="'Change Notifications'">
+							<div class="checkbox twcTableCheckbox">
+								<label>
+									<input type="checkbox" ng-model="row.u_change_email" ng-change="ss.changeRow(row);"/> eMail
+								</label>
+							</div>	
+							<div class="checkbox twcTableCheckbox">
+								<label>
+									<input type="checkbox" ng-model="row.u_change_sms" ng-change="ss.changeRow(row);"/> SMS
+								</label>						
+							</div>	
+						</td>
+												
+					</tr>
+				</table>
+			
+			</div>
+		</div>
+
+	</div>
+
+	<div class="row" ng-show="ss.createNew">
+		<div class="col-sm-12">
+			<div class="form-group">
+				<button type="submit" 
+						ng-click="ss.createSubscriptions()"
+						ng-disabled="ss.checkboxes.getCheckedItems().length == 0 || ss.productSubscriptionsForm.$invalid"
+						class="btn btn-sm btn-primary">Create New Subscriptions</button>
+			</div>				
+		</div>
+
+	</div>
+	
+
+</j:jelly>]]></html>
+        <name>subscriptions-tpl</name>
+        <processing_script/>
+        <sys_class_name>sys_ui_page</sys_class_name>
+        <sys_created_by>andrey.zlatin@weather.com</sys_created_by>
+        <sys_created_on>2016-07-18 10:50:16</sys_created_on>
+        <sys_customer_update>true</sys_customer_update>
+        <sys_id>6c107eff0fe4e60034457d4ce1050e14</sys_id>
+        <sys_mod_count>114</sys_mod_count>
+        <sys_name>subscriptions-tpl</sys_name>
+        <sys_package display_value="Product" source="x_wec_product">daa7dccd0f44220034457d4ce1050e47</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Product">daa7dccd0f44220034457d4ce1050e47</sys_scope>
+        <sys_update_name>sys_ui_page_6c107eff0fe4e60034457d4ce1050e14</sys_update_name>
+        <sys_updated_by>anton.sychikov.contractor@weather.com</sys_updated_by>
+        <sys_updated_on>2016-09-14 07:48:30</sys_updated_on>
+    </sys_ui_page>
+</record_update>

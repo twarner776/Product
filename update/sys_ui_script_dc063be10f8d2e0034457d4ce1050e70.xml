@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update table="sys_ui_script">
+    <sys_ui_script action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <description/>
+        <global>false</global>
+        <name>x_wec_product.leadership-tasks-ctrl</name>
+        <script><![CDATA[(function () {
+    'use strict';
+
+    angular
+        .module('twc-product')
+        .controller('LeadershipTasksCtrl', LeadershipTasksCtrl);
+
+    LeadershipTasksCtrl.$inject = ['$scope', '$window', '$state', '$stateParams', '$http', '$q', 'ProductFactory', 'TaskFactory', 'NgTableParams', 'ReferenceBookFactory', 'users', 'userService'];
+
+    function LeadershipTasksCtrl($scope, $window, $state, $stateParams, $http, $q, ProductFactory, TaskFactory, NgTableParams, ReferenceBookFactory, users, userService) {
+		
+		console.log($stateParams);
+		
+        var tic = this,
+			method = $state.current.data.config.method,
+			criterion = $state.current.data.config.criterion,
+			filter = $stateParams.filter ? $stateParams.filter : null;
+
+		tic.label = $state.current.data.config.label;
+		tic.column = $state.current.data.config.column;
+		
+		var myusers = [];
+		users.result.forEach(function(user){
+			myusers.push('assignment_group.manager=' + user.sys_id);
+		});
+
+		criterion = criterion.replace('#user_id#', userService.sys_id);
+		criterion = criterion.replace('#my_users#', myusers.join('^OR'));
+		
+		if(filter){
+			criterion += '^' + filter;
+		}
+
+		tic.table = initTable();
+		
+		function initTable() {
+			return new NgTableParams({
+				count: 25
+			}, {
+				counts: [25, 50, 100, 200],
+				getData: function(params) {
+					
+					tic.loader = true;
+					
+					var filters = params.filter(),
+						filtersArr = [];
+
+					filtersArr.push('ORDERBYpriority');
+					filtersArr.push(criterion);
+					
+					
+					return TaskFactory[method]({
+						sysparm_limit: params.count(),
+						sysparm_offset: (params.page() - 1) * params.count(),
+						sysparm_query: filtersArr.join('^'),
+						sysparm_display_value: 'all',
+						preloader: false,
+						sysparm_suppress_pagination_header: true
+					}).$promise.then(function(res) {
+						tic.loader = false;
+						params.total(res.headers['x-total-count']);
+						return res.data.result;
+					});
+				}
+			});
+			
+		}
+		
+    }
+
+})();
+
+]]></script>
+        <script_name>leadership-tasks-ctrl</script_name>
+        <sys_class_name>sys_ui_script</sys_class_name>
+        <sys_created_by>anton.sychikov.contractor@weather.com</sys_created_by>
+        <sys_created_on>2016-08-05 12:41:32</sys_created_on>
+        <sys_customer_update>true</sys_customer_update>
+        <sys_id>dc063be10f8d2e0034457d4ce1050e70</sys_id>
+        <sys_mod_count>20</sys_mod_count>
+        <sys_name>x_wec_product.leadership-tasks-ctrl</sys_name>
+        <sys_package display_value="Product" source="x_wec_product">daa7dccd0f44220034457d4ce1050e47</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Product">daa7dccd0f44220034457d4ce1050e47</sys_scope>
+        <sys_update_name>sys_ui_script_dc063be10f8d2e0034457d4ce1050e70</sys_update_name>
+        <sys_updated_by>anton.sychikov.contractor@weather.com</sys_updated_by>
+        <sys_updated_on>2016-08-19 11:04:40</sys_updated_on>
+        <use_scoped_format>false</use_scoped_format>
+    </sys_ui_script>
+</record_update>

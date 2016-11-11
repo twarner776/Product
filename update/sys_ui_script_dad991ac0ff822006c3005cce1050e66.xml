@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update table="sys_ui_script">
+    <sys_ui_script action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <description>Tasks list controller</description>
+        <global>false</global>
+        <name>x_wec_product.tasks-ctrl</name>
+        <script><![CDATA[(function () {
+    'use strict';
+
+    angular
+        .module('twc-product')
+        .controller('TasksCtrl', TasksCtrl);
+
+    TasksCtrl.$inject = ['$scope', '$window', '$state', '$stateParams', '$http', '$q', 'ProductFactory', 'TaskFactory', 'NgTableParams', 'ReferenceBookFactory', 'userService'];
+
+    function TasksCtrl($scope, $window, $state, $stateParams, $http, $q, ProductFactory, TaskFactory, NgTableParams, ReferenceBookFactory, userService) {
+		
+        var tc = this;
+		
+		$scope.$emit('side-bar-show-info', true);
+		
+		tc.label = $state.current.data.config.label;
+		tc.info = $state.current.data.config.info;
+		tc.view = $state.current.data.config.view;
+		tc.detailState = $state.current.name + '_details';
+		tc.table = initTable();
+		tc.reloadTable = reloadTable;
+		tc.searchAssignmentGroupByName = searchAssignmentGroupByName;
+		tc.prioritys = getPriority();
+		
+		function initTable() {
+			return new NgTableParams({
+				count: 25,
+				sorting: { t_number: "desc" }, 
+			}, {
+				counts: [25, 50, 100, 200],
+				getData: function(params) {
+					
+					tc.loader = true;
+					
+					var filters = params.filter(),
+						filtersArr = [];
+
+					var sorting = Object.keys(params.sorting());
+					if(sorting.length > 0){
+						filtersArr.push('ORDERBY' + (params.sorting()[sorting[0]] === 'desc' ? 'DESC' : '') + sorting[0]);
+					}
+					
+					
+					$state.current.data.config.criterion.forEach(function(c){
+						filtersArr.push(c);
+					});
+					
+					if(filters.hasOwnProperty('t_number') && filters.t_number !== ""){
+						filtersArr.push('t_numberLIKE' + filters.t_number);
+					}
+					if(filters.hasOwnProperty('t_priority') && filters.t_priority !== ""){
+						filtersArr.push('t_priority=' + filters.t_priority);
+					}
+					if(filters.hasOwnProperty('t_cmdb_ci') && filters.t_cmdb_ci !== ""){
+						filtersArr.push('t_cmdb_ciLIKE' + filters.t_cmdb_ci);
+					}
+
+					if(filters.hasOwnProperty('t_assignment_group') && filters.t_assignment_group !== ""){
+						filtersArr.push('t_assignment_group=' + filters.t_assignment_group);
+					}
+					if(filters.hasOwnProperty('t_short_description') && filters.t_short_description !== ""){
+						filtersArr.push('t_short_descriptionLIKE' + filters.t_short_description);
+					}
+					
+					return TaskFactory[$state.current.data.config.controller]({
+						sysparm_limit: params.count(),
+						sysparm_offset: (params.page() - 1) * params.count(),
+						sysparm_query: filtersArr.join('^'),
+						sysparm_display_value: 'all',
+						preloader: false
+					}).$promise.then(function(res) {
+						tc.loader = false;
+						params.total(res.headers['x-total-count']);
+						return res.data.result;
+					});
+				}
+			});
+			
+		}
+
+		function searchAssignmentGroupByName(name){
+            return ReferenceBookFactory.assignmentGroupSearch({sysparm_query: 'nameLIKE' + name, sysparm_limit: 20}).$promise.then(function(res){
+                return res.result;
+            });
+        }
+
+		function reloadTable(model, key){
+			if(!model){
+				var filter = {};
+				filter[key] = "";
+				angular.extend(tc.table.filter(), filter);				
+			}
+        }
+		
+		function getPriority(){
+			return [{id: 1, title: '1 - Critical'}, {id: 2, title: '2 - High'}, {id: 3, title: '3 - Moderate'}, {id: 4, title: '4 - Low'}, {id: 5, title: '5 - Minimal'}];
+        }
+		
+		
+    }
+
+})();
+
+]]></script>
+        <script_name>tasks-ctrl</script_name>
+        <sys_class_name>sys_ui_script</sys_class_name>
+        <sys_created_by>andrey.zlatin@weather.com</sys_created_by>
+        <sys_created_on>2016-07-20 12:39:13</sys_created_on>
+        <sys_customer_update>true</sys_customer_update>
+        <sys_id>dad991ac0ff822006c3005cce1050e66</sys_id>
+        <sys_mod_count>36</sys_mod_count>
+        <sys_name>x_wec_product.tasks-ctrl</sys_name>
+        <sys_package display_value="Product" source="x_wec_product">daa7dccd0f44220034457d4ce1050e47</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Product">daa7dccd0f44220034457d4ce1050e47</sys_scope>
+        <sys_update_name>sys_ui_script_dad991ac0ff822006c3005cce1050e66</sys_update_name>
+        <sys_updated_by>anton.sychikov.contractor@weather.com</sys_updated_by>
+        <sys_updated_on>2016-10-05 10:00:40</sys_updated_on>
+        <use_scoped_format>false</use_scoped_format>
+    </sys_ui_script>
+</record_update>

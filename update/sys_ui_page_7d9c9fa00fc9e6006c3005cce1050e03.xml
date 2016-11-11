@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update table="sys_ui_page">
+    <sys_ui_page action="INSERT_OR_UPDATE">
+        <category>general</category>
+        <client_script/>
+        <description>Side panel template for TOC</description>
+        <direct>true</direct>
+        <endpoint>x_wec_product_toc-side-panel-tpl.do</endpoint>
+        <html><![CDATA[<?xml version="1.0" encoding="utf-8" ?>
+<j:jelly trim="false" xmlns:j="jelly:core" xmlns:g="glide" xmlns:j2="null" xmlns:g2="null">
+
+
+<div class="panel panel-default">
+  <div class="panel-heading twc-panel-heading">TOC Overview</div>
+
+	<div class="list-group font13">
+	  <a ui-sref="incidents" class="list-group-item">Incidents P1, P2, P3</a>
+	  <a ui-sref="problems" class="list-group-item">Open Problem Tickets</a>
+	  <a ui-sref="change_requests" class="list-group-item">Scheduled Changes</a>
+	</div>
+	
+</div>
+	
+<div class="panel panel-default">
+  <div class="panel-heading twc-panel-heading">TOC Utilities</div>
+
+	<div class="list-group font13">
+	  <a ui-sref="product" class="list-group-item">Enroll or Locate an Item</a>
+	  <a ui-sref="new_group" class="list-group-item">Create New Assignment Group</a>
+	  <a ui-sref="my_groups" class="list-group-item">Edit Existing Assignment Group</a>
+	  <a href="/x_wec_communicatio_app.do#/dashboard" class="list-group-item">Communications Center</a>
+		
+	  <a href="{{sp.calendarUrl}}" class="list-group-item" target="_blank">TOC Schedule</a>
+	</div>
+	
+</div>
+	
+<div class="panel panel-default">
+  <div class="panel-heading twc-panel-heading">My Team Arena</div>
+
+	<div class="list-group font13">
+	  <a ui-sref="my_incidents" class="list-group-item">TOC Incidents</a>
+	  <a ui-sref="my_problems" class="list-group-item">TOC Problem Tickets</a>
+	  <a ui-sref="my_change_requests" class="list-group-item">TOC Scheduled Changes</a>
+	</div>
+</div>
+	
+	
+<div class="panel-heading twc-panel-heading"><span class="ticket-number">Knowledge</span><i class="fa fa-refresh fa-spin fa-1x fa-fw" ng-show="sp.knowledgeLoad"></i></div>  	
+	<table class="table table-striped twc-dashboard-table" ng-show="sp.knowledge.length > 0">
+		<tr ng-repeat="item in sp.knowledge">
+			<td><span style="display: block;"><a ui-sref="knowledge({id: item.sys_id})">{{item.short_description}}</a></span><span>Author: {{item.author.display_value}}</span></td>
+		</tr>
+	</table>
+	<div class="alert alert-warning twc-alerts" role="alert" ng-show="sp.knowledge.length == 0" style="text-align: center;">
+		No records to display
+	</div>
+	
+</j:jelly>]]></html>
+        <name>toc-side-panel-tpl</name>
+        <processing_script/>
+        <sys_class_name>sys_ui_page</sys_class_name>
+        <sys_created_by>anton.sychikov.contractor@weather.com</sys_created_by>
+        <sys_created_on>2016-08-02 08:15:59</sys_created_on>
+        <sys_customer_update>true</sys_customer_update>
+        <sys_id>7d9c9fa00fc9e6006c3005cce1050e03</sys_id>
+        <sys_mod_count>30</sys_mod_count>
+        <sys_name>toc-side-panel-tpl</sys_name>
+        <sys_package display_value="Product" source="x_wec_product">daa7dccd0f44220034457d4ce1050e47</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Product">daa7dccd0f44220034457d4ce1050e47</sys_scope>
+        <sys_update_name>sys_ui_page_7d9c9fa00fc9e6006c3005cce1050e03</sys_update_name>
+        <sys_updated_by>anton.sychikov.contractor@weather.com</sys_updated_by>
+        <sys_updated_on>2016-10-14 08:46:48</sys_updated_on>
+    </sys_ui_page>
+</record_update>

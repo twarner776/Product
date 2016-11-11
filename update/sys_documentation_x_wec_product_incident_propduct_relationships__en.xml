@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update>
+    <sys_documentation element="" label="Product incident propduct relationships" language="en" table="x_wec_product_incident_propduct_relationships">
+        <sys_documentation action="INSERT_OR_UPDATE">
+            <element/>
+            <help/>
+            <hint/>
+            <label>Product incident propduct relationships</label>
+            <language>en</language>
+            <name>x_wec_product_incident_propduct_relationships</name>
+            <plural>Product incident propduct relationships</plural>
+            <sys_class_name>sys_documentation</sys_class_name>
+            <sys_created_by>anton.sychikov.contractor@weather.com</sys_created_by>
+            <sys_created_on>2016-08-15 08:50:18</sys_created_on>
+            <sys_customer_update>true</sys_customer_update>
+            <sys_id>7051eaf80f99ee006c3005cce1050e0c</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_name>Product incident propduct relationships</sys_name>
+            <sys_package display_value="Product" source="x_wec_product">daa7dccd0f44220034457d4ce1050e47</sys_package>
+            <sys_policy/>
+            <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+            <sys_scope display_value="Product">daa7dccd0f44220034457d4ce1050e47</sys_scope>
+            <sys_update_name>sys_documentation_x_wec_product_incident_propduct_relationships__en</sys_update_name>
+            <sys_updated_by>anton.sychikov.contractor@weather.com</sys_updated_by>
+            <sys_updated_on>2016-08-15 08:50:18</sys_updated_on>
+            <url/>
+            <url_target/>
+        </sys_documentation>
+    </sys_documentation>
+</record_update>

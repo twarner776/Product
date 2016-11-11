@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update>
+    <sys_documentation element="owned_by" label="Product Owner" language="en" table="x_wec_product_table">
+        <sys_documentation action="INSERT_OR_UPDATE">
+            <element>owned_by</element>
+            <help/>
+            <hint>Owner of the product</hint>
+            <label>Product Owner</label>
+            <language>en</language>
+            <name>x_wec_product_table</name>
+            <plural>Product Owners</plural>
+            <sys_class_name>sys_documentation</sys_class_name>
+            <sys_created_by>tony.fugere@cs</sys_created_by>
+            <sys_created_on>2016-07-06 19:48:02</sys_created_on>
+            <sys_customer_update>true</sys_customer_update>
+            <sys_id>59483e400f6062006c3005cce1050e25</sys_id>
+            <sys_mod_count>1</sys_mod_count>
+            <sys_name>Product Owner</sys_name>
+            <sys_package display_value="Product" source="x_wec_product">daa7dccd0f44220034457d4ce1050e47</sys_package>
+            <sys_policy/>
+            <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+            <sys_scope display_value="Product">daa7dccd0f44220034457d4ce1050e47</sys_scope>
+            <sys_update_name>sys_documentation_x_wec_product_table_owned_by_en</sys_update_name>
+            <sys_updated_by>tony.fugere@cs</sys_updated_by>
+            <sys_updated_on>2016-07-06 19:48:33</sys_updated_on>
+            <url/>
+            <url_target/>
+        </sys_documentation>
+    </sys_documentation>
+</record_update>

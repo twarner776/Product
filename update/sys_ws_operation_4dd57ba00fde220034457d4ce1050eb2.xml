@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update table="sys_ws_operation">
+    <sys_ws_operation action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <consumes>application/json,application/xml,text/xml</consumes>
+        <consumes_customized>false</consumes_customized>
+        <default_operation_uri/>
+        <enforce_acl/>
+        <http_method>GET</http_method>
+        <name>Get current date/time</name>
+        <operation_script><![CDATA[(function process(/*RESTAPIRequest*/ request, /*RESTAPIResponse*/ response) {
+	
+	var gdt = new GlideDateTime();
+	
+	
+   	return {
+		date: gdt.getValue(),
+		dateDisplay: gdt.getDisplayValue(),
+		offset: gdt.getTZOffset()
+	}
+
+
+})(request, response);]]></operation_script>
+        <operation_uri>/api/x_wec_product/table/current_date</operation_uri>
+        <produces>application/json,application/xml,text/xml</produces>
+        <produces_customized>false</produces_customized>
+        <relative_path>/current_date</relative_path>
+        <request_example/>
+        <requires_acl_authorization>false</requires_acl_authorization>
+        <requires_authentication>false</requires_authentication>
+        <short_description/>
+        <sys_class_name>sys_ws_operation</sys_class_name>
+        <sys_created_by>anton.sychikov.contractor@weather.com</sys_created_by>
+        <sys_created_on>2016-10-03 13:25:11</sys_created_on>
+        <sys_customer_update>true</sys_customer_update>
+        <sys_id>4dd57ba00fde220034457d4ce1050eb2</sys_id>
+        <sys_mod_count>15</sys_mod_count>
+        <sys_name>Get current date/time</sys_name>
+        <sys_package display_value="Product" source="x_wec_product">daa7dccd0f44220034457d4ce1050e47</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Product">daa7dccd0f44220034457d4ce1050e47</sys_scope>
+        <sys_update_name>sys_ws_operation_4dd57ba00fde220034457d4ce1050eb2</sys_update_name>
+        <sys_updated_by>anton.sychikov.contractor@weather.com</sys_updated_by>
+        <sys_updated_on>2016-10-19 09:53:36</sys_updated_on>
+        <web_service_definition display_value="Table API">365010a60ffce2006c3005cce1050e21</web_service_definition>
+        <web_service_version/>
+    </sys_ws_operation>
+</record_update>

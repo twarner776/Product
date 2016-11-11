@@ -1,0 +1,332 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update table="sys_ui_page">
+    <sys_ui_page action="INSERT_OR_UPDATE">
+        <category>general</category>
+        <client_script/>
+        <description>Product Details tab content</description>
+        <direct>true</direct>
+        <endpoint>x_wec_product_product-tab-0-tpl.do</endpoint>
+        <html><![CDATA[<?xml version="1.0" encoding="utf-8" ?>
+<j:jelly trim="false" xmlns:j="jelly:core" xmlns:g="glide" xmlns:j2="null" xmlns:g2="null">
+	<h4>{{pr.product.name.value ? pr.product.name.value + ' product details' : ' Product details'}} </h4>
+	
+	<p>Please enter the below details about your item&#160;<i class="fa fa-info-circle" aria-hidden="true" style="cursor: pointer; color: #1b809e" ng-click="pr.openInfo({template: 'product', title: 'Product Details'})"></i></p>
+	
+	<form class="form-horizontal twc-form" name="pr.productDetailForm" novalidate="true" autocomplete="off">
+		<div class="row">
+			
+			<div class="col-sm-6">
+			
+				<div class="form-group form-group-sm required" ng-class="{'has-error': pr.isInvalid(pr.productDetailForm['name'])}">
+					<label class="col-sm-4 control-label" uib-tooltip="Name of NEW product or application">Product Name</label>
+					<div class="col-sm-8" ng-show="pr.canEdit()">
+					  <input type="text" class="form-control" ng-model="pr.product.name.value" 
+							 ng-change="pr.verifyDuplicateProduct(pr.product.name.value)"
+							 name="name" ng-required="true"/>
+						<div ng-show="pr.productDetailForm.name.$error.duplicate" class="alert alert-warning twc-side-nav-alert">
+							 <span>Product with this name already exists.</span> <a style="display: block;" ui-sref="product({id: pr.duplicateProduct.sys_id})">Please click here to update it.</a>
+						</div>			  
+					</div>
+					<div class="col-sm-8" ng-if="!pr.canEdit()">
+						<p class="form-control-static" ng-bind="pr.product.name.display_value"></p>
+					</div>
+					
+				</div>
+
+				<div class="form-group form-group-sm required" ng-class="{'has-error': pr.isInvalid(pr.productDetailForm['owned_by'])}">
+					<label class="col-sm-4 control-label" uib-tooltip="The owner of this product or application (Product Manager)">Product Owner</label>
+					<div class="col-sm-8" ng-show="pr.canEdit()">
+						<div class="input-group input-group-sm">
+						  <input type="text" class="form-control" ng-required="true" name="owned_by"
+								 placeholder="Please typeahead search value"
+								 uib-typeahead="user as (user.name + ' (' + user.email + ')') for user in pr.searchUserByName($viewValue)"
+								 typeahead-on-select="pr.setModel($item, $model, $label, $event, 'owned_by')"
+								 typeahead-wait-ms="500"
+								 typeahead-editable="false"
+								 ng-model="pr.product.owned_by.display_value" />
+						  
+							<span class="input-group-btn">
+								<button class="btn btn-default" type="button" ng-click="pr.searchUser('owned_by');"><i class="fa fa-search" aria-hidden="true"></i></button>
+							</span>
+
+						</div>
+						
+					</div>
+					<div class="col-sm-8" ng-show="!pr.canEdit()">
+						<p class="form-control-static">{{pr.product.owned_by.display_value}}</p>
+					</div>
+					
+				</div>
+				
+				<div class="form-group form-group-sm">
+					<label class="col-sm-4 control-label" uib-tooltip="The Product Owner's Department">Department</label>
+					<div class="col-sm-8" ng-show="pr.canEdit()">
+					  <input type="text" class="form-control" disabled="disabled" ng-model="pr.product.department.display_value"/>
+					</div>
+					<div class="col-sm-8" ng-show="!pr.canEdit()">
+						<p class="form-control-static">{{pr.product.department.display_value}}</p>
+					</div>
+					
+				</div>
+				
+				<div class="form-group form-group-sm required" ng-class="{'has-error': pr.isInvalid(pr.productDetailForm['owned_by'])}">
+					<label class="col-sm-4 control-label" uib-tooltip="The Product Owner's Organizational Unit">Organizational Unit</label>
+					<div class="col-sm-8" ng-show="pr.canEdit()">
+						<select class="form-control" ng-model="pr.product.u_organizational_unit.value" name="u_organizational_unit" ng-required="true">
+							<option value="ProdTech">Product and Technology</option>
+							<option value="Tel">Television</option>
+						</select>
+					</div>
+					<div class="col-sm-8" ng-show="!pr.canEdit()">
+						<p class="form-control-static">{{pr.product.u_organizational_unit.display_value}}</p>
+					</div>
+					
+				</div>
+				
+				<div class="form-group form-group-sm required" ng-class="{'has-error': pr.isInvalid(pr.productDetailForm['u_business_group'])}">
+					<label class="col-sm-4 control-label" uib-tooltip="A business unit or organization that owns business services.  Example: CTS">Business Group<i class="fa fa-question-circle-o" aria-hidden="true" style="position: absolute;right: 0;top: 8px;"></i></label>
+					<div class="col-sm-8" ng-show="pr.canEdit()">
+						<div class="input-group input-group-sm">
+						  <input type="text" class="form-control" name="u_business_group" ng-required="true"
+								 placeholder="Please typeahead search value"
+								 uib-typeahead="bgroup as bgroup.name for bgroup in pr.searchBusinessGroupByName($viewValue)"
+								 typeahead-on-select="pr.setModel($item, $model, $label, $event, 'u_business_group')"
+								 typeahead-wait-ms="500"
+								 typeahead-editable="false"
+								 ng-model="pr.product.u_business_group.display_value" />
+						  
+						  <span class="input-group-btn">
+							<button class="btn btn-default" type="button" ng-click="pr.createBusinessGroup('u_business_group', 'edit');" ng-show="pr.product.u_business_group.display_value"><i class="fa fa-pencil" aria-hidden="true"></i></button>
+							<button class="btn btn-default" type="button" ng-click="pr.createBusinessGroup('u_business_group', 'new');"><i class="fa fa-search" aria-hidden="true"></i></button>
+						  </span>
+
+						</div>
+						
+					</div>
+					
+					<div class="col-sm-8" ng-show="!pr.canEdit()">
+						<p class="form-control-static">{{pr.product.u_business_group.display_value}}</p>
+					</div>
+					
+				</div>
+				
+				<div class="form-group form-group-sm required" ng-class="{'has-error': pr.isInvalid(pr.productDetailForm['u_business_service'])}">
+					<label class="col-sm-4 control-label" uib-tooltip="A high-level collection of IT products used by external customers or by internal users.  Example: Telephony, Web Services, Collaboration, Enterprise Services">Business Services<i class="fa fa-question-circle-o" aria-hidden="true" style="position: absolute;right: 0;top: 8px;"></i></label>
+					<div class="col-sm-8" ng-show="pr.canEdit()">
+						<div class="input-group input-group-sm">
+						  <input type="text" class="form-control" name="u_business_service" ng-required="true" ng-disabled="!pr.product.u_business_group.display_value"
+								 placeholder="Please typeahead search value"
+								 uib-typeahead="bservice as bservice.name for bservice in pr.searchBusinessServiceByName($viewValue)"
+								 typeahead-on-select="pr.setModel($item, $model, $label, $event, 'u_business_service')"
+								 typeahead-wait-ms="500"
+								 typeahead-editable="false"
+								 ng-model="pr.product.u_business_service.display_value" />
+						  <span class="input-group-btn">
+							<button class="btn btn-default" type="button" ng-click="pr.createServiceGroup('u_business_service', 'edit');" ng-show="pr.product.u_business_service.display_value"><i class="fa fa-pencil" aria-hidden="true"></i></button>
+							<button class="btn btn-default" type="button" ng-click="pr.createServiceGroup('u_business_service', 'new');" ng-disabled="!pr.product.u_business_group.display_value"><i class="fa fa-search" aria-hidden="true"></i></button>
+						  </span>
+							
+						</div>
+					</div>
+
+					<div class="col-sm-8" ng-show="!pr.canEdit()">
+						<p class="form-control-static">{{pr.product.u_business_service.display_value}}</p>
+					</div>
+					
+				</div>
+				
+			</div>
+			
+			<div class="col-sm-6">
+			
+				<div class="form-group form-group-sm required" ng-class="{'has-error': pr.isInvalid(pr.productDetailForm['operational_status'])}">
+					<label class="col-sm-4 control-label" uib-tooltip="What is the current operational status for the product or application">Operational Status</label>
+					<div class="col-sm-8" ng-show="pr.canEdit()">
+						<select class="form-control" ng-model="pr.product.operational_status.value" name="operational_status" ng-required="true" >
+							<option value="1">Operational</option>
+							<option value="2">Non-Operational</option>
+							<option value="3">Repair In Progress</option>
+							<option value="4">DR Standby</option>
+						</select>
+					</div>
+					<div class="col-sm-8" ng-show="!pr.canEdit()">
+						<p class="form-control-static">{{pr.product.operational_status.display_value}}</p>
+					</div>
+					
+				</div>
+
+				<div class="form-group form-group-sm required" ng-class="{'has-error': pr.isInvalid(pr.productDetailForm['assignment_group'])}">
+					<label class="col-sm-4 control-label" uib-tooltip="Support team that owns the product or application.  If new, please leave blank and create a new group on the Support Information tab.">Assignment Group</label>
+					<div class="col-sm-8" ng-show="pr.canEdit()">
+						<div class="input-group input-group-sm">
+						  <input type="text" class="form-control" name="assignment_group" ng-required="true"
+								 placeholder="Please typeahead search value"
+								 uib-typeahead="agroup as agroup.name for agroup in pr.searchAssignmentGroupByName($viewValue)"
+								 typeahead-on-select="pr.setModel($item, $model, $label, $event, 'assignment_group')"
+								 typeahead-wait-ms="500"
+								 typeahead-editable="false"
+								 ng-model="pr.product.assignment_group.display_value" />
+						  <span class="input-group-btn">
+							<button class="btn btn-default" type="button" ng-click="pr.createUserGroup('assignment_group', 'edit');" ng-show="pr.product.assignment_group.display_value"><i class="fa fa-pencil" aria-hidden="true"></i></button>							<button class="btn btn-default" type="button" ng-click="pr.createUserGroup('assignment_group', 'new');"><i class="fa fa-search" aria-hidden="true"></i></button>
+						  </span>
+						</div>
+						
+					</div>
+					<div class="col-sm-8" ng-show="!pr.canEdit()">
+						<p class="form-control-static">{{pr.product.assignment_group.display_value}}</p>
+					</div>
+					
+				</div>
+
+				<div class="form-group form-group-sm required" ng-class="{'has-error': pr.isInvalid(pr.productDetailForm['u_product_type'])}">
+					<label class="col-sm-4 control-label" uib-tooltip="Is this physical - On Prem or Virtual - SAAS?">Type</label>
+					<div class="col-sm-8" ng-show="pr.canEdit()">
+						<select class="form-control" ng-model="pr.product.u_product_type.value" name="u_product_type" ng-required="true">
+							<option value="SAAS">SAAS</option>
+							<option value="On Prem">On Prem</option>
+						</select>
+					</div>
+					<div class="col-sm-8" ng-show="!pr.canEdit()">
+						<p class="form-control-static">{{pr.product.u_product_type.display_value}}</p>
+					</div>
+					
+				</div>
+	
+				<div class="form-group form-group-sm" ng-hide="pr.product.u_product_type.value === 'SAAS'">
+					<label class="col-sm-4 control-label" uib-tooltip="If On Prem, please select the location of this product">Location</label>
+					<div class="col-sm-8" ng-show="pr.canEdit()">
+						<div class="input-group input-group-sm">
+						  <input type="text" class="form-control" 
+								 placeholder="Please typeahead search value"
+								 uib-typeahead="location as location.full_name for location in pr.locationByName($viewValue)"
+								 typeahead-on-select="pr.setModel($item, $model, $label, $event, 'location')"
+								 typeahead-wait-ms="500"
+								 typeahead-editable="false"
+								 ng-model="pr.product.location.display_value" />
+							<span class="input-group-btn">
+								<button class="btn btn-default" type="button" ng-click="pr.searchLocation();"><i class="fa fa-search" aria-hidden="true"></i></button>
+							</span>
+							
+						</div>
+						
+					</div>
+					<div class="col-sm-8" ng-show="!pr.canEdit()">
+						<p class="form-control-static">{{pr.product.location.display_value}}</p>
+					</div>
+					
+				</div>
+	
+				<div class="form-group form-group-sm required" ng-class="{'has-error': pr.isInvalid(pr.productDetailForm['sys_class_name'])}">
+					<label class="col-sm-4 control-label" uib-tooltip="Please notate whether this is a product or application">Class</label>
+					<div class="col-sm-8" ng-show="pr.canEdit()">
+						<select class="form-control" ng-model="pr.product.sys_class_name.value" name="sys_class_name" ng-required="true">
+							<option value="x_wec_product_application">Application</option>
+							<option value="x_wec_product_table">Product</option>
+						</select>
+					</div>
+					<div class="col-sm-8" ng-show="!pr.canEdit()">
+						<p class="form-control-static">{{pr.product.sys_class_name.display_value}}</p>
+					</div>
+					
+				</div>
+
+				<div class="form-group form-group-sm" ng-if="pr.isShowUpstreamProduct()">
+					<label class="col-sm-4 control-label" uib-tooltip="">Upstream Product</label>
+					<div class="col-sm-8" ng-show="pr.canEdit()">
+					  <input type="text" class="form-control" 
+							 ng-model="pr.product.upstreamProduct"
+							 placeholder="Please typeahead search value"
+							 name="upstreamProduct"
+							 typeahead-editable="false"
+							 uib-typeahead="product as product.name for product in pr.searchProductByName($viewValue, '^sys_class_name=x_wec_product_table')"
+							 typeahead-wait-ms="500"/>
+						
+						
+					</div>
+					<div class="col-sm-8" ng-show="!pr.canEdit()">
+						<p class="form-control-static">{{pr.product.upstreamProduct.display_value}}</p>
+					</div>
+					
+				</div>
+	
+				<div class="form-group form-group-sm" ng-show="pr.canEdit()">
+					<div class="col-sm-offset-4 col-sm-8">
+					  <div class="checkbox">
+						<label uib-tooltip="Is this product or application accessible by customers that purchase TWC products?">
+						  <input type="checkbox" ng-model="pr.product.u_client_facing.value" ng-true-value="'true'" ng-false-value="'false'"/> Client / Customer Facing 
+						</label>
+					  </div>
+					</div>
+				</div>	
+
+				<div class="form-group form-group-sm" ng-show="!pr.canEdit()">
+
+					<label class="col-sm-4 control-label" uib-tooltip="Is this product or application accessible by customers that purchase TWC products?">Client Facing</label>
+					<div class="col-sm-8">
+						<p class="form-control-static"><i class="fa" aria-hidden="true" ng-class="{'fa-square-o' : !pr.product.u_client_facing.value, 'fa-check-square-o': pr.product.u_client_facing.value}"></i></p>
+					</div>
+					
+				</div>	
+			
+			</div>
+				
+			<div class="col-sm-12">
+
+				<div class="form-group form-group-sm required" ng-class="{'has-error': pr.isInvalid(pr.productDetailForm['short_description'])}">
+					<label class="col-sm-2 control-label" uib-tooltip="Provide a brief description for the buisness or consumer purpose for this product or application.">Description</label>
+					<div class="col-sm-10" ng-show="pr.canEdit()">
+					  <textarea class="form-control" rows="3" ng-model="pr.product.short_description.value" name="short_description" maxlength="1000" ng-required="true"></textarea>
+					</div>
+					<div class="col-sm-10" ng-show="!pr.canEdit()">
+						<p class="form-control-static">{{pr.product.short_description.value}}</p>
+					</div>
+					
+				</div>
+				
+			</div>
+
+			<div class="col-sm-12">
+
+			  <div class="form-group">
+				<div class="col-sm-offset-2 col-sm-10" ng-show="pr.canEdit()">
+				  <button type="submit" 
+						  ng-disabled="pr.productDetailForm.$invalid"
+						  ng-click="pr.upsertProduct()"
+						  ng-class="{'btn-primary': pr.productDetailForm.$dirty, 'btn-default active': pr.productDetailForm.$pristine}"
+						  class="btn btn-sm">Save</button>
+
+					<button type="submit" 
+						  ng-click="pr.tabActive = 1"
+						  ng-show="pr.existProduct.sys_id.value" 	
+						  ng-class="{'btn-info': pr.productDetailForm.$pristine, 'btn-default active': pr.productDetailForm.$dirty}"
+						  class="btn btn-sm" style="margin-left: 5px;">Next</button>
+
+					<button type="button" 
+						  class="btn btn-default btn-sm pull-right" ng-click="pr.state.go('dashboard')">Cancel</button>
+				</div>
+			  </div>				
+			</div>
+		
+		</div>
+	</form>
+		
+	
+</j:jelly>]]></html>
+        <name>product-tab-0-tpl</name>
+        <processing_script/>
+        <sys_class_name>sys_ui_page</sys_class_name>
+        <sys_created_by>andrey.zlatin@weather.com</sys_created_by>
+        <sys_created_on>2016-07-08 14:03:19</sys_created_on>
+        <sys_customer_update>true</sys_customer_update>
+        <sys_id>674cf7a40fec62006c3005cce1050ea5</sys_id>
+        <sys_mod_count>148</sys_mod_count>
+        <sys_name>product-tab-0-tpl</sys_name>
+        <sys_package display_value="Product" source="x_wec_product">daa7dccd0f44220034457d4ce1050e47</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Product">daa7dccd0f44220034457d4ce1050e47</sys_scope>
+        <sys_update_name>sys_ui_page_674cf7a40fec62006c3005cce1050ea5</sys_update_name>
+        <sys_updated_by>anton.sychikov.contractor@weather.com</sys_updated_by>
+        <sys_updated_on>2016-10-17 11:55:01</sys_updated_on>
+    </sys_ui_page>
+</record_update>

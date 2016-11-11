@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update table="sys_ws_operation">
+    <sys_ws_operation action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <consumes>application/json,application/xml,text/xml</consumes>
+        <consumes_customized>false</consumes_customized>
+        <default_operation_uri/>
+        <enforce_acl/>
+        <http_method>GET</http_method>
+        <name>weather</name>
+        <operation_script><![CDATA[(function process(/*RESTAPIRequest*/ request, /*RESTAPIResponse*/ response) {
+	
+	var apiKey = "3f2f53db88454a819fb26bae1c163497";
+	
+	var path = request.pathParams,
+		queryParams = request.queryParams,
+		restUrl = 'http://qaapi.weather.com/v1/geocode/' + path.latitude + '/' + path.longitude + '/forecast/daily/10day.json?language=en&apiKey=' + apiKey,
+		req = new sn_ws.RESTMessageV2(),
+		parser = new global.JSON();
+	
+	req.setEndpoint(restUrl);  
+	req.setHttpMethod('GET'); 
+	
+	var res =  req.execute();
+
+	var body = res.getBody();
+	
+	return  parser.decode(body);
+
+})(request, response);
+]]></operation_script>
+        <operation_uri>/api/x_wec_product/chrome_extensions_weather_api/{latitude}/{longitude}</operation_uri>
+        <produces>application/json,application/xml,text/xml</produces>
+        <produces_customized>false</produces_customized>
+        <relative_path>/{latitude}/{longitude}</relative_path>
+        <request_example/>
+        <requires_acl_authorization>false</requires_acl_authorization>
+        <requires_authentication>false</requires_authentication>
+        <short_description/>
+        <sys_class_name>sys_ws_operation</sys_class_name>
+        <sys_created_by>anton.sychikov.contractor@weather.com</sys_created_by>
+        <sys_created_on>2016-09-02 07:57:59</sys_created_on>
+        <sys_customer_update>true</sys_customer_update>
+        <sys_id>8dd04be60fa9a60034457d4ce1050e98</sys_id>
+        <sys_mod_count>14</sys_mod_count>
+        <sys_name>weather</sys_name>
+        <sys_package display_value="Product" source="x_wec_product">daa7dccd0f44220034457d4ce1050e47</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Product">daa7dccd0f44220034457d4ce1050e47</sys_scope>
+        <sys_update_name>sys_ws_operation_8dd04be60fa9a60034457d4ce1050e98</sys_update_name>
+        <sys_updated_by>anton.sychikov.contractor@weather.com</sys_updated_by>
+        <sys_updated_on>2016-09-02 14:32:12</sys_updated_on>
+        <web_service_definition display_value="Chrome extensions weather API">3880c7e60fa9a60034457d4ce1050e18</web_service_definition>
+        <web_service_version/>
+    </sys_ws_operation>
+</record_update>

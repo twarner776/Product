@@ -1,0 +1,434 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update table="sys_ui_script">
+    <sys_ui_script action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <description>Relationships services</description>
+        <global>false</global>
+        <name>x_wec_product.RelationshipsService</name>
+        <script><![CDATA[(function () {
+    'use strict';
+
+    angular
+        .module('twc-product')
+        .factory('RelationshipsService', RelationshipsService);
+
+    RelationshipsService.$inject = ['$q', '$filter', '$uibModal', '$stateParams', 'ReferenceBookFactory', 'ProductFactory', 'RelationshipsFactory', 'NgTableParams', 'toastr', 'toastrConfig', 'SubscriptionsFactory', 'userService', 'UserFactory'];
+
+    function RelationshipsService($q, $filter, $uibModal, $stateParams, ReferenceBookFactory, ProductFactory, RelationshipsFactory, NgTableParams, toastr, toastrConfig, SubscriptionsFactory, userService, UserFactory) {
+		return {
+			initProductsTable: function(scope, loading){
+				
+				return new NgTableParams({
+					count: 10
+				}, {
+					counts: [10, 30, 60, 100],
+					getData: function(params) {
+
+						scope[loading] = true;
+						
+						var filters = params.filter(),
+							filtersArr = [];
+
+						filtersArr.push('ORDERBYname');
+						filtersArr.push('nameISNOTEMPTY');
+
+						if(filters.hasOwnProperty('sys_class_name') && filters.sys_class_name !== ""){
+							filtersArr.push('sys_class_name=' + filters.sys_class_name);
+						}
+						if(filters.hasOwnProperty('name') && filters.name !== ""){
+							filtersArr.push('nameLIKE' + filters.name);
+						}
+						if(filters.hasOwnProperty('assignment_group') && filters.assignment_group !== ""){
+							filtersArr.push('assignment_group=' + filters.assignment_group);
+						}
+
+						return ProductFactory.fullList({
+							sysparm_limit: params.count(),
+							sysparm_offset: (params.page() - 1) * params.count(),
+							sysparm_query: filtersArr.join('^'),
+							sysparm_display_value: true,
+							preloader: false
+						}).$promise.then(function(res) {
+							scope[loading] = false;
+							params.total(res.headers['x-total-count']);
+							return res.data.result;
+						});
+					}
+				});
+				
+					
+			},
+			initServerTable: function(scope, loading){
+				
+				return new NgTableParams({
+					count: 10
+				}, {
+					counts: [10, 50, 100, 250],
+					getData: function(params) {
+
+						scope[loading] = true;
+						
+						var filters = params.filter(),
+							filtersArr = [];
+
+						filtersArr.push('ORDERBYname');
+
+						if(filters.hasOwnProperty('sys_class_name') && filters.sys_class_name !== ""){
+							filtersArr.push('sys_class_name=' + filters.sys_class_name);
+						}
+						if(filters.hasOwnProperty('name') && filters.name !== ""){
+							filtersArr.push('nameLIKE' + filters.name);
+						}
+						if(filters.hasOwnProperty('assignment_group') && filters.assignment_group !== ""){
+							filtersArr.push('assignment_group=' + filters.assignment_group);
+						}
+
+						return ReferenceBookFactory.serversList({
+							sysparm_limit: params.count(),
+							sysparm_offset: (params.page() - 1) * params.count(),
+							sysparm_query: filtersArr.join('^'),
+							sysparm_display_value: true,
+							preloader: false
+						}).$promise.then(function(res) {
+							scope[loading] = false;
+							params.total(res.headers['x-total-count']);
+							return res.data.result;
+						});
+					}
+				});
+				
+					
+			},
+			getRelationshipDownstream: function(id, model){
+				RelationshipsFactory.get({sysparm_query: 'parent=' + id, sysparm_display_value: 'all'}).$promise.then(function(res){
+					model.relationshipDownstream = res.result;
+				});				
+			},
+			getRelationshipUpstream: function(id, model){
+				RelationshipsFactory.get({sysparm_query: 'child=' + id, sysparm_display_value: 'all'}).$promise.then(function(res){
+					model.relationshipUpstream = res.result;
+				});				
+			},
+			
+			upsertRelationshipBtn: function(model){
+				var disabled = false;
+				
+				if(!model.relationshipDownstream){
+					return disabled;
+				}
+				
+				disabled = model.relationshipDownstream.some(function(rel){
+					return !rel.type.value;
+				});
+				
+				if(disabled){
+					return disabled;
+				}
+
+				if(!model.relationshipUpstream){
+					return disabled;
+				}
+
+				disabled = model.relationshipUpstream.some(function(rel){
+					return !rel.type.value;
+				});
+				
+				
+				return disabled;
+			},
+			upsertRelationship: function(model){
+				var request = [], self = this;
+				model.relationshipDownstream.forEach(function(rel){
+					if(!rel.sys_id.value){
+					
+						request.push(RelationshipsFactory.insert({
+							parent: $stateParams.id,
+							child: rel.child.value,
+							type: rel.type.value
+						}).$promise);
+					
+					}else{
+						request.push(RelationshipsFactory.update({id: rel.sys_id.value}, {
+							type: rel.type.value
+						}).$promise);
+					}
+					
+				});
+				
+				model.relationshipUpstream.forEach(function(rel){
+					if(!rel.sys_id.value){
+						request.push(RelationshipsFactory.insert({
+							parent: rel.parent.value,
+							child: $stateParams.id,
+							type: rel.type.value
+						}).$promise);
+					
+					}else{
+						request.push(RelationshipsFactory.update({id: rel.sys_id.value}, {
+							type: rel.type.value
+						}).$promise);
+					}
+				});
+				
+				model.deleteRelationships.forEach(function(id){
+					request.push(RelationshipsFactory.delete({id: id}).$promise);
+
+				});
+				
+				if(request.length > 0){
+					$q.all(request).then(function (results) {
+						
+						
+						model['relationshipProductTCreateNew'] = false;
+						
+						model.deleteRelationships = [];
+						return $q.all(
+							[RelationshipsFactory.get({sysparm_query: 'parent=' + $stateParams.id, sysparm_display_value: 'all'}).$promise, 
+							 RelationshipsFactory.get({sysparm_query: 'child=' + $stateParams.id, sysparm_display_value: 'all'}).$promise]);
+					}).then(function (res) {
+							model.relationshipDownstream = res[0].result;
+							model.relationshipUpstream = res[1].result;
+						
+							toastr.success('<h3 style="text-align: center;">The product has been successfully updated.</h3>', null,  {
+								allowHtml: true,
+								timeOut: 5000
+							});
+							
+							model.tabActive = 0;
+						});
+					
+				}
+				
+			},
+
+			addToDownstream: function(model, item){
+				toastr.info('New relationship added');
+				model.relationshipDownstream.unshift(getEmptyModel(item, 'child'));
+			},
+			
+			addToUpstream: function(model, item){
+				toastr.info('New relationship added');
+				model.relationshipUpstream.unshift(getEmptyModel(item, 'parent'));
+			},
+			deleteFromRelationship: function(model, item, key, index){
+				if(item.sys_id && item.sys_id.value){
+					model.deleteRelationships.push(item.sys_id.value);
+				}
+				
+				model[key].splice(index, 1);
+			},
+			
+			userSubscriptions: function(item, product, skipModal){
+				if(skipModal){
+					
+						SubscriptionsFactory.get({sysparm_exclude_reference_link: true, sysparm_query: 'u_name_sub=' + userService.sys_id + '^u_product_sub=' + product}).$promise.then(function(subscription){
+							var model = null;
+							if(subscription.result.length > 0){
+								model = subscription.result[0];
+							}
+							
+							openUserSubscriptions(product, model);
+							
+							
+						});
+					
+				}else{
+
+					if(item.isNew){
+						var modalInstance = $uibModal.open({
+
+							templateUrl: '/x_wec_product_modal-confirm-create-subscriptions-tpl.do',
+							resolve: {
+								subscription: function (SubscriptionsFactory, userService){
+									return SubscriptionsFactory.get({sysparm_exclude_reference_link: true, sysparm_query: 'u_name_sub=' + userService.sys_id + '^u_product_sub=' + product}).$promise;
+								}
+							},
+							controller: function ($scope, $uibModalInstance, subscription) {
+								console.log(subscription);
+								var vm = this;
+								vm.ok = ok;
+								vm.cancel = cancel;
+
+								var model = null;
+
+								if(subscription.result.length > 0){
+									model = subscription.result[0];
+									vm.msg = 'You are already subscribed to notifications on this relationship. Would you like to review and update them?';
+								}else{
+									vm.msg = 'Would you like to subscribe to notifications on this relationship?';
+								}
+
+								function ok () {
+									$uibModalInstance.close({product: product, model: model});
+								}
+
+								function cancel() {
+									$uibModalInstance.dismiss('cancel');
+								}
+
+							},
+							controllerAs: "vm"
+						});
+
+						modalInstance.result.then(function (data) {
+
+								openUserSubscriptions(data.product, data.model);
+
+
+						});							
+					}
+
+
+					item.isNew = false;
+					
+				}
+				
+				
+			},
+			
+			getClassServes: function(){
+				var def = $q.defer(), arr = [];
+				
+				RelationshipsFactory.getServerClass().$promise.then(function(res) {
+					res.result.forEach(function(cls){
+						arr.push({
+							id: cls.groupby_fields[0].value,
+							title: cls.groupby_fields[0].display_value + ' (' + cls.stats.count + ')',
+						})
+					});
+
+					def.resolve(arr);
+				});
+				return def;
+				
+			},
+			getClassProducts: function(){
+				var def = $q.defer(), arr = [];
+				
+				RelationshipsFactory.getProductClass().$promise.then(function(res) {
+					res.result.forEach(function(cls){
+						arr.push({
+							id: cls.groupby_fields[0].value,
+							title: cls.groupby_fields[0].display_value + ' (' + cls.stats.count + ')',
+						})
+					});
+
+					def.resolve(arr);
+				});
+				return def;
+				
+			},
+		}
+		
+		function openUserSubscriptions(product, model){
+
+			var modalInstance = $uibModal.open({
+
+				templateUrl: '/x_wec_product_modal-create-subscriptions-tpl.do',
+				resolve: {
+					product: function (ProductFactory, userService){
+						return ProductFactory.get({id: product, sysparm_display_value: 'all'}).$promise;
+					}
+				},
+				
+				controller: function ($scope, $uibModalInstance, userService, product) {
+
+					var vm = this;
+					
+					vm.ok = ok;
+					vm.cancel = cancel;
+					vm.isInvalid = isInvalid;
+					vm.user = userService;
+					vm.model = {};
+					
+					vm.isOnwer = userService.sys_id == product.result.owned_by.value;
+					
+					if(model){
+						vm.model = model;
+					}
+					if(vm.isOnwer){
+						vm.model['u_high_sms'] = 'true';
+					}
+
+					function ok () {
+						$uibModalInstance.close({model: vm.model, product: product.result, user: vm.user, method: model ? 'update' : 'create'});
+					}
+
+					function cancel() {
+						$uibModalInstance.dismiss('cancel');
+					}
+
+					function isInvalid(field){
+						return field.$invalid && field.$dirty;
+					}
+
+				},
+				controllerAs: "vm"
+			});
+
+			modalInstance.result.then(function (data) {
+				var model = data.model, user = data.user, method = data.method, product = data.product;
+				var item = {}, 
+					fields = ['u_low_email', 'u_low_sms', 'u_medium_email', 'u_medium_sms', 'u_high_email', 'u_high_sms', 'u_problem_email', 'u_problem_sms', 'u_change_email', 'u_change_sms'];
+				fields.forEach(function(f){
+					item[f] = model[f] ? model[f] : false;
+				});
+				
+				item.u_product_sub = product.sys_id.value;
+				item.u_name_sub = userService.sys_id;
+				item.u_name_sub_mobile_phone = user.mobile_phone;
+				
+				return UserFactory.update({id: userService.sys_id}, {mobile_phone: user.mobile_phone}).$promise.then(function(){
+					if('method' === 'update'){
+						return SubscriptionsFactory.update({id: model.sys_id}, item).$promise;
+					}else{
+						return SubscriptionsFactory.create(item).$promise;
+					}
+					
+				});
+				
+			}).then(function(){
+				
+				toastr.info('Subscription was successfully updated');
+			});					
+			
+		}
+		
+		function getEmptyModel(item, rel){
+			var obj = {
+				type: {},
+				sys_id: {},
+			}
+			obj[rel] = {
+				display_value: item.name,
+				value: item.sys_id
+			}
+			
+			obj.edit = true;
+			obj.isNew = true;
+			
+			return obj;
+		};
+
+
+    }
+
+})();]]></script>
+        <script_name>RelationshipsService</script_name>
+        <sys_class_name>sys_ui_script</sys_class_name>
+        <sys_created_by>andrey.zlatin@weather.com</sys_created_by>
+        <sys_created_on>2016-07-14 08:49:00</sys_created_on>
+        <sys_customer_update>true</sys_customer_update>
+        <sys_id>daed61e20fa066006c3005cce1050eda</sys_id>
+        <sys_mod_count>109</sys_mod_count>
+        <sys_name>x_wec_product.RelationshipsService</sys_name>
+        <sys_package display_value="Product" source="x_wec_product">daa7dccd0f44220034457d4ce1050e47</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Product">daa7dccd0f44220034457d4ce1050e47</sys_scope>
+        <sys_update_name>sys_ui_script_daed61e20fa066006c3005cce1050eda</sys_update_name>
+        <sys_updated_by>anton.sychikov.contractor@weather.com</sys_updated_by>
+        <sys_updated_on>2016-10-17 12:19:55</sys_updated_on>
+        <use_scoped_format>false</use_scoped_format>
+    </sys_ui_script>
+</record_update>

@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update table="sys_ui_page">
+    <sys_ui_page action="INSERT_OR_UPDATE">
+        <category>general</category>
+        <client_script/>
+        <description>Template for navbar</description>
+        <direct>true</direct>
+        <endpoint>x_wec_product_navbar-tpl.do</endpoint>
+        <html><![CDATA[	<nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" ui-sref="dashboard"><img style="height: 70px; margin-top: -8px;" ng-src="logo.png" src="logo.png" /></a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav navbar-right" style="padding-top: 15px;">
+			<li uib-dropdown="true" style="margin-top: 2px;">
+				<a href="" id="9x" uib-dropdown-toggle="true">
+					<span class="glyphicon glyphicon-th" aria-hidden="true"></span>
+				</a>
+				<div uib-dropdown-menu="true" style="min-width: 290px; padding: 5px; right: -70px;">
+					<div ng-repeat="(key, value) in nav.sections">
+						<div class="twc-icons-separator" ng-if="$index != 0" ng-show="value.length > 0">{{key}}</div>
+						
+						<ul class="twc-icons-list twc-icons" aria-labelledby="9x">
+							<li ng-repeat="item in value" ng-click="nav.open(item)">
+								<i><img src="{{item['9_box_logo'].display_value}}" height="40" width="40" class="twc-nav-icons"/></i>
+								<span>{{item.u_title.display_value}}</span>  
+							</li>							
+						</ul>
+						
+					</div>
+				</div>
+			</li>  
+            <li uib-dropdown="true">
+				<a href="" id="simple-dropdown" uib-dropdown-toggle="true" style="padding-left: 0px;">
+					{{nav.user.name}}
+				</a>
+				<ul class="dropdown-menu" uib-dropdown-menu="true" aria-labelledby="simple-dropdown">
+					<li><a href="{{nav.profileUrl}}">Profile</a></li>
+					<li><a href="/logout.do?sysparm_goto_url=/apicustomer">Logout</a></li>
+				</ul>
+			</li>
+			
+          </ul>
+        </div>
+      </div>
+    </nav>]]></html>
+        <name>navbar-tpl</name>
+        <processing_script/>
+        <sys_class_name>sys_ui_page</sys_class_name>
+        <sys_created_by>andrey.zlatin@weather.com</sys_created_by>
+        <sys_created_on>2016-07-08 14:06:29</sys_created_on>
+        <sys_customer_update>true</sys_customer_update>
+        <sys_id>ca3d33e40fec62006c3005cce1050e16</sys_id>
+        <sys_mod_count>111</sys_mod_count>
+        <sys_name>navbar-tpl</sys_name>
+        <sys_package display_value="Product" source="x_wec_product">daa7dccd0f44220034457d4ce1050e47</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Product">daa7dccd0f44220034457d4ce1050e47</sys_scope>
+        <sys_update_name>sys_ui_page_ca3d33e40fec62006c3005cce1050e16</sys_update_name>
+        <sys_updated_by>anton.sychikov.contractor@weather.com</sys_updated_by>
+        <sys_updated_on>2016-08-26 09:08:01</sys_updated_on>
+    </sys_ui_page>
+</record_update>

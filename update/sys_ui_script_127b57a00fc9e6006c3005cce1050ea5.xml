@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update table="sys_ui_script">
+    <sys_ui_script action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <description>Side panel directive for TOC</description>
+        <global>false</global>
+        <name>x_wec_product.toc-side-panel-directive</name>
+        <script><![CDATA[(function () {
+    'use strict';
+
+    angular
+        .module('twc-product')
+        .directive('tocSidePanel', TocSidePanel)
+        .controller('TocSidePanelCtrl', TocSidePanelCtrl);
+
+    TocSidePanelCtrl.$inject = ['$scope', 'GroupsService', 'ReferenceBookFactory', '$interval', '$sce'];
+
+    function TocSidePanel() {
+        var directive = {
+            bindToController: true,
+            transclude: true,
+            controller: 'TocSidePanelCtrl',
+            controllerAs: 'sp',
+            restrict: 'EA',
+            templateUrl: 'x_wec_product_toc-side-panel-tpl.do'
+        };
+        return directive;
+    }
+
+    function TocSidePanelCtrl($scope, GroupsService, ReferenceBookFactory, $interval, $sce) {
+        
+		var sp = this;
+		sp.createUserGroup = createUserGroup;
+		sp.calendarUrl = $sce.trustAsResourceUrl('https://whentowork.com/logins.htm');
+		
+		function createUserGroup(){
+			GroupsService.createSysUserGroup(null, null, true);
+		}
+
+		$interval(function(){
+			loadKnowledge()
+		}, 1000 * 60);
+		
+		loadKnowledge()
+		
+		function loadKnowledge(){
+			sp.knowledgeLoad = true;
+			ReferenceBookFactory.knowledge({sysparm_query: 'workflow_stateINpublished^publishedONToday@javascript:gs.daysAgoStart(0)@javascript:gs.daysAgoEnd(0)^ORpublishedONYesterday@javascript:gs.daysAgoStart(1)@javascript:gs.daysAgoEnd(1)', sysparm_display_value: true}).$promise.then(function(res){
+				sp.knowledgeLoad = false;
+				sp.knowledge = res.result;
+			});
+			
+		};
+    }
+
+})();
+
+]]></script>
+        <script_name>toc-side-panel-directive</script_name>
+        <sys_class_name>sys_ui_script</sys_class_name>
+        <sys_created_by>anton.sychikov.contractor@weather.com</sys_created_by>
+        <sys_created_on>2016-08-02 08:13:33</sys_created_on>
+        <sys_customer_update>true</sys_customer_update>
+        <sys_id>127b57a00fc9e6006c3005cce1050ea5</sys_id>
+        <sys_mod_count>12</sys_mod_count>
+        <sys_name>x_wec_product.toc-side-panel-directive</sys_name>
+        <sys_package display_value="Product" source="x_wec_product">daa7dccd0f44220034457d4ce1050e47</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Product">daa7dccd0f44220034457d4ce1050e47</sys_scope>
+        <sys_update_name>sys_ui_script_127b57a00fc9e6006c3005cce1050ea5</sys_update_name>
+        <sys_updated_by>anton.sychikov.contractor@weather.com</sys_updated_by>
+        <sys_updated_on>2016-09-02 10:39:28</sys_updated_on>
+        <use_scoped_format>false</use_scoped_format>
+    </sys_ui_script>
+</record_update>

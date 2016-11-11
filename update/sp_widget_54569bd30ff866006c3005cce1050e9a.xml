@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update table="sp_widget">
+    <sp_widget action="INSERT_OR_UPDATE">
+        <client_script><![CDATA[function ($scope, $element, $window, $location, $rootScope, $timeout, snAttachmentHandler, $http, spUtil) {
+	
+	// Many of these fields are more configuration-type fields than profile fields. We still want to display
+	// these to a user who is configuring their 'settings', but we shouldn't show them on a user profile page.
+	// We need to handle this better.
+	debugger;
+	
+	var fieldExcludes = {
+		sys_user: ['name', 'introduction', 'title', 'department', 'location', 'photo',
+							 'manager', 'company'],
+		live_profile: ['short_description', 'photo']
+	}
+	
+	$scope.openConnectConversation = function() {
+		$window.open('/$c.do#?user=' + $scope.data.liveProfileID, '_blank');
+	}
+	
+	$scope.avatarPicture = "";
+	
+	$http.get('/api/now/live/profiles/sys_user.' + $scope.data.sysUserID).then(function (response) {
+		if (response.data.result && response.data.result.avatar){
+			var avatarPicture = response.data.result.avatar.replace("?t=small", "");
+			$scope.avatarPicture = {
+				'background-image': "url('" + avatarPicture + "')",
+				'color': 'transparent'
+			};
+		}
+	});
+	
+	spUtil.recordWatch($scope, "sys_user", "sys_id=" + $scope.data.sysUserID);
+	spUtil.recordWatch($scope, "live_profile", "sys_id=" + $scope.data.liveProfileID);
+	
+	$scope.connectEnabled = function() {
+		return $scope.data.connectEnabled && !$scope.data.isLoggedInUsersProfile;
+	}
+	
+	$scope.openUserProfile = function($event, userID) {
+		$event.stopPropagation();
+		$event.preventDefault();
+		$location.search("id=user_profile&sys_id=" + userID);
+	}
+	
+	$scope.getSysUserModelFields = function() {
+		return $scope.data.sysUserModelList
+						.filter(function(field) {
+							return $scope.displayField("sys_user", field.name)
+						});
+	}
+	
+	var models = {
+		sys_user: $scope.data.sysUserModel,
+		live_profile: $scope.data.liveProfileModel
+	}
+	
+	$scope.displayField = function(tableName, field, isHeader) {
+		if (!isHeader && fieldExcludes[tableName].indexOf(field) > -1) return false;
+		
+		if (models[tableName][field] && models[tableName][field].type === "boolean") return false;
+		
+		if ($scope.data.isLoggedInUsersProfile) {
+			if (models[tableName][field] && models[tableName][field].readonly)
+				return models[tableName][field].displayValue;
+			else
+				return models[tableName][field];
+		} else {
+			return models[tableName][field] && models[tableName][field].displayValue;
+		}
+	}
+
+	$timeout(function(){
+		$rootScope.$broadcast('finishedChanged', {profile: $scope.data.teamData});
+	});
+}]]></client_script>
+        <controller_as>c</controller_as>
+        <css>.list-group-item {&#13;
+  border: none;&#13;
+}&#13;
+&#13;
+&#13;
+.select2-container.select2-allowclear .select2-choice .select2-chosen {&#13;
+  margin-right: 60px;&#13;
+}&#13;
+&#13;
+.mia i {&#13;
+  font-size: 6rem;&#13;
+}&#13;
+&#13;
+.mia {&#13;
+  color: #808080;&#13;
+}</css>
+        <data_table>sp_instance</data_table>
+        <demo_data>123
+123
+
+</demo_data>
+        <description/>
+        <docs/>
+        <field_list/>
+        <has_preview>false</has_preview>
+        <id/>
+        <internal>false</internal>
+        <link/>
+        <name>evelopers user_account</name>
+        <option_schema/>
+        <public>false</public>
+        <roles>snc_external,snc_internal</roles>
+        <script><![CDATA[// populate the 'data' object
+// e.g., data.table = $sp.getValue('table');
+data.sysUserID = $sp.getParameter("sys_id");
+if (!data.sysUserID)
+         data.sysUserID = gs.getUser().getID();
+var sysUserGR = new GlideRecord("sys_user");
+data.userExists = sysUserGR.get(data.sysUserID);
+
+if (data.userExists) {
+	data.name = sysUserGR.getValue("name");
+	var loggedInSysUserID = gs.getUser().getID();
+	data.connectEnabled = GlidePluginManager().isActive('com.glide.connect');
+	data.liveProfileID = "";
+
+	//get live profile id for sending connect messages
+	if (GlidePluginManager().isActive('com.glideapp.live_common')) {
+		var liveProfileGR = new GlideRecord("live_profile");
+		liveProfileGR.addQuery("document", data.sysUserID);
+		liveProfileGR.query();
+		if (liveProfileGR.next()) {
+			data.liveProfileID = liveProfileGR.getValue("sys_id");
+			data.liveProfileModel = $sp.getForm("live_profile", data.liveProfileID)._fields;
+		} else
+			data.connectEnabled = false; //can't find a live profile for this user, so lets not integrate Connect
+	}
+
+	data.isLoggedInUsersProfile = loggedInSysUserID.equals(data.sysUserID);
+	var sysUserForm = $sp.getForm("sys_user", data.sysUserID);
+	data.sysUserView = sysUserForm._view;
+	data.sysUserModel = sysUserForm._fields;
+	data.sysUserModelList = [];
+	
+	for (var i = 0; i < data.sysUserView.length; i++) {
+		data.sysUserModelList.push(data.sysUserModel[data.sysUserView[i].name]);
+	}
+}
+
+function buildUser(userGR) {
+	return {
+		email: userGR.getValue("email") || "",
+		first_name: userGR.getValue("first_name"),
+		last_name: userGR.getValue("last_name"),
+		name: userGR.getValue("name"),
+		phone: userGR.getValue("phone") || "",
+		sys_id: userGR.getValue("sys_id")
+	}
+}]]></script>
+        <servicenow>false</servicenow>
+        <sys_class_name>sp_widget</sys_class_name>
+        <sys_created_by>andrey.zlatin@weather.com</sys_created_by>
+        <sys_created_on>2016-07-29 10:35:15</sys_created_on>
+        <sys_customer_update>true</sys_customer_update>
+        <sys_id>54569bd30ff866006c3005cce1050e9a</sys_id>
+        <sys_mod_count>3</sys_mod_count>
+        <sys_name>evelopers user_account</sys_name>
+        <sys_package display_value="Product" source="x_wec_product">daa7dccd0f44220034457d4ce1050e47</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Product">daa7dccd0f44220034457d4ce1050e47</sys_scope>
+        <sys_update_name>sp_widget_54569bd30ff866006c3005cce1050e9a</sys_update_name>
+        <sys_updated_by>andrey.zlatin@weather.com</sys_updated_by>
+        <sys_updated_on>2016-07-29 11:53:12</sys_updated_on>
+        <template><![CDATA[<div>
+  <div ng-if="data.userExists">
+    <div class="panel panel-default">
+      <div class="panel-body">
+        <div class="row">
+          <div class="col-xs-12 col-sm-4 text-right">
+            <div class="row">
+              <div class="avatar-extra-large avatar-container" style="cursor:default;">
+                <div class="avatar soloAvatar bottom">
+                  <div class="sub-avatar mia" ng-style="avatarPicture"><i class="fa fa-user"></i></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-xs-12 col-sm-8 text-left">
+            <h2>{{data.name}}</h2>
+            <h4 ng-if="::(displayField('sys_user', 'title', true) || displayField('sys_user', 'company', true))">
+              <sp-editable-field ng-if="::displayField('sys_user', 'title', true)" editable-by-user="false" table="sys_user" table-id="data.sysUserID" field-model="data.sysUserModel.title" on-change="titleOnChange" on-submit="titleOnSubmit"></sp-editable-field>
+              <span ng-if="::(displayField('sys_user', 'company', true) && displayField('sys_user', 'title', true))">at</span>
+              <span ng-if="::(displayField('sys_user', 'company', true) && !displayField('sys_user', 'title', true))">Works at</span>
+              <sp-editable-field ng-if="::displayField('sys_user', 'company', true)" editable-by-user="false" table="sys_user" table-id="data.sysUserID" field-model="data.sysUserModel.company"></sp-editable-field>
+            </h4>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+  <div ng-if="!data.userExists" >
+    <div class="panel panel-default">
+      <div class="panel-heading"><h4 class="panel-title">User not found</h4></div>
+      <div class="panel-body wrapper">
+        <p>This user does not exist</p>
+        <p>Suggestions:</p>
+        <ul>
+          <li>Contact your portal administrator</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>]]></template>
+    </sp_widget>
+</record_update>

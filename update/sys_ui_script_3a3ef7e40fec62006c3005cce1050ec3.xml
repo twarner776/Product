@@ -1,0 +1,477 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update table="sys_ui_script">
+    <sys_ui_script action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <description>Angular main app config</description>
+        <global>false</global>
+        <name>x_wec_product.app</name>
+        <script><![CDATA[(function () {
+    'use strict';
+
+angular
+    .module('twc-product', [
+        'ngResource',
+        'ngAnimate',
+        'ngSanitize',
+		'ngTable',
+        'blockUI',
+        'ui.bootstrap',
+		'ui.router',
+		'ui.select',
+		'highcharts-ng',
+		'toastr'
+    ])
+
+	.config(['$stateProvider', '$urlRouterProvider',  function($stateProvider, $urlRouterProvider) {
+		
+		$urlRouterProvider.when('', '/dashboard');
+		
+		$stateProvider		
+		.state('dashboard', {
+            url: '/dashboard',
+			controller: 'DashboardCtrl',
+			controllerAs: 'db',
+            templateUrl: 'x_wec_product_dahboard-tpl.do'
+        })
+		.state('product', {
+            url: '/product/:id?tab',
+			controller: 'ProductCtrl',
+			controllerAs: 'pr',
+            templateUrl: 'x_wec_product_product-tpl.do',
+			data: {isToc: false},
+			resolve:{
+				productOwner: function (ReferenceBookFactory, UserFactory, userService){
+					return ReferenceBookFactory.assignmentGroupSearch({sysparm_query: 'name=Product Owners^ORname=TOC'}).$promise.then(function(groups){
+						return ReferenceBookFactory.groupMemberSearch({sysparm_query: 'user=' + userService.sys_id + '^' + groups.result.map(function(item){return 'group=' + item.sys_id}).join('^OR'), sysparm_display_value: 'all'}).$promise;
+
+					});
+				},
+				types: function (GroupFactory){
+					return GroupFactory.getTypes({sysparm_query: 'name=administrative^ORname=Agile Team'}).$promise
+				}
+				
+			}
+			
+        })
+		.state('subscriptions', {
+            url: '/subscriptions',
+			controller: 'SubscriptionsCtrl',
+			controllerAs: 'ss',
+            templateUrl: 'x_wec_product_subscriptions-tpl.do'
+        })
+		.state('products', {
+            url: '/products',
+			controller: 'ProductsCtrl',
+			controllerAs: 'ps',
+            templateUrl: 'x_wec_product_products-tpl.do',
+			data: {
+				config: {
+					label: 'My Products',
+					message: 'Below are all of the Products in our database that you are listed as the Product owner or Support Group Member. To update an application, click the Product Name and make any necessary changes.',
+					criterion: ['sys_class_name=x_wec_product_table']
+				}
+			},
+			resolve:{
+				userGroups: function (ProductFactory, GroupFactory, userService){
+					return GroupFactory.getMember({sysparm_query: 'user=' + userService.sys_id}).$promise
+				}
+			}
+
+        })
+		.state('applications', {
+            url: '/applications',
+			controller: 'ProductsCtrl',
+			controllerAs: 'ps',
+            templateUrl: 'x_wec_product_products-tpl.do',
+			data: {
+				config: {
+					label: 'My Applications',
+					message: 'Below are all of the Applications in our database that you are listed as the Application owner, or Support Group Member. To update an application, click the Application Name and make any necessary changes.',
+					criterion: ['sys_class_name=x_wec_product_application']
+				}
+			},
+			resolve:{
+				userGroups: function (ProductFactory, GroupFactory, userService){
+					return GroupFactory.getMember({sysparm_query: 'user=' + userService.sys_id}).$promise
+				}
+			}
+			
+			
+        })
+		.state('abandoned_items', {
+            url: '/abandoned_items',
+			controller: 'AbandonedItemsCtrl',
+			controllerAs: 'ps',
+            templateUrl: 'x_wec_product_abandoned_items-tpl.do',
+			resolve:{
+				prepareAbandonedItems: function (ProductFactory, userService){
+					return ProductFactory.prepareAbandonedItems({user: userService.sys_id, preloader: false}).$promise
+				}
+			}
+
+        })
+		
+		.state('decommissions', {
+            url: '/decommissions',
+			controller: function($scope, $sce){
+				var t = this;
+				$scope.$emit('side-bar-show-info', true);
+				t.label = 'Decommissions';
+				t.url = $sce.trustAsResourceUrl('/ess_portal/com.glideapp.servicecatalog_cat_item_view.do?v=1&sysparm_id=2f91c9d70fd642006c3005cce1050e34&sysparm_link_parent=05a7240d0f3231006c3005cce1050e48&sysparm_catalog=e0d08b13c3330100c8b837659bba8fb4&sysparm_catalog_view=catalog_default');
+			},
+			controllerAs: 't',
+            templateUrl: 'x_wec_product_iframe-tpl.do',
+			
+        })
+		.state('incident_new', {
+            url: '/incident/new',
+			controller: function($scope, $sce){
+				var t = this;
+				$scope.$emit('side-bar-show-info', true);
+				t.url = $sce.trustAsResourceUrl('/incident.do?sys_id=-1&sysparm_query=active=true&sysparm_stack=incident_list.do?sysparm_query=active=true');
+				t.label = 'New incident';
+			},
+			controllerAs: 't',
+            templateUrl: 'x_wec_product_iframe-tpl.do',
+			
+        })
+		.state('problem_new', {
+            url: '/problem/new',
+			controller: function($scope, $sce){
+				var t = this;
+				$scope.$emit('side-bar-show-info', true);
+				t.url = $sce.trustAsResourceUrl('/problem.do?sys_id=-1&sysparm_stack=problem_list.do');
+				t.label = 'New problem';
+			},
+			controllerAs: 't',
+            templateUrl: 'x_wec_product_iframe-tpl.do',
+			
+        })
+		.state('change_requests_new', {
+            url: '/change-requests/new',
+			controller: function($scope, $sce){
+				var t = this;
+				$scope.$emit('side-bar-show-info', true);
+				t.url = $sce.trustAsResourceUrl('/change_request.do?sys_id=-1&sysparm_stack=change_request_list.do&sysparm_query=active=true');
+				t.label = 'New Change requests';
+			},
+			controllerAs: 't',
+            templateUrl: 'x_wec_product_iframe-tpl.do',
+			
+        })
+		.state('knowledge', {
+            url: '/knowledge/:id',
+			controller: function($scope, $sce, $stateParams){
+				var t = this;
+				t.label = 'Knowledge';
+				t.url = $sce.trustAsResourceUrl('/kb_knowledge.do?sys_id=' + $stateParams.id);
+			},
+			controllerAs: 't',
+            templateUrl: 'x_wec_product_iframe-tpl.do',
+			
+        })
+		.state('incidents', {
+            url: '/incidents',
+			controller: 'TasksCtrl',
+			controllerAs: 'tc',
+            templateUrl: 'x_wec_product_tasks-tpl.do',
+			data: {
+				config: {
+					label: 'Incidents',
+					info: 'Incidents on products you own or assigned to your group',
+					view: 'user',
+					controller: 'fullListDependingsIncidentTaskView',
+					criterion: ['t_stateNOT IN7,6^d_user_id=' + userId]
+				}
+			},
+			resolve:{
+				dependingsTasks: function (TaskFactory, userService){
+					return TaskFactory.dependingsTasks({user: userService.sys_id}).$promise
+				}
+			}
+			
+        })
+		.state('incidents_filter', {
+            url: '/incidents-filter?filter',
+			controller: 'TasksFilterCtrl',
+			controllerAs: 'tc',
+            templateUrl: 'x_wec_product_tasks-filter-tpl.do',
+			resolve:{
+				groups: function (GroupFactory, userService){
+					return GroupFactory.getMember({sysparm_query: 'user=' + userService.sys_id}).$promise
+				}
+			}
+			
+        })
+		
+		.state('problems', {
+            url: '/problems',
+			controller: 'TasksCtrl',
+			controllerAs: 'tc',
+            templateUrl: 'x_wec_product_tasks-tpl.do',
+			data: {
+				config: {
+					label: 'Problems',
+					info: 'Problems on products you own or assigned to your group',
+					view: 'user',
+					controller: 'fullListDependingsProblemTaskView',
+					criterion: ['t_stateNOT IN7,4^d_user_id=' + userId]
+				}
+			},
+			resolve:{
+				dependingsTasks: function (TaskFactory, userService){
+					return TaskFactory.dependingsTasks({user: userService.sys_id}).$promise
+				}
+			}
+			
+        })
+		.state('change_requests', {
+            url: '/change-requests',
+			controller: 'TasksCtrl',
+			controllerAs: 'tc',
+            templateUrl: 'x_wec_product_tasks-tpl.do',
+			data: {
+				config: {
+					label: 'Change Requests',
+					info: 'Changes on products you own or assigned to you or your group',
+					view: 'user',
+					controller: 'fullListDependingsChangeTaskView',
+					criterion: ['t_stateNOT IN3^d_user_id=' + userId]
+				}
+			},
+			resolve:{
+				dependingsTasks: function (TaskFactory, userService){
+					return TaskFactory.dependingsTasks({user: userService.sys_id}).$promise
+				}
+			}
+			
+        })
+		.state('task', {
+			url: '/task/:id',
+			controller: 'TaskCtrl',
+			controllerAs: 't',
+			templateUrl: 'x_wec_product_task-tpl.do'
+		})		
+		.state('edit_group', {
+            url: '/group/:id',
+			controller: 'AssigGroupCtrl',
+			controllerAs: 'gr',
+            templateUrl: 'x_wec_product_assig-group-tpl.do',
+			data: {
+				isToc: false,
+				label: 'Manage My Group'
+			},
+			resolve:{
+				roles: function (ReferenceBookFactory){
+					return null;
+				},
+				userGroups: function (ProductFactory, GroupFactory, userService){
+					return GroupFactory.getMember({sysparm_query: 'user=' + userService.sys_id}).$promise
+				},
+				types: function (GroupFactory){
+					return GroupFactory.getTypes({sysparm_query: 'name=administrative^ORname=Agile Team'}).$promise
+				}
+
+				
+			}
+			
+        })
+		.state('new_group', {
+            url: '/group',
+			controller: 'AssigGroupCtrl',
+			controllerAs: 'gr',
+            templateUrl: 'x_wec_product_assig-group-tpl.do',
+			data: {
+				isToc: false,
+				label: 'Create New Assignment Group'
+			},
+			resolve:{
+				roles: function (ReferenceBookFactory){
+					return null;
+				},
+				userGroups: function (ProductFactory, GroupFactory, userService){
+					return GroupFactory.getMember({sysparm_query: 'user=' + userService.sys_id}).$promise
+				},
+				types: function (GroupFactory){
+					return GroupFactory.getTypes({sysparm_query: 'name=administrative^ORname=Agile Team'}).$promise
+				}
+				
+			}
+			
+        })
+		
+		.state('my_groups', {
+            url: '/groups',
+			controller: 'AssigGroupsCtrl',
+			controllerAs: 'grs',
+            templateUrl: 'x_wec_product_assig-groups-tpl.do',
+			data: {
+				isToc: false,
+				label: 'My Groups'
+			},
+			resolve:{
+				roles: function (ReferenceBookFactory){
+					return null;
+				},
+				userGroups: function (ProductFactory, GroupFactory, userService){
+					return GroupFactory.getMember({sysparm_query: 'user=' + userService.sys_id}).$promise
+				},
+				types: function (GroupFactory){
+					return GroupFactory.getTypes({sysparm_query: 'name=administrative^ORname=Agile Team'}).$promise
+				}
+
+				
+			}
+			
+        })
+
+
+	
+		
+	}])
+
+    .provider('userService', function () {
+		var options = {};
+		this.config = function (opt) {
+			angular.extend(options, opt);
+		};
+		this.$get = [function () {
+			if (!options) {
+				throw new Error('Config options must be configured');
+			}
+			return options;
+		}];
+	})
+
+    .config(['blockUIConfig', function(blockUIConfig) {
+        blockUIConfig.delay = 400;
+		
+        blockUIConfig.requestFilter = function(config) {
+			if(config.method === 'GET' && (config.url === '/api/x_wec_product/table/sys_user_group' ||
+										  config.url === '/api/x_wec_product/table/sys_user' ||
+										  config.url === '/api/x_wec_product/table/cmdb_ci_group' ||
+										  config.url === '/api/x_wec_product/table/cmdb_ci_service' || 
+										  config.url === '/api/x_wec_product/table/cmn_location' || 
+										  config.url === '/api/x_wec_product/table/cmdb_rel_ci' || 
+										  config.url === '/api/x_wec_product/stats/x_wec_product_table' ||
+										  config.url === '/api/x_wec_product/stats/task')) {
+				return false;
+			}
+			
+			if(config.params && config.params.hasOwnProperty('preloader')){
+				return false;
+			}
+        };
+		
+    }])
+
+
+	.config(function(toastrConfig) {
+	  angular.extend(toastrConfig, {
+
+		  positionClass: 'toast-top-center',
+		  timeOut: 2000,
+	  });
+	})
+
+	.config(['$provide', '$httpProvider', function($provide, $httpProvider) {
+        
+		$provide.factory('errHttpInterceptor', function($q, $rootScope, $injector) {
+            return {
+                'responseError': function(rejection) {
+					if(rejection.status !== 200) {
+                        var msg = 'An unexpected error occurred.',
+                            title = '<b>' + rejection.status + ' ' + rejection.statusText + '</b>',
+							uibModal = $injector.get('$uibModal');
+
+							uibModal.open({
+
+								templateUrl: '/x_wec_product_modal-dialog-tpl.do',
+								size: 'lg',
+								controller: function ($scope, $uibModalInstance) {
+									var dlg = this;
+
+									dlg.close = close;
+									
+									dlg.title = rejection.statusText;
+									dlg.body = rejection.data.error.message;
+
+									function close () {
+										$uibModalInstance.close();
+									}
+
+								},
+								controllerAs: "dlg"
+							});			
+
+                    }
+                    return $q.reject(rejection);
+                }
+
+
+            }
+        });
+
+        $httpProvider.interceptors.push('errHttpInterceptor');
+
+    }])
+
+	.run(function ($http, $templateCache) { 
+		
+		
+	
+		$http.defaults.headers.common['X-UserToken'] = userToken; 
+	
+		$templateCache.put('ng-table/filters/search-assignment-group-product.html', '<input type="text" class="form-control input-sm" placeholder="Please typeahead search value" uib-typeahead="agroup as agroup.name for agroup in pr.searchAssignmentGroupByName($viewValue)" ng-keyup="pr.reloadTable(\'relationshipProductTable\', searchAssignmentGroupProduct, \'assignment_group\')" typeahead-on-select="params.filter()[name] = $item.sys_id" typeahead-wait-ms="500" ng-model="searchAssignmentGroupProduct"/>');
+	    $templateCache.put('ng-table/filters/search-assignment-group.html', '<input type="text" class="form-control input-sm" placeholder="Please typeahead search value" uib-typeahead="agroup as agroup.name for agroup in ps.searchAssignmentGroupByName($viewValue)" ng-keyup="ps.reloadTable(searchAssignmentGroupProduct, \'assignment_group\')" typeahead-on-select="params.filter()[name] = $item.sys_id" typeahead-wait-ms="500" ng-model="searchAssignmentGroupProduct"/>');
+	    $templateCache.put('ng-table/filters/search-assignment-group-task.html', '<input type="text" class="form-control input-sm" placeholder="Please typeahead search value" uib-typeahead="agroup as agroup.name for agroup in tc.searchAssignmentGroupByName($viewValue)" ng-keyup="tc.reloadTable(searchAssignmentGroupProduct, \'assignment_group\')" typeahead-on-select="params.filter()[name] = $item.sys_id" typeahead-wait-ms="500" ng-model="searchAssignmentGroupProduct"/>');
+	    $templateCache.put('ng-table/filters/search-assignment-group-sub.html', '<input type="text" class="form-control input-sm" placeholder="Please typeahead search value" uib-typeahead="agroup as agroup.name for agroup in ss.searchAssignmentGroupByName($viewValue)" ng-keyup="ss.reloadTable(searchAssignmentGroupProduct, \'assignment_group\')" typeahead-on-select="params.filter()[name] = $item.sys_id" typeahead-wait-ms="500" ng-model="searchAssignmentGroupProduct"/>');
+	    $templateCache.put('ng-table/filters/search-assignment-group-server.html', '<input type="text" class="form-control input-sm" placeholder="Please typeahead search value" uib-typeahead="agroup as agroup.name for agroup in pr.searchAssignmentGroupByName($viewValue)" ng-keyup="pr.reloadTable(\'relationshipServerTable\', searchAssignmentGroupServer, \'assignment_group\')" typeahead-on-select="params.filter()[name] = $item.sys_id" typeahead-wait-ms="500" ng-model="searchAssignmentGroupServer"/>');
+	    
+		$templateCache.put('headerCheckbox.html', '<input type="checkbox" ng-model="ss.checkboxes.checked" class="select-all" value="" />');
+	
+	});
+
+	
+	
+	$.ajaxSetup({headers: {"X-UserToken": userToken}});
+	$.get('/api/now/table/sys_user/' + userId, function (userData) {
+		
+		$.get('/api/x_wec_product/table/sys_user_has_role?sysparm_query=user%3D' + userId, function (userRole) {
+
+			angular.module('twc-product').config(['userServiceProvider', function (userServiceProvider) {
+
+				userData.result['roles'] = userRole.result;
+				
+				userServiceProvider.config(userData.result);
+
+			}]);
+
+			angular.bootstrap(document, ['twc-product']);
+
+		});
+		
+    });
+	
+})();
+
+
+]]></script>
+        <script_name>app</script_name>
+        <sys_class_name>sys_ui_script</sys_class_name>
+        <sys_created_by>andrey.zlatin@weather.com</sys_created_by>
+        <sys_created_on>2016-07-08 14:10:52</sys_created_on>
+        <sys_customer_update>true</sys_customer_update>
+        <sys_id>3a3ef7e40fec62006c3005cce1050ec3</sys_id>
+        <sys_mod_count>270</sys_mod_count>
+        <sys_name>x_wec_product.app</sys_name>
+        <sys_package display_value="Product" source="x_wec_product">daa7dccd0f44220034457d4ce1050e47</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Product">daa7dccd0f44220034457d4ce1050e47</sys_scope>
+        <sys_update_name>sys_ui_script_3a3ef7e40fec62006c3005cce1050ec3</sys_update_name>
+        <sys_updated_by>anton.sychikov.contractor@weather.com</sys_updated_by>
+        <sys_updated_on>2016-10-06 08:31:34</sys_updated_on>
+        <use_scoped_format>false</use_scoped_format>
+    </sys_ui_script>
+</record_update>

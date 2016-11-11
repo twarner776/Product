@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update table="sys_ui_page">
+    <sys_ui_page action="INSERT_OR_UPDATE">
+        <category>general</category>
+        <client_script/>
+        <description/>
+        <direct>true</direct>
+        <endpoint>x_wec_product_leadership-tasks-tpl.do</endpoint>
+        <html><![CDATA[<?xml version="1.0" encoding="utf-8" ?>
+<j:jelly trim="false" xmlns:j="jelly:core" xmlns:g="glide" xmlns:j2="null" xmlns:g2="null">
+	
+	<ol class="breadcrumb">
+		<li><a href="https://service.weather.com">Home</a></li>
+		<li><a href="/x_wec_product_box-app.do#/dashboard">My Apps</a></li>
+		<li><a ui-sref="dashboard">Dashboard</a></li>
+		<li class="active">{{tic.label}}</li>
+	</ol>
+	
+	<h1 class="page-header twc-header">{{tic.label}} list <i class="fa fa-refresh fa-spin fa-1x fa-fw" ng-show="tic.loader"></i></h1>
+	<div class="row">
+		<div class="col-sm-12">
+				<table ng-table="tic.table" class="table table-striped twc-table">
+					<tr ng-repeat="row in $data track by row.sys_id.value">
+						<td data-title="'Number'"><a ui-sref="task({id: row.sys_id.value})">{{row.number.display_value}}</a></td>
+						<td data-title="'Short Description'"><div uib-tooltip="{{row.short_description.display_value}}">{{row.short_description.display_value | limitTo: 80}}{{row.short_description.display_value.length > 80 ? '...' : ''}}</div></td>
+						<td data-title="'Assignment Group'" ng-if="tic.column.assignment_group">{{row.assignment_group.display_value}}</td>
+						<td data-title="'Assigned To'">{{row.assigned_to.display_value}}</td>
+						<td data-title="'Priority'" ng-if="tic.column.priority">{{row.priority.display_value}}</td>
+						<td data-title="'State'">{{row.state.display_value}}</td>
+						<td data-title="'Updated'" ng-if="tic.column.sys_updated_on">{{row.sys_updated_on.display_value}}</td>
+					</tr>
+				</table>
+			
+		</div>
+	</div>
+	<div ui-view=""></div>
+</j:jelly>]]></html>
+        <name>leadership-tasks-tpl</name>
+        <processing_script/>
+        <sys_class_name>sys_ui_page</sys_class_name>
+        <sys_created_by>anton.sychikov.contractor@weather.com</sys_created_by>
+        <sys_created_on>2016-08-05 12:38:06</sys_created_on>
+        <sys_customer_update>true</sys_customer_update>
+        <sys_id>092573e10f8d2e0034457d4ce1050ed9</sys_id>
+        <sys_mod_count>5</sys_mod_count>
+        <sys_name>leadership-tasks-tpl</sys_name>
+        <sys_package display_value="Product" source="x_wec_product">daa7dccd0f44220034457d4ce1050e47</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Product">daa7dccd0f44220034457d4ce1050e47</sys_scope>
+        <sys_update_name>sys_ui_page_092573e10f8d2e0034457d4ce1050ed9</sys_update_name>
+        <sys_updated_by>anton.sychikov.contractor@weather.com</sys_updated_by>
+        <sys_updated_on>2016-08-12 13:32:26</sys_updated_on>
+    </sys_ui_page>
+</record_update>

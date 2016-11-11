@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<database>
+    <element label="Abandoned items" max_length="40" name="x_wec_product_no_dependings_product" type="collection">
+        <element label="Product ID" max_length="32" name="product_id" reference="cmdb_ci" type="reference"/>
+        <element label="User ID" max_length="32" name="user_id" reference="sys_user" type="reference"/>
+        <index name="index">
+            <element name="user_id"/>
+        </index>
+        <index name="index2">
+            <element name="product_id"/>
+        </index>
+    </element>
+</database>

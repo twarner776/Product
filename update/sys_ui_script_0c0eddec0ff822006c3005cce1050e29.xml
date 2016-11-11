@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update table="sys_ui_script">
+    <sys_ui_script action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <description>Product Factory</description>
+        <global>false</global>
+        <name>x_wec_product.ProductFactory</name>
+        <script><![CDATA[(function () {
+    'use strict';
+
+    angular
+        .module('twc-product')
+        .factory('ProductFactory', ProductFactory);
+
+    ProductFactory.$inject = ['$resource'];
+
+    function ProductFactory($resource) {
+		return $resource('', {}, {
+			list: {method: 'GET', url: '/api/x_wec_product/table/x_wec_product_table'},
+			fullList: {
+				method: 'GET', 
+				url: '/api/x_wec_product/table/x_wec_product_table',
+				transformResponse: function(data, headers){
+					var response = {}
+					response.data = angular.fromJson(data);
+					response.headers = headers();
+					return response;
+				}
+			},
+			get: {method: 'GET', url: '/api/x_wec_product/table/x_wec_product_table/:id'},
+			create: {method: 'POST', url: '/api/now/table/x_wec_product_table'},
+			update: {method: 'PATCH', url: '/api/now/table/x_wec_product_table/:id'},
+			prepareAbandonedItems: {method: 'GET', url: '/api/x_wec_product/table/dependings/abandoned_items'},
+			prepareAbandonedCount: {method: 'GET', url: '/api/x_wec_product/table/stats/x_wec_product_abandoned_items_view'},
+			abandonedItemsList: {
+				method: 'GET', 
+				url: '/api/x_wec_product/table/x_wec_product_abandoned_items_view',
+				transformResponse: function(data, headers){
+					var response = {}
+					response.data = angular.fromJson(data);
+					response.headers = headers();
+					return response;
+				}
+			},
+			
+		})
+
+    }
+
+})();
+
+]]></script>
+        <script_name>ProductFactory</script_name>
+        <sys_class_name>sys_ui_script</sys_class_name>
+        <sys_created_by>andrey.zlatin@weather.com</sys_created_by>
+        <sys_created_on>2016-07-20 12:47:28</sys_created_on>
+        <sys_customer_update>true</sys_customer_update>
+        <sys_id>0c0eddec0ff822006c3005cce1050e29</sys_id>
+        <sys_mod_count>4</sys_mod_count>
+        <sys_name>x_wec_product.ProductFactory</sys_name>
+        <sys_package display_value="Product" source="x_wec_product">daa7dccd0f44220034457d4ce1050e47</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Product">daa7dccd0f44220034457d4ce1050e47</sys_scope>
+        <sys_update_name>sys_ui_script_0c0eddec0ff822006c3005cce1050e29</sys_update_name>
+        <sys_updated_by>anton.sychikov.contractor@weather.com</sys_updated_by>
+        <sys_updated_on>2016-10-17 08:44:14</sys_updated_on>
+        <use_scoped_format>false</use_scoped_format>
+    </sys_ui_script>
+</record_update>

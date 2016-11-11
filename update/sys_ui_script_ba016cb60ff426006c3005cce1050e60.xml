@@ -1,0 +1,798 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update table="sys_ui_script">
+    <sys_ui_script action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <description>ChartService</description>
+        <global>false</global>
+        <name>x_wec_product.ChartService</name>
+        <script><![CDATA[(function () {
+	'use strict';
+	
+	angular
+	.module('twc-product')
+	.factory('ChartService', ChartService);
+	
+	ChartService.$inject = ['$q', '$filter', 'userService', 'TaskFactory', 'UserFactory', 'GroupFactory'];
+	
+	function ChartService($q, $filter, userService, TaskFactory, UserFactory, GroupFactory) {
+		return {
+			incidentTrendByPriority: function(){
+				
+				return getLineChart({
+					table: 'incident',
+					filter: 'closed_atONLast 3 months@javascript:gs.monthsAgoStart(3)@javascript:gs.endOfThisMonth()^priority!=^cmdb_ci.owned_by=' + userService.sys_id,
+					trendBy: ['closed_at'],
+					groupBy: 'week',
+					field: 'priority',
+					title: 'Incident Trend By Priority',
+					yText: 'Incident Count'
+				});
+				
+				
+			},
+			
+			incidentTrendByPriorityLeadership: function(){
+				
+				return getLineChart({
+					table: 'incident',
+					filter:'closed_atONLast 3 months@javascript:gs.monthsAgoStart(3)@javascript:gs.endOfThisMonth()^priority!=^assignment_group.manager=' + userService.sys_id + '^ORassigned_to.manager=' + userService.sys_id,
+					trendBy: ['closed_at'],
+					groupBy: 'week',
+					field: 'priority',
+					title: 'Incident Trend By Priority',
+					yText: 'Incident Count'
+				});
+				
+				
+			},
+			
+			changeTrendByChangeType: function(){
+				
+				return getLineChart({
+					table: 'change_request',
+					filter: 'cmdb_ci.owned_byDYNAMIC' + userService.sys_id,
+					trendBy: ['opened_at'],
+					groupBy: 'week',
+					field: 'type',
+					title: 'Open Change Trend by Change Type',
+					yText: 'Change Request Count'
+				});
+				
+				
+			},
+			
+			changeTrendByChangeTypeLeadership: function(){
+				
+				return getLineChart({
+					table: 'change_request',
+					filter: ' assigned_to.manager=' + userService.sys_id,
+					trendBy: ['opened_at'],
+					groupBy: 'week',
+					field: 'type',
+					title: 'Open Change Trend by Change Type',
+					yText: 'Change Request Count'
+				});
+				
+				
+			},
+			
+			problemTrendReport: function(){
+				
+				return getLineChartCount({
+					table: 'problem',
+					filter: 'cmdb_ci.owned_by=' + userService.sys_id,
+					trendBy: ['opened_at'],
+					title: 'Monthly Problem Trend Report',
+					yText: 'Problem Count'
+				});
+				
+				
+			},
+			
+			problemTrendReportLeadership: function(){
+				
+				return getLineChartCount({
+					table: 'problem',
+					filter: 'assigned_to.manager=' + userService.sys_id + '^ORassignment_group.manager=' + userService.sys_id,
+					trendBy: ['opened_at'],
+					title: 'Monthly Problem Trend Report',
+					yText: 'Problem Count'
+				});
+				
+				
+			},
+			
+			openIncidentAssignedMyTeam: function(callback){
+				return UserFactory.search({sysparm_query: 'manager=' + userService.sys_id}).$promise.then(function(res){
+					var users = [];
+					res.result.forEach(function(user){
+						users.push('assignment_group.manager=' + user.sys_id);
+					});
+					
+					return getColumnChart({
+						table: 'incident',
+						filter: 'assignment_group.manager=' + userService.sys_id + '^OR' + users.join('^OR')  + '^active=true^state!=7^state!=6',
+						trendBy: ['state'],
+						groupBy: 'assignment_group',
+						field: 'state',
+						title: 'Open Incidents Assigned to My Team',
+						titleSize: '14px',
+						yText: 'Incident Count',
+						type: 'column',
+						callback: callback
+					});
+					
+				});
+				
+			},
+			
+			openChangeAssignedMyTeam: function(callback){
+				
+				return getColumnChart({
+					table: 'change_request',
+					filter: 'assigned_to.manager=' + userService.sys_id + '^active=true^state=1',
+					trendBy: ['type'],
+					groupBy: 'assigned_to',
+					field: 'type',
+					title: 'Scheduled Changes Assigned to My Team',
+					titleSize: '14px',
+					yText: 'Change Request Count',
+					type: 'bar',
+					callback: callback
+				});
+				
+			},
+			
+			openProblemAssignedMyTeam: function(callback){
+				return UserFactory.search({sysparm_query: 'manager=' + userService.sys_id}).$promise.then(function(res){
+					var users = [];
+					res.result.forEach(function(user){
+						users.push('assignment_group.manager=' + user.sys_id);
+					});
+					
+					return getDonutChart({
+						table: 'problem',
+						filter: 'assignment_group.manager=' + userService.sys_id + '^OR' + users.join('^OR')  + '^active=true^state!=7',
+						groupBy: 'state',
+						title: 'Open Incidents Assigned to My Team',
+						titleSize: '14px',
+						yText: 'Incident Count',
+						callback: callback
+					});
+					
+				});
+				
+			},
+			
+			openIncidentsByPriorityHeatmap: function(callback){
+				return TaskFactory.dependingsTasksIncidentView({sysparm_query: 't_stateNOT IN7,6^d_user_id=' + userService.sys_id, preloader: false, sysparm_display_value: 'all'}).$promise.then(function(res){
+						var deferred = $q.defer();
+					
+						var priority = _.chain(res.result).groupBy(function(b) { return b.t_priority.display_value}).value();
+						var cmdbCi = _.chain(res.result).groupBy(function(b) { return b.t_cmdb_ci.display_value}).value();
+						var yAxis = [], xAxis = [], data = [];
+					
+					
+						var priorityCount = 0;
+						//_.forOwnRight(priority, function(valuePri, keyPri) {
+						_(priority).keys().sort().reverse().each(function (keyPri) {
+							var valuePri = priority[keyPri];
+							yAxis.push(keyPri);
+
+							
+							var productCount = 0;
+							_.forOwnRight(cmdbCi, function(valueP, keyP) {
+								xAxis.push(keyP);
+
+								var items = _.filter(valueP, function(o) { return o.t_priority.display_value === keyPri;});
+								
+								if(items.length > 0){
+									data.push([productCount, priorityCount, items.length]);
+								}
+								
+								productCount++;
+
+							});	
+							
+							priorityCount++;
+							
+						});	
+					
+					
+						deferred.resolve({
+							options: {
+								chart: {
+									type: 'heatmap',
+									spacingBottom: 10,
+									spacingTop: 5,
+									marginTop: 30
+								},
+								tooltip: {
+									formatter: function () {
+										return this.point.value + ' record for ' + this.series.xAxis.categories[this.point.x] + ' and '  + this.series.yAxis.categories[this.point.y];
+									}
+								},
+								colorAxis: {
+									min: 0,
+									minColor: '#FFFFFF',
+									maxColor: Highcharts.getOptions().colors[0]
+								},
+
+								legend: {
+									align: 'center',
+									layout: 'horizontal',
+									verticalAlign: 'bottom',
+									symbolWidth: 300
+								},
+								
+							},
+
+							title: {
+								text: "Open Incidents By Priority & Product (Heatmap)",
+								x: -20
+							},
+
+							xAxis: {
+								categories: xAxis,
+
+							},
+							yAxis: {
+								categories: yAxis,
+								title: null
+							},							
+							size: {
+								height: 400,
+								width: 750
+							},
+							series: [{
+								name: 'Incident per product',
+								borderWidth: 1,
+								data: data,
+								dataLabels: {
+									enabled: true,
+									color: '#000000'
+								},
+								point:{
+									events:{
+										click: function (event) {
+											window.location.href = 'x_wec_product_app.do#/incidents-filter?filter=' + encodeURIComponent(JSON.stringify({name: this.series.xAxis.categories[event.point.x], priority: this.series.yAxis.categories[event.point.y]}));
+
+										}
+									}
+								}          
+								
+							}]							
+						});
+					
+					return deferred.promise;
+					});
+
+				
+			},
+			
+			
+			pieAndTable: function(data, chart, table, label, ctrlScope, scope){
+				var groupByState = _.chain(data).groupBy("state").value(), chartData = [];
+				
+				ctrlScope[table] = _.orderBy(data, ['number'], ['desc']).slice(0, 5);
+				
+				_.forOwn(groupByState, function(value, key) {
+					
+					chartData.push({
+						name: key,
+						y: value.length
+					});
+					
+					ctrlScope[chart] = {
+						options: {
+							chart: {
+								plotBackgroundColor: null,
+								plotBorderWidth: null,
+								plotShadow: false,
+								type: 'pie',
+								spacingBottom: 0,
+								spacingTop: 0,
+								marginTop: 10
+							},
+							plotOptions: {
+								pie: {
+									allowPointSelect: true,
+									cursor: 'pointer',
+									dataLabels: {
+										enabled: false
+									},
+									showInLegend: false
+								}
+							},
+						},
+						title: {
+							text: label,
+							style: {
+								fontFamily: 'sans-serif'
+							}
+						},
+						subtitle: {
+							text: '',
+							style: {
+								display: 'none'
+							}
+						},
+						size: {
+							height: 160
+						},
+						
+						series: [{
+							name: 'States',
+							colorByPoint: true,
+							data: chartData,
+							point:{
+								events:{
+									click: function (event) {
+										var newData = [];
+										if(this.state === "hover"){
+											newData = _.filter(_.orderBy(data, ['number'], ['desc']), {state: this.name}).slice(0, 5);
+											
+										}else{
+											newData = _.orderBy(data, ['number'], ['desc']).slice(0, 5);
+											
+										}
+										scope.$apply(function () {
+											ctrlScope[table] = newData;
+										});
+										
+									}
+								}
+							}
+							
+						}]
+					}
+					
+				});
+				
+				
+				
+			},
+			
+		}
+		
+		function getLineChart(config){
+			
+			var deferred = $q.defer();
+			
+			TaskFactory[config.table]({sysparm_query: config.filter, sysparm_display_value: 'true', preloader: false}).$promise.then(function(res){
+				
+				var orderData = _.orderBy(res.result, config.trendBy, ['asc']), groups = {}, legendKeys = [], categories = [], series = [];
+				
+				_.forOwn(_.chain(orderData).groupBy(config.field).value(), function(value, key) {
+					legendKeys.push(key);
+				});
+				
+				legendKeys.sort();
+				
+				orderData.forEach(function(item){
+					var current = new Date(item[config.trendBy[0]]);
+					
+					var weekstart = current.getDate() - current.getDay() + (current.getDay() === 0 ? -6 : 1);
+					
+					var monday = new Date(current.setDate(weekstart));
+					
+					var weekKey = $filter('date')(monday, 'yyyy-MM-dd')
+					if(groups.hasOwnProperty(weekKey)){
+						groups[weekKey].push(item);
+					}else{
+						groups[weekKey] = [item];
+					}
+					
+				});
+				
+				_.forOwn(groups, function(value, key) {
+					groups[key] = _.chain(value).groupBy(config.field).value();
+					categories.push(key);
+				});
+				
+				legendKeys.forEach(function(pKeys){
+					
+					var counts = [];
+					
+					_.forOwn(groups, function(value, key) {
+						
+						if(value.hasOwnProperty(pKeys)){
+							counts.push(value[pKeys].length);
+						}else{
+							counts.push(0);
+						}
+						
+					});
+					
+					series.push({
+						name: pKeys,
+						data: counts
+					})
+					
+				});
+				
+				if(series.length == 0){
+					
+					deferred.resolve(null);
+					
+				}else{
+					
+					deferred.resolve({
+						options: {
+							chart: {
+								spacingBottom: 10,
+								spacingTop: 5,
+								marginTop: 30
+							},
+						},
+						
+						title: {
+							text: config.title,
+							x: -20
+						},
+						
+						xAxis: {
+							categories: categories,
+							
+						},
+						yAxis: {
+							title: {
+								text: config.yText
+							},
+							plotLines: [{
+								value: 0,
+								width: 1,
+								color: '#808080'
+							}]
+						},
+						tooltip: {
+							valueSuffix: '°C'
+						},
+						size: {
+							height: 300
+						},
+						
+						legend: {
+							layout: 'vertical',
+							align: 'right',
+							verticalAlign: 'middle',
+							borderWidth: 0
+						},
+						series: series
+					});
+				}
+				
+			});
+			
+			return deferred.promise;
+		}
+		
+		function getLineChartCount(config){
+			
+			var deferred = $q.defer();
+			
+			TaskFactory[config.table]({sysparm_query: config.filter, sysparm_display_value: 'true', preloader: false}).$promise.then(function(res){
+				
+				var orderData = _.orderBy(res.result, config.trendBy, ['asc']), groups = {}, categories = [], series = [];
+				
+				orderData.forEach(function(item){
+					var current = new Date(item[config.trendBy[0]]);
+					
+					var dateKey = $filter('date')(current, 'MMMM/yyyy')
+					if(groups.hasOwnProperty(dateKey)){
+						groups[dateKey].push(item);
+					}else{
+						groups[dateKey] = [item];
+					}
+					
+				});
+				
+				var counts = [];
+				
+				_.forOwn(groups, function(value, key) {
+					counts.push(value.length);
+					categories.push(key);
+				});
+				
+				
+				_.forOwn(groups, function(value, key) {
+					
+					
+				});
+				
+				series.push({
+					name: 'Count',
+					data: counts
+				})
+				
+				if(series.length == 0){
+					
+					deferred.resolve(null);
+					
+				}else{
+					
+					deferred.resolve({
+						options: {
+							chart: {
+								spacingBottom: 10,
+								spacingTop: 5,
+								marginTop: 30
+							},
+						},
+						
+						title: {
+							text: config.title,
+							x: -20
+						},
+						
+						xAxis: {
+							categories: categories,
+							
+						},
+						yAxis: {
+							title: {
+								text: config.yText
+							},
+							plotLines: [{
+								value: 0,
+								width: 1,
+								color: '#808080'
+							}]
+						},
+						tooltip: {
+							valueSuffix: '°C'
+						},
+						legend: {
+							enabled: false
+						},
+						series: series
+					});
+				}
+				
+			});
+			
+			return deferred.promise;
+		}
+		
+		function getColumnChart(config){
+			
+			var deferred = $q.defer();
+			
+			TaskFactory[config.table]({sysparm_query: config.filter, sysparm_display_value: 'true', sysparm_exclude_reference_link: true, preloader: false}).$promise.then(function(res){
+				
+				var orderData = _.orderBy(res.result, config.trendBy, ['asc']), groups = {}, legendKeys = [], categories = [], series = [];
+				
+				_.forOwn(_.chain(orderData).groupBy(config.field).value(), function(value, key) {
+					legendKeys.push(key);
+				});
+				
+				legendKeys.sort();
+				
+				orderData.forEach(function(item){
+					var current = item;
+					
+					
+					var key = item[config.groupBy]
+					
+					if(groups.hasOwnProperty(key)){
+						groups[key].push(item);
+					}else{
+						groups[key] = [item];
+					}
+					
+				});
+				
+				_.forOwn(groups, function(value, key) {
+					groups[key] = _.chain(value).groupBy(config.field).value();
+					categories.push(key);
+				});
+				
+				legendKeys.forEach(function(pKeys){
+					
+					var counts = [];
+					
+					_.forOwn(groups, function(value, key) {
+						
+						if(value.hasOwnProperty(pKeys)){
+							counts.push(value[pKeys].length);
+						}else{
+							counts.push(0);
+						}
+						
+					});
+
+					var s = {
+						name: pKeys,
+						data: counts,
+						stack: 'group',
+					}
+					
+					if(config.callback){
+						s.point = {
+							events:{
+								click: function (event){
+									config.callback(this, event);
+								}
+							}
+						}
+					}
+					
+					series.push(s)
+					
+				});
+				
+				if(series.length == 0){
+					
+					deferred.resolve(null);
+					
+				}else{
+					
+					deferred.resolve({
+						options: {
+							chart: {
+								spacingBottom: 10,
+								spacingTop: 5,
+								marginTop: 30,
+								type: config.type
+							},
+							plotOptions: {
+								column: {
+									stacking: 'normal'
+								}
+							},
+							
+						},
+						
+						title: {
+							text: config.title,
+							style: {
+								fontSize: config.titleSize
+							}
+						},
+						
+						xAxis: {
+							categories: categories,
+							
+						},
+						yAxis: {
+							title: {
+								text: config.yText
+							},
+							plotLines: [{
+								value: 0,
+								width: 1,
+								color: '#808080'
+							}]
+						},
+						tooltip: {
+							valueSuffix: '°C'
+						},
+						size: {
+							height: 300
+						},
+						legend: {
+							layout: 'vertical',
+							align: 'right',
+							verticalAlign: 'middle',
+							borderWidth: 0
+						},
+						series: series,
+					});
+				}
+				
+			});
+			
+			return deferred.promise;
+		}
+		
+		function getDonutChart(config){
+			
+			var deferred = $q.defer();
+			
+			TaskFactory[config.table]({sysparm_query: config.filter, sysparm_display_value: 'true', sysparm_exclude_reference_link: true, preloader: false}).$promise.then(function(res){
+				
+				var groups = _.chain(res.result).groupBy(config.groupBy).value(), data = [], series = [];
+				
+				
+				_.forOwn(groups, function(value, key) {
+					var a = [];
+					a.push(key);
+					a.push(value.length)
+					data.push(a);
+				});
+				
+				if(data.length == 0){
+					
+					deferred.resolve(null);
+					
+				}else{
+					
+					var s = {
+						type: 'pie',
+						name: 'Problems',
+						innerSize: '50%',
+						data: data
+					}
+					
+					if(config.callback){
+						s.point = {
+							events:{
+								click: function (event){
+									config.callback(this, event);
+								}
+							}
+						}
+					}
+					
+					series.push(s)
+					
+					deferred.resolve({
+						options: {
+							chart: {
+								spacingBottom: 10,
+								spacingTop: 5,
+								marginTop: 30,
+								plotBackgroundColor: null,
+								plotBorderWidth: 0,
+								plotShadow: false
+							},
+							plotOptions: {
+								pie: {
+									dataLabels: {
+										enabled: true,
+										distance: -50,
+										style: {
+											fontWeight: 'bold',
+											color: 'white',
+											textShadow: '0px 1px 2px black'
+										}
+									},
+									startAngle: -90,
+									endAngle: 90,
+									center: ['50%', '75%']
+								}
+							},
+							
+						},
+						
+						title: {
+							text: config.title,
+							x: -20,
+							style: {
+								fontSize: config.titleSize
+							}
+						},
+						
+						size: {
+							height: 300
+						},
+						series: series
+						
+					});
+				}
+				
+			});
+			
+			return deferred.promise;
+		}
+	}
+	
+})();]]></script>
+        <script_name>ChartService</script_name>
+        <sys_class_name>sys_ui_script</sys_class_name>
+        <sys_created_by>andrey.zlatin@weather.com</sys_created_by>
+        <sys_created_on>2016-07-27 08:08:55</sys_created_on>
+        <sys_customer_update>true</sys_customer_update>
+        <sys_id>ba016cb60ff426006c3005cce1050e60</sys_id>
+        <sys_mod_count>121</sys_mod_count>
+        <sys_name>x_wec_product.ChartService</sys_name>
+        <sys_package display_value="Product" source="x_wec_product">daa7dccd0f44220034457d4ce1050e47</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Product">daa7dccd0f44220034457d4ce1050e47</sys_scope>
+        <sys_update_name>sys_ui_script_ba016cb60ff426006c3005cce1050e60</sys_update_name>
+        <sys_updated_by>anton.sychikov.contractor@weather.com</sys_updated_by>
+        <sys_updated_on>2016-09-29 15:12:25</sys_updated_on>
+        <use_scoped_format>false</use_scoped_format>
+    </sys_ui_script>
+</record_update>

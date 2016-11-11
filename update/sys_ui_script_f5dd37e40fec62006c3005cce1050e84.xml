@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update table="sys_ui_script">
+    <sys_ui_script action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <description>Task Factory</description>
+        <global>false</global>
+        <name>x_wec_product.TaskFactory</name>
+        <script><![CDATA[(function () {
+    'use strict';
+
+    angular
+        .module('twc-product')
+        .factory('TaskFactory', TaskFactory);
+
+    TaskFactory.$inject = ['$resource'];
+
+    function TaskFactory($resource) {
+		return $resource('', {}, {
+			list: {method: 'GET', url: '/api/x_wec_product/table/task'},
+			publicList: {method: 'GET', url: '/api/x_wec_product/table/filtered/task'},
+			
+			incident: {method: 'GET', url: '/api/x_wec_product/table/incident'},
+			publicIncident: {method: 'GET', url: '/api/x_wec_product/table/filtered/incident'},
+			
+			change_request: {method: 'GET', url: '/api/x_wec_product/table/change_request'},
+			problem: {method: 'GET', url: '/api/x_wec_product/table/problem'},
+			
+			reqItem: {method: 'GET', url: '/api/x_wec_product/table/sc_req_item'},
+			
+			comm: {method: 'GET', url: '/api/x_wec_product/table/x_wec_communicatio_communications_center_table'},
+			publicComm: {method: 'GET', url: '/api/x_wec_product/table/filtered/x_wec_communicatio_communications_center_table'},
+			
+			incident_propduct_relationships: {method: 'GET', url: '/api/x_wec_product/table/x_wec_product_incident_propduct_relationships'},
+			
+			fullList: {
+				method: 'GET', 
+				url: '/api/x_wec_product/table/task',
+				transformResponse: function(data, headers){
+					var response = {}
+					response.data = angular.fromJson(data);
+					response.headers = headers();
+					return response;
+				}
+			},
+			fullListDependingsProductView: {
+				method: 'GET', 
+				url: '/api/x_wec_product/table/x_wec_product_dependings_product_view',
+				transformResponse: function(data, headers){
+					var response = {}
+					response.data = angular.fromJson(data);
+					response.headers = headers();
+					return response;
+				}
+			},
+			fullListDependingsChangetView: {
+				method: 'GET', 
+				url: '/api/x_wec_product/table/x_wec_product_dependings_change_view',
+				transformResponse: function(data, headers){
+					var response = {}
+					response.data = angular.fromJson(data);
+					response.headers = headers();
+					return response;
+				}
+			},
+			fullListDependingsTaskView: {
+				method: 'GET', 
+				url: '/api/x_wec_product/table/x_wec_product_dependings_task_view',
+				transformResponse: function(data, headers){
+					var response = {}
+					response.data = angular.fromJson(data);
+					response.headers = headers();
+					return response;
+				}
+			},
+			fullListDependingsChangeTaskView: {
+				method: 'GET', 
+				url: '/api/x_wec_product/table/x_wec_product_dependings_task_change_view',
+				transformResponse: function(data, headers){
+					var response = {}
+					response.data = angular.fromJson(data);
+					response.headers = headers();
+					return response;
+				}
+			},
+			fullListDependingsIncidentTaskView: {
+				method: 'GET', 
+				url: '/api/x_wec_product/table/x_wec_product_dependings_task_incident_view',
+				transformResponse: function(data, headers){
+					var response = {}
+					response.data = angular.fromJson(data);
+					response.headers = headers();
+					return response;
+				}
+			},
+			fullListDependingsProblemTaskView: {
+				method: 'GET', 
+				url: '/api/x_wec_product/table/x_wec_product_dependings_task_problem_view',
+				transformResponse: function(data, headers){
+					var response = {}
+					response.data = angular.fromJson(data);
+					response.headers = headers();
+					return response;
+				}
+			},
+			fullListSLA: {
+				method: 'GET', 
+				url: '/api/x_wec_product/table/x_wec_product_task_with_sla',
+				transformResponse: function(data, headers){
+					var response = {}
+					response.data = angular.fromJson(data);
+					response.headers = headers();
+					return response;
+				}
+			},
+			fullListСhangeRequest: {
+				method: 'GET', 
+				url: '/api/x_wec_product/table/change_request',
+				transformResponse: function(data, headers){
+					var response = {}
+					response.data = angular.fromJson(data);
+					response.headers = headers();
+					return response;
+				}
+			},
+			fullListReqItem: {
+				method: 'GET', 
+				url: '/api/x_wec_product/table/sc_req_item',
+				transformResponse: function(data, headers){
+					var response = {}
+					response.data = angular.fromJson(data);
+					response.headers = headers();
+					return response;
+				}
+			},
+			fullListScTask: {
+				method: 'GET', 
+				url: '/api/x_wec_product/table/sc_task',
+				transformResponse: function(data, headers){
+					var response = {}
+					response.data = angular.fromJson(data);
+					response.headers = headers();
+					return response;
+				}
+			},
+			fullListIncident: {
+				method: 'GET', 
+				url: '/api/x_wec_product/table/incident',
+				transformResponse: function(data, headers){
+					var response = {}
+					response.data = angular.fromJson(data);
+					response.headers = headers();
+					return response;
+				}
+			},
+
+			fullListComm: {
+				method: 'GET', 
+				url: '/api/x_wec_product/table/x_wec_communicatio_communications_center_table',
+				transformResponse: function(data, headers){
+					var response = {}
+					response.data = angular.fromJson(data);
+					response.headers = headers();
+					return response;
+				}
+			},
+			
+			get: {method: 'GET', url: '/api/x_wec_product/table/task/:id'},
+			create: {method: 'POST', url: '/api/x_wec_product/table/task'},
+			update: {method: 'PATCH', url: '/api/x_wec_product/table/task/:id'},
+			
+			contractSla: {method: 'GET', url: '/api/x_wec_product/table/contract_sla'},
+			
+			dependingsProductRelation: {method: 'GET', url: '/api/x_wec_product/table/dependings/relation'},
+			dependingsProductUser: {method: 'GET', url: '/api/x_wec_product/table/dependings/user'},
+			
+			dependingsProductView: {method: 'GET', url: '/api/x_wec_product/table/x_wec_product_dependings_product_view'},
+			dependingsProductViewStat: {method: 'GET', url: '/api/x_wec_product/table/stats/x_wec_product_dependings_product_view'},
+
+			dependingsChangeView: {method: 'GET', url: '/api/x_wec_product/table/x_wec_product_dependings_change_view'},
+			dependingsChangeViewStat: {method: 'GET', url: '/api/x_wec_product/table/stats/x_wec_product_dependings_change_view'},
+			
+			dependingsProductTable: {method: 'GET', url: '/api/x_wec_product/table/x_wec_product_dependings_cmdb_ci_view'},
+			dependingsProductTableStat: {method: 'GET', url: '/api/x_wec_product/table/stats/x_wec_product_dependings_cmdb_ci_view'},
+			
+			dependingsTasks: {method: 'GET', url: '/api/x_wec_product/table/tasks/user'},
+			dependingsTasksView: {method: 'GET', url: '/api/x_wec_product/table/x_wec_product_dependings_task_view'},
+			
+			dependingsTasksIncidentView: {method: 'GET', url: '/api/x_wec_product/table/x_wec_product_dependings_task_incident_view'},
+			dependingsTasksProblemView: {method: 'GET', url: '/api/x_wec_product/table/x_wec_product_dependings_task_problem_view'},
+			dependingsTasksChangeView: {method: 'GET', url: '/api/x_wec_product/table/x_wec_product_dependings_task_change_view'},
+			
+			dependingsTasksIncidentViewStat: {method: 'GET', url: '/api/x_wec_product/table/stats/x_wec_product_dependings_task_incident_view'},
+			dependingsTasksProblemViewStat: {method: 'GET', url: '/api/x_wec_product/table/stats/x_wec_product_dependings_task_problem_view'},
+			dependingsTasksChangeViewStat: {method: 'GET', url: '/api/x_wec_product/table/stats/x_wec_product_dependings_task_change_view'},
+			
+			dependingsTasksViewStat: {method: 'GET', url: '/api/x_wec_product/table/stats/x_wec_product_dependings_task_view'},
+		})
+
+    }
+ 
+})();
+
+]]></script>
+        <script_name>TaskFactory</script_name>
+        <sys_class_name>sys_ui_script</sys_class_name>
+        <sys_created_by>andrey.zlatin@weather.com</sys_created_by>
+        <sys_created_on>2016-07-08 14:09:11</sys_created_on>
+        <sys_customer_update>true</sys_customer_update>
+        <sys_id>f5dd37e40fec62006c3005cce1050e84</sys_id>
+        <sys_mod_count>38</sys_mod_count>
+        <sys_name>x_wec_product.TaskFactory</sys_name>
+        <sys_package display_value="Product" source="x_wec_product">daa7dccd0f44220034457d4ce1050e47</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Product">daa7dccd0f44220034457d4ce1050e47</sys_scope>
+        <sys_update_name>sys_ui_script_f5dd37e40fec62006c3005cce1050e84</sys_update_name>
+        <sys_updated_by>anton.sychikov.contractor@weather.com</sys_updated_by>
+        <sys_updated_on>2016-10-26 10:08:45</sys_updated_on>
+        <use_scoped_format>false</use_scoped_format>
+    </sys_ui_script>
+</record_update>

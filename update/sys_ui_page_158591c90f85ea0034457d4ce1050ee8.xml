@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update table="sys_ui_page">
+    <sys_ui_page action="INSERT_OR_UPDATE">
+        <category>general</category>
+        <client_script/>
+        <description/>
+        <direct>true</direct>
+        <endpoint>x_wec_product_leadership-dahboard-tpl.do</endpoint>
+        <html><![CDATA[<?xml version="1.0" encoding="utf-8" ?>
+<j:jelly trim="false" xmlns:j="jelly:core" xmlns:g="glide" xmlns:j2="null" xmlns:g2="null">
+	<ol class="breadcrumb">
+		<li><a href="https://service.weather.com">Home</a></li>
+		<li><a href="/x_wec_product_box-app.do#/dashboard">My Apps</a></li>
+		<li class="active">Dashboard</li>
+	</ol>
+
+
+	<div class="row">
+		<div class="col-sm-12">
+			<div class="panel panel-primary">
+				<div class="panel-heading twc-panel-heading">My Teams Arena</div>
+				<div class="panel-body">
+
+				  <div class="row">
+					  <div class="col-sm-4" ng-if="ldb.incidentsChartConfig">
+						  <highchart config="ldb.incidentsChartConfig"></highchart>  
+					  </div>
+					  <div class="col-sm-4" ng-if="!ldb.incidentsChartConfig">
+						  <div class="alert alert-warning twc-alerts" role="alert">
+							  <i class="fa fa-refresh fa-spin fa-1x fa-fw" ng-show="ldb.loadChart"></i>
+							  <span class="sr-only" ng-show="ldb.loadChart">Loading...</span>
+							  There are no incidents for the products you own or support. Please check later. 
+						  </div>
+					  </div>
+
+					  <div class="col-sm-4" ng-if="ldb.changeChartConfig">
+						  <highchart config="ldb.changeChartConfig"></highchart>  
+					  </div>
+					  <div class="col-sm-4" ng-if="!ldb.changeChartConfig">
+						  <div class="alert alert-warning twc-alerts" role="alert">
+							  <i class="fa fa-refresh fa-spin fa-1x fa-fw" ng-show="ldb.loadChart"></i>
+							  <span class="sr-only" ng-show="ldb.loadChart">Loading...</span>
+							  There are no changes for the products you own or support. Please check later. 
+						  </div>
+					  </div>
+
+					  <div class="col-sm-4" ng-if="ldb.problemChartConfig">
+						  <highchart config="ldb.problemChartConfig"></highchart>  
+					  </div>
+					  <div class="col-sm-4" ng-if="!ldb.problemChartConfig">
+						  <div class="alert alert-warning twc-alerts" role="alert">
+							  <i class="fa fa-refresh fa-spin fa-1x fa-fw" ng-show="ldb.loadChart"></i>
+							  <span class="sr-only" ng-show="ldb.loadChart">Loading...</span>
+							  There are no problems for the products you own or support. Please check later. 
+						  </div>
+					  </div>
+					  
+				  </div>
+				  
+				  
+			  </div>
+			</div>			
+
+			
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-sm-12">
+			<div class="panel panel-primary">
+				<div class="panel-heading twc-panel-heading">Trend Reports</div>
+				<div class="panel-body">
+
+				  <div class="twc-carousel" uib-carousel="true" active="ldb.active" interval="ldb.duration">
+					  <div uib-slide="true" index="0">
+						  <div class="row">
+							  <div class="col-sm-12" ng-if="ldb.showIncident">
+								  <highchart config="ldb.incidentTrendChartConfig"></highchart>
+							  </div>
+							  <div class="col-sm-12" ng-if="!ldb.showIncident">
+								  <div class="alert alert-warning twc-alerts" role="alert">
+									  <i class="fa fa-refresh fa-spin fa-1x fa-fw" ng-if="ldb.loadIncident"></i>
+									  <span class="sr-only" ng-show="ldb.loadIncident">Loading...</span>
+									  No data for Incident Trend By Priority
+								  </div>  
+							  </div>						  
+						  
+						  </div> 	
+					  </div>
+					  <div uib-slide="true" index="1">
+						  <div class="row">
+							  <div class="col-sm-12" ng-if="ldb.showChange">
+								  <highchart config="ldb.changeTrendChartConfig"></highchart>
+							  </div>
+							  <div class="col-sm-12" ng-if="!ldb.showChange">
+								  <div class="alert alert-warning twc-alerts" role="alert">
+									  <i class="fa fa-refresh fa-spin fa-1x fa-fw" ng-if="ldb.loadChange"></i>
+									  <span class="sr-only" ng-show="db.loadChange">Loading...</span>
+									  No data for Incident Trend By Priority
+								  </div>  
+							  </div>
+						  </div> 	
+					  </div>
+					  
+					  <div uib-slide="true" index="2">
+						  <div class="row">
+							  <div class="col-sm-12" ng-if="ldb.showProblem">
+								  <highchart config="ldb.problemTrendChartConfig"></highchart>
+							  </div>
+							  <div class="col-sm-12" ng-if="!ldb.showProblem">
+								  <div class="alert alert-warning twc-alerts" role="alert">
+									  <i class="fa fa-refresh fa-spin fa-1x fa-fw" ng-if="ldb.loadProblem"></i>
+									  <span class="sr-only" ng-show="ldb.loadProblem">Loading...</span>
+									  No data for Monthly Problem Trend Report
+								  </div>  
+							  </div>
+						  </div> 	
+					  </div>
+					  
+				  </div>
+				  
+				  
+			  </div>
+			</div>			
+
+			
+		</div>
+	</div>
+	
+</j:jelly>]]></html>
+        <name>leadership-dahboard-tpl</name>
+        <processing_script/>
+        <sys_class_name>sys_ui_page</sys_class_name>
+        <sys_created_by>anton.sychikov.contractor@weather.com</sys_created_by>
+        <sys_created_on>2016-08-03 11:42:43</sys_created_on>
+        <sys_customer_update>true</sys_customer_update>
+        <sys_id>158591c90f85ea0034457d4ce1050ee8</sys_id>
+        <sys_mod_count>11</sys_mod_count>
+        <sys_name>leadership-dahboard-tpl</sys_name>
+        <sys_package display_value="Product" source="x_wec_product">daa7dccd0f44220034457d4ce1050e47</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Product">daa7dccd0f44220034457d4ce1050e47</sys_scope>
+        <sys_update_name>sys_ui_page_158591c90f85ea0034457d4ce1050ee8</sys_update_name>
+        <sys_updated_by>anton.sychikov.contractor@weather.com</sys_updated_by>
+        <sys_updated_on>2016-08-12 13:32:35</sys_updated_on>
+    </sys_ui_page>
+</record_update>

@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update table="sys_ui_page">
+    <sys_ui_page action="INSERT_OR_UPDATE">
+        <category>general</category>
+        <client_script/>
+        <description/>
+        <direct>true</direct>
+        <endpoint>x_wec_product_incident-dahboard-tpl.do</endpoint>
+        <html><![CDATA[<?xml version="1.0" encoding="utf-8" ?>
+<j:jelly trim="false" xmlns:j="jelly:core" xmlns:g="glide" xmlns:j2="null" xmlns:g2="null">
+	<div class="row">
+		
+		<div class="col-sm-10" ng-if="inc.incidents.length > 0" ng-class="inc.paddingClass">
+			<div class="row tickets" ng-class="inc.font">
+
+				<div uib-carousel="true" active="inc.slideActive" interval="inc.slideInterval" class="twc-carousel">
+				  <div uib-slide="true" ng-repeat="slide in inc.sliders track by slide.id" index="slide.id">
+					  
+					<div ng-class="inc.sizeClass"
+						 ng-repeat="i in slide.items" 
+						 ng-click="inc.open(i)" 
+						 style="cursor: pointer;" class="tile">
+
+						<div ng-class="inc.ribbonWrapperClass"><div ng-class="[inc.getRibbonClass(i), inc.ribbonClass]">{{inc.getState(i)}}</div></div>
+						<task item="i" item-style="inc.itemStyle" current-date="inc.currentDate"></task>
+
+					</div>
+					  
+				  </div>
+				</div>				
+				
+				
+			</div>
+			
+		</div>
+
+
+		<div class="col-sm-2 side-panel" ng-if="inc.incidents.length > 0">
+			
+			<div class="panel side-panel-container">
+			  <div class="panel-body">
+				<img src="TWC%20Logos%20Updated.png" class="img-responsive twc-logo"/>
+				<p><span style="position: absolute;bottom: 15px;left: 0;right: 0;text-align: center;font-size: 12px;color: #dad7d7;">Data refreshed every 30 seconds</span></p>  
+				<h3 style="color: #dad7d7; text-align:center;">Infrastructure Forecast</h3>
+				<img src="{{inc.img}}" class="img-responsive" />  
+				<h3 style="color: #dad7d7; text-align:center;">{{inc.subtext}}</h3>
+				  
+				<div ng-if="inc.isDev">
+					<p><a href="#" ng-click="inc.showPanel = !inc.showPanel">---</a></p>
+					<div class="btn-toolbar btn-group-sm" role="toolbar" ng-if="inc.showPanel">
+						<button type="button" class="btn btn-default" ng-click="inc.total = 1; inc.sysparm_offset = 10000; inc.load();">0</button>
+						<button type="button" class="btn btn-default" ng-click="inc.total = 1; inc.sysparm_offset = 2; inc.load();">1</button>
+						<button type="button" class="btn btn-default" ng-click="inc.total = 2; inc.sysparm_offset = 0; inc.load();">2</button>
+						<button type="button" class="btn btn-default" ng-click="inc.total = 3; inc.sysparm_offset = 0; inc.load();">3</button>						
+						<button type="button" class="btn btn-default" ng-click="inc.total = 4; inc.sysparm_offset = 0; inc.load();">4</button>						
+						<button type="button" class="btn btn-default" ng-click="inc.total = 10000; inc.sysparm_offset = 0; inc.load();">all</button>						
+
+					</div>				  
+				  
+				</div>
+
+				  <span ng-if="inc.changeFreeze.length > 0">
+					  <div class="alert alert-danger" role="alert" ng-repeat="item in inc.changeFreeze">
+						  <strong><i class="fa fa-ban" aria-hidden="true"></i></strong>&#160;&#160;Change Freeze in Effect from {{item.u_maintenance_start_time.display_value}} to {{item.u_maintenance_projected_end_time.display_value}}
+						  <p>#{{item.number.display_value}}</p>
+					  </div>
+				  </span>
+				  
+				<div class="row" ng-if="db.changeFreeze.length > 0">
+				</div>				  
+			  </div>
+			</div>			
+			
+		</div>
+
+		<div class="col-sm-12" ng-if="inc.incidents.length == 0" style="padding-top: 200px;">
+				<h1 style="color: #dad7d7; text-align:center;font-size: 40px;">Infrastructure Forecast</h1>
+				<img src="Cloudy.png" class="img-responsive" style="margin: 0 auto;width: 20%;"/>  
+				<h2 style="color: #dad7d7; text-align:center;">Clear and Sunny Skies</h2>
+			    <h2 style="color: #dad7d7; text-align:center;">All Systems GO!</h2>
+		</div>
+
+		
+	</div>
+</j:jelly>]]></html>
+        <name>incident-dahboard-tpl</name>
+        <processing_script/>
+        <sys_class_name>sys_ui_page</sys_class_name>
+        <sys_created_by>anton.sychikov.contractor@weather.com</sys_created_by>
+        <sys_created_on>2016-08-11 15:09:07</sys_created_on>
+        <sys_customer_update>true</sys_customer_update>
+        <sys_id>54a1176f0fc9224034457d4ce1050e96</sys_id>
+        <sys_mod_count>139</sys_mod_count>
+        <sys_name>incident-dahboard-tpl</sys_name>
+        <sys_package display_value="Product" source="x_wec_product">daa7dccd0f44220034457d4ce1050e47</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Product">daa7dccd0f44220034457d4ce1050e47</sys_scope>
+        <sys_update_name>sys_ui_page_54a1176f0fc9224034457d4ce1050e96</sys_update_name>
+        <sys_updated_by>anton.sychikov.contractor@weather.com</sys_updated_by>
+        <sys_updated_on>2016-11-02 09:16:49</sys_updated_on>
+    </sys_ui_page>
+</record_update>

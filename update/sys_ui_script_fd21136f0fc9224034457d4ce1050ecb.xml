@@ -1,0 +1,350 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update table="sys_ui_script">
+    <sys_ui_script action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <description/>
+        <global>false</global>
+        <name>x_wec_product.incident-app</name>
+        <script><![CDATA[(function () {
+    'use strict';
+
+angular
+    .module('twc-product', [
+        'ngResource',
+        'ngAnimate',
+        'ngSanitize',
+		'ngTable',
+        'blockUI',
+        'ui.bootstrap',
+		'ui.router'
+    ])
+
+	.config(['$stateProvider', '$urlRouterProvider',  function($stateProvider, $urlRouterProvider) {
+		
+		$urlRouterProvider.when('', '/dashboard');
+		$stateProvider
+		.state('dashboard', {
+            url: '/dashboard',
+            templateUrl: 'x_wec_product_incident-dahboard-tpl.do',
+			resolve:{
+				currentDate: function (ReferenceBookFactory){
+					return ReferenceBookFactory.currentDate().$promise;
+				}
+			},
+			controller: function($scope, $window, $timeout, $interval, $filter, TaskFactory, currentDate){
+				var inc = this;
+				
+				inc.open = open;
+				inc.load = load;
+				inc.getRibbonClass = getRibbonClass;
+				inc.getState = getState;
+				inc.currentDate = currentDate;
+				
+				inc.isDev = instanceName  === 'weatherdev'; 
+				
+				inc.total = 10000;
+				inc.sysparm_offset = 0;
+				
+				inc.slideActive = 0;
+				inc.slideInterval = 30000;
+				
+				load();
+				
+				$interval(function(){
+					load();
+				}, 1000 * 60);				
+				
+				
+				function getRibbonClass(item){
+
+					switch (item.state) {
+					  case 'New':
+						return 'ribbon-red';
+					  case 'Active':
+						return 'ribbon-blue';
+					  case 'Routing':
+						return 'ribbon-yellow';
+					  default:
+						return 'ribbon-white';
+					}					
+					
+				}
+
+				function getState(item){
+
+					switch (item.state) {
+					  case 'New':
+						return 'New';
+					  case 'Active':
+						return 'Active';
+					  case 'Routing':
+						return 'Routing';
+					  default:
+						return 'Pending';
+					}					
+					
+				}
+				
+				function load(){
+
+					TaskFactory.publicComm({sysparm_query: 'u_notification_type=Change Freeze^u_status=Sent^u_maintenance_projected_end_time>=javascript:gs.minutesAgoStart(0)^u_change_display=True', sysparm_display_value: 'all', preloader: false}).$promise.then(function(res){
+						inc.changeFreeze = res.result;
+					});
+					
+					TaskFactory.publicIncident({sysparm_query: 'ORDERBYnumber^state!=7^state!=6^active=true^priority=1', sysparm_display_value: true, sysparm_limit: inc.total, sysparm_offset: inc.sysparm_offset}).$promise.then(function(res) {
+						
+						inc.sliders = [];
+						
+						inc.incidents = group(res.result);
+						
+						var count = inc.incidents.length;
+						
+						for (var i = 0; i <= Math.ceil(count / 8); i++) {
+							var incForSlider = [], startIndex = i * 8, endIndex = startIndex + 7;
+							for (var ii = startIndex; ii <= endIndex; ii++) {
+								if(inc.incidents[ii]){
+									incForSlider.push(inc.incidents[ii]);
+								}
+							}
+							
+							if(incForSlider.length > 0){
+								inc.sliders.push({
+									id: i,
+									items: incForSlider
+								});
+								
+							}
+						}
+						
+						
+						inc.sizeClass = getClassSize(count);
+						inc.paddingClass = '';
+						inc.ribbonWrapperClass = 'ribbon-wrapper';
+						inc.ribbonClass = 'ribbon';
+						
+						if(count <= 3){
+							inc.ribbonWrapperClass = 'ribbon-wrapper-big';
+						}
+						
+						if(count < 3){
+							inc.ribbonClass = 'ribbon-big ribbon-color-big';
+						}
+						if(count === 3){
+							inc.ribbonClass = 'ribbon-middle ribbon-color-middle';
+						}
+
+						if(count <= 4){
+							inc.paddingClass = 'padding-tickets';
+						}
+						
+						if(count <= 2){
+							inc.img = 'low.png';
+							inc.subtext = 'Overcast Reported';
+						}else if(count >= 3 && count <= 4){
+							inc.img = 'medium.png';
+							inc.subtext = 'Isolated Showers';
+						}else{
+							inc.img = 'high.png';
+							inc.subtext = 'Heavy Thunder Showers';
+						}
+
+						$timeout(function () {
+								var width = $('.tile').width();
+								var height = $('.tile').height();
+							if(count == 3 || count == 4){
+								$('.tile').height(height + (width / 2))
+							}else if(count > 4){
+								$('.tile').height(height + (width / 3))
+							}
+							recalculateFont();
+						}, 300);
+
+
+						$(window).resize(function() {
+							$scope.$apply(function () {
+								recalculateFont();
+							});
+						});
+
+
+					});	
+					
+				}
+				
+				function open(item){
+					$window.location.href = 'incident.do?sys_id=' + item.sys_id;
+				};
+
+				function recalculateFont(){
+
+					var ticketWidth = $('.thumbnail').width();
+					
+					if(ticketWidth >= 550){
+						$scope.inc.font = 'font-size-big';
+					}else if(ticketWidth <= 549 && ticketWidth >= 440){
+						$scope.inc.font = 'font-size-middle';
+					}else if(ticketWidth <= 439 && ticketWidth >= 300){
+						$scope.inc.font = 'font-size-1';
+					}else if(ticketWidth <= 299 && ticketWidth >= 235){
+						$scope.inc.font = 'font-size-2';
+					}else if(ticketWidth <= 234 && ticketWidth >= 180){
+						$scope.inc.font = 'font-size-3';
+					}else if(ticketWidth <= 179 && ticketWidth >= 100){
+						$scope.inc.font = 'font-size-4';
+					}
+
+					$timeout(function () {
+						var outerHeights = [];
+						
+						$('div.active').find('.twc-panel-footer').each(function(i, el) {
+						
+							outerHeights.push($(el).outerHeight());
+							
+						});
+						
+						var maxPanelFooterHeight = Math.max.apply(Math, outerHeights);
+						
+						
+						$scope.inc.itemStyle = {
+							position: 'absolute',
+							left: 0,
+							right: 0,
+							bottom: maxPanelFooterHeight
+						}
+					}, 700);
+					
+				}
+				
+				function getClassSize(count){
+
+					switch (count) {
+					  case 1:
+						return 'col-md-6 col-md-offset-3';
+					  case 2:
+						return 'col-md-6';
+					  case 3:
+						return 'col-xs-6 col-md-4';
+					  default:
+						return 'col-md-3 col-sm-4 col-xs-6';
+					}					
+					
+				}
+				
+				function group(items){
+					var result = [], chain = _.chain(items);
+					
+					result = result.concat(chain.filter({state: 'New'}).sortBy('number').reverse().value());
+					result = result.concat(chain.filter({state: 'Active'}).sortBy('number').reverse().value());
+					result = result.concat(chain.filter({state: 'Routing'}).sortBy('number').reverse().value());
+					result = result.concat(chain.filter(function(o) { 
+						return o.state !== 'New' && o.state !== 'Active' && o.state !== 'Routing'; 
+					}).sortBy('number').value());
+					
+					
+					return result;
+				}
+				
+				
+			},
+			controllerAs: 'inc',
+			
+        });
+
+		
+	}])
+
+    .directive('task', function () {
+		return {
+            bindToController: true,
+            transclude: true,
+            controllerAs: 't',
+			controller: function($filter){
+				var t = this;
+				
+				t.toJsDate = toJsDate;
+				t.dayAgo = dayAgo;
+				t.hoursAgo = hoursAgo;
+				t.showUpdate = showUpdate;
+				
+				function toJsDate(str){
+					if(!str)return null;
+						return new Date(str);
+				}
+
+				function dayAgo(str){
+					var now = moment(new Date(t.currentDate)),
+						update = moment(str)
+						
+					return now.diff(update, 'days');
+				}
+				
+				function hoursAgo(str){
+					var now = moment(new Date(t.currentDate)),
+						update = moment(str)
+						
+					return now.diff(update, 'hours');
+				}
+				
+				function showUpdate(str){
+					return hoursAgo(str) > 24 ? true : false
+				}
+			},
+            restrict: 'EA',
+            templateUrl: '/x_wec_product_directive-incident-task-tpl.do',
+            scope: {
+                item: '=item',
+				itemStyle: '=itemStyle',
+				currentDate: '=currentDate'
+            }
+			
+		}
+	})
+
+    .provider('userService', function () {
+		var options = {};
+		this.config = function (opt) {
+			angular.extend(options, opt);
+		};
+		this.$get = [function () {
+			if (!options) {
+				throw new Error('Config options must be configured');
+			}
+			return options;
+		}];
+	})
+
+    .config(['blockUIConfig', function(blockUIConfig) {
+        blockUIConfig.delay = 400;
+		
+        blockUIConfig.requestFilter = function(config) {
+			
+			if(config.params && config.params.hasOwnProperty('preloader')){
+				return false;
+			}
+        };
+		
+    }]);
+
+
+})();
+
+
+]]></script>
+        <script_name>incident-app</script_name>
+        <sys_class_name>sys_ui_script</sys_class_name>
+        <sys_created_by>anton.sychikov.contractor@weather.com</sys_created_by>
+        <sys_created_on>2016-08-11 15:08:42</sys_created_on>
+        <sys_customer_update>true</sys_customer_update>
+        <sys_id>fd21136f0fc9224034457d4ce1050ecb</sys_id>
+        <sys_mod_count>239</sys_mod_count>
+        <sys_name>x_wec_product.incident-app</sys_name>
+        <sys_package display_value="Product" source="x_wec_product">daa7dccd0f44220034457d4ce1050e47</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Product">daa7dccd0f44220034457d4ce1050e47</sys_scope>
+        <sys_update_name>sys_ui_script_fd21136f0fc9224034457d4ce1050ecb</sys_update_name>
+        <sys_updated_by>anton.sychikov.contractor@weather.com</sys_updated_by>
+        <sys_updated_on>2016-10-26 10:08:56</sys_updated_on>
+        <use_scoped_format>false</use_scoped_format>
+    </sys_ui_script>
+</record_update>

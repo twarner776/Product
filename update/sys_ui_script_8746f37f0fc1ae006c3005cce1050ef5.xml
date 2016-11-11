@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update table="sys_ui_script">
+    <sys_ui_script action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <description/>
+        <global>false</global>
+        <name>x_wec_product.box-app</name>
+        <script><![CDATA[(function () {
+    'use strict';
+
+angular
+    .module('twc-product', [
+        'ngResource',
+        'ngAnimate',
+        'ngSanitize',
+		'ngTable',
+        'blockUI',
+        'ui.bootstrap',
+		'ui.router',
+		'highcharts-ng'
+    ])
+
+	.config(['$stateProvider', '$urlRouterProvider',  function($stateProvider, $urlRouterProvider) {
+		
+		$urlRouterProvider.when('', '/dashboard');
+		$stateProvider
+		.state('dashboard', {
+            url: '/dashboard',
+            templateUrl: 'x_wec_product_box-dahboard-tpl.do',
+			controller: function($scope, ReferenceBookFactory, userService){
+				var box = this;
+				
+				box.open = open;
+
+				(function init9Box(box){
+					var sections = {}; 
+					var userRoles = userService.roles.map(function(role){
+						return role.role.value;
+					});
+					
+					ReferenceBookFactory.sysСhoice({sysparm_query: 'name=x_wec_product_9box_items^inactive=false^ORDERBYsequence'}).$promise.then(function(res){
+						res.result.forEach(function(sec){
+							sections[sec.value] = [];
+						});
+
+						return ReferenceBookFactory.boxItems({sysparm_query: 'active=true^ORDERBYu_priority', sysparm_display_value: 'all'}).$promise; 
+
+					}).then(function(res){
+
+						_.forOwn(sections, function(value, key) {
+
+							var items = _.filter(res.result, function(o) {
+								if(o.u_section.value === key){
+									if(!o.u_roles.value){
+										return false;
+									}
+
+									var isFound = false;
+
+									o.u_roles.value.split(',').forEach(function(item){
+										if(!isFound && userRoles.indexOf(item) !== -1){
+											isFound = true;
+										}
+									});
+
+									return isFound;
+								}
+
+								return false; 
+							});
+
+
+							if(items.length > 0){
+								sections[key] = items;	
+							}
+
+						});
+
+						box.sections = sections;
+					});
+				})(box);		
+				
+				function open(item){
+					var url;
+					if(item.u_is_internal.value === 'true'){
+						url = instanceUrl.substring(0, instanceUrl.length - 1) + item.u_url.value;
+					}else{
+						url = item.u_url.value;
+					}
+
+					if(item.u_open_new_tab.value === 'true'){
+						$window.open(url);
+					}else{
+						$window.location.href = url;
+					}
+				};
+				
+				
+			},
+			controllerAs: 'box',
+			
+        });
+
+	
+		
+	}])
+
+    .provider('userService', function () {
+		var options = {};
+		this.config = function (opt) {
+			angular.extend(options, opt);
+		};
+		this.$get = [function () {
+			if (!options) {
+				throw new Error('Config options must be configured');
+			}
+			return options;
+		}];
+	})
+
+    .config(['blockUIConfig', function(blockUIConfig) {
+        blockUIConfig.delay = 400;
+		
+        blockUIConfig.requestFilter = function(config) {
+			
+			if(config.params && config.params.hasOwnProperty('preloader')){
+				return false;
+			}
+        };
+		
+    }])
+
+	.run(function ($http, $templateCache) { 
+
+		$http.defaults.headers.common['X-UserToken'] = userToken; 
+	
+	});
+
+	
+	
+	$.ajaxSetup({headers: {"X-UserToken": userToken}});
+	$.get('/api/now/table/sys_user/' + userId, function (userData) {
+		
+		$.get('/api/x_wec_product/table/sys_user_has_role?sysparm_query=user%3D' + userId, function (userRole) {
+
+			angular.module('twc-product').config(['userServiceProvider', function (userServiceProvider) {
+
+				userData.result['roles'] = userRole.result;
+				
+				userServiceProvider.config(userData.result);
+
+			}]);
+
+			angular.bootstrap(document, ['twc-product']);
+
+		});
+		
+    });
+	
+})();
+
+
+]]></script>
+        <script_name>box-app</script_name>
+        <sys_class_name>sys_ui_script</sys_class_name>
+        <sys_created_by>anton.sychikov.contractor@weather.com</sys_created_by>
+        <sys_created_on>2016-08-12 12:28:55</sys_created_on>
+        <sys_customer_update>true</sys_customer_update>
+        <sys_id>8746f37f0fc1ae006c3005cce1050ef5</sys_id>
+        <sys_mod_count>9</sys_mod_count>
+        <sys_name>x_wec_product.box-app</sys_name>
+        <sys_package display_value="Product" source="x_wec_product">daa7dccd0f44220034457d4ce1050e47</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Product">daa7dccd0f44220034457d4ce1050e47</sys_scope>
+        <sys_update_name>sys_ui_script_8746f37f0fc1ae006c3005cce1050ef5</sys_update_name>
+        <sys_updated_by>anton.sychikov.contractor@weather.com</sys_updated_by>
+        <sys_updated_on>2016-09-19 14:49:01</sys_updated_on>
+        <use_scoped_format>false</use_scoped_format>
+    </sys_ui_script>
+</record_update>

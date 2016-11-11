@@ -1,0 +1,499 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update table="sys_ui_script">
+    <sys_ui_script action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <description>Product / application controller</description>
+        <global>false</global>
+        <name>x_wec_product.product-ctrl</name>
+        <script><![CDATA[(function () {
+    'use strict';
+
+    angular
+        .module('twc-product')
+        .controller('ProductCtrl', ProductCtrl);
+
+    ProductCtrl.$inject = ['$scope', '$sce', '$window', '$state', '$stateParams', '$http', '$q', '$uibModal','UserFactory', 'ProductFactory', 'ReferenceBookFactory', 'UtilService', 'GroupsService', 'RelationshipsService', 'userService', 'SubscriptionsFactory', 'RelationshipsFactory', 'toastr', 'productOwner', 'types', 'SearchServiceHelper', 'GroupFactory'];
+
+    function ProductCtrl($scope, $sce, $window, $state, $stateParams, $http, $q, $uibModal,UserFactory, ProductFactory, ReferenceBookFactory, UtilService, GroupsService, RelationshipsService, userService, SubscriptionsFactory, RelationshipsFactory, toastr, productOwner, types, SearchServiceHelper, GroupFactory) {
+		
+        var pr = this,
+			detailsFields = ['name', 'operational_status', 'sys_class_name', 'u_product_type', 'owned_by', 'u_business_service', 'u_business_group', 'assignment_group', 'location', 'u_client_facing', 'short_description'],
+			supportFields = ['u_low_group', 'u_med_group', 'u_high_group'],
+			notificationsFields = ['u_name_sub_mobile_phone', 'email', 'u_low_email', 'u_low_sms', 'u_medium_email', 'u_medium_sms', 'u_high_email', 'u_high_sms', 'u_problem_email', 'u_problem_sms'],
+			isToc = $state.current.data.isToc;
+		
+		pr.productOwner = productOwner.result.length > 0;
+		pr.showProductInfo = false;
+		pr.requestProductOwner = requestProductOwner;
+		
+		pr.user = userService;
+		pr.showForm = false;
+		pr.state = $state;
+		pr.searchProductByName = searchProductByName;
+		pr.searchUserByName = searchUserByName;
+		pr.searchDepartmentByName = searchDepartmentByName;
+		pr.searchBusinessGroupByName = searchBusinessGroupByName;
+		pr.searchBusinessServiceByName = searchBusinessServiceByName;
+		pr.searchAssignmentGroupByName = searchAssignmentGroupByName;
+		pr.locationByName = locationByName;
+		pr.loadProduct = loadProduct;
+		pr.upsertProduct = upsertProduct;
+		pr.upsertSupport = upsertSupport;
+		pr.upsertNotifications = upsertNotifications;
+		pr.setModel = setModel;
+		pr.createUserGroup = createUserGroup;
+		pr.createBusinessGroup = createBusinessGroup;
+		pr.createServiceGroup = createServiceGroup;
+		pr.initNewProduct = initNewProduct;
+		pr.isShowUpstreamProduct = isShowUpstreamProduct;
+		pr.verifyDuplicateProduct = verifyDuplicateProduct;
+		
+		pr.addToDownstream = RelationshipsService.addToDownstream;
+		pr.addToUpstream = RelationshipsService.addToUpstream;
+		
+		pr.upsertRelationshipBtn = RelationshipsService.upsertRelationshipBtn;
+		pr.upsertRelationship = RelationshipsService.upsertRelationship;
+		pr.deleteFromRelationship = RelationshipsService.deleteFromRelationship;
+		pr.userSubscriptions = RelationshipsService.userSubscriptions;
+		pr.updateSearchProducts = updateSearchProducts;
+		pr.searchUser = searchUser;
+		pr.searchLocation = searchLocation;
+		pr.searchAssignmentGroup = searchAssignmentGroup;
+		
+		pr.isInvalid = isInvalid;
+		pr.isValid = isValid;
+		
+		pr.reloadTable = reloadTable;
+		
+		pr.showBSMView = showBSMView;
+		
+		pr.openInfo = openInfo;
+		
+		pr.classFilters = RelationshipsService.getClassProducts();
+		pr.classServerFilters = RelationshipsService.getClassServes();
+		
+		pr.searchProducts = [];
+		
+		$scope.$emit('side-bar-show-info', true);
+		
+		
+		pr.canEdit = canEdit;
+		pr.canCreate = canCreate;
+		
+		function canEdit(){
+			if(pr.product && pr.product.sys_id){
+
+				if(pr.product.owned_by.value == userService.sys_id){
+					return true;
+				}
+
+				var isToc = false;
+				productOwner.result.forEach(function(item){
+					if(item.group.display_value.indexOf('TOC') !== -1){
+						isToc = true;
+					}
+				});
+
+
+				return isToc;
+				
+			}else{
+				return canCreate();
+			}
+		}
+		
+		function canCreate(){
+			return productOwner.result.length > 0;
+		}
+		
+		if($stateParams.tab){
+			pr.tabActive = parseInt($stateParams.tab);
+		}
+		
+		if($stateParams.id){
+			loadProduct($stateParams.id);
+		}
+		
+		
+		function requestProductOwner(){
+			pr.showRequestProductOwner = true;
+			pr.urlRequestProductOwner = $sce.trustAsResourceUrl('ess_portal/com.glideapp.servicecatalog_cat_item_view.do?v=1&sysparm_id=5e2dfd4d0f852a006c3005cce1050e50&sysparm_link_parent=4730a4c50f532100bea005cce1050ebc&sysparm_catalog=e0d08b13c3330100c8b837659bba8fb4&sysparm_catalog_view=catalog_default');
+
+		}
+		
+		function initNewProduct(){
+			pr.product = {
+				name: null,
+				owned_by: {
+					value: userService.sys_id,
+					display_value: userService.name
+				}
+			};
+			
+			if(pr.existProduct && pr.existProduct.name && pr.noResultsProductSearch){
+				pr.product.name = {
+					value: pr.existProduct.name.display_value
+				} 
+			}
+			
+			
+			
+		}
+		
+		$scope.$watch('pr.product.owned_by', function (value) {
+		  if (typeof value !== 'undefined' && value.value) {
+			  UserFactory.profile({id: value.value, sysparm_display_value: 'all'}).$promise.then(function(res){
+				  pr.product.u_organizational_unit = res.result.u_organizational_unit;
+				  pr.product.department = res.result.department;
+			  });			  
+		  } 
+		});		
+
+        function setModel($item, $model, $label, $event, field){
+			pr.product[field] = {
+				display_value: $item.name,
+				value: $item.sys_id
+			}
+        }
+		
+        function reloadTable(table, model, key){
+			var tbl = pr[table];
+			if(!model){
+				var filter = {};
+				filter[key] = "";
+				angular.extend(tbl.filter(), filter);				
+			}
+        }
+		
+		function verifyDuplicateProduct(name){
+            ProductFactory.list({sysparm_query: 'name=' + name, preloader: false}).$promise.then(function(res){
+                pr.duplicateProduct = res.result.length > 0 ? res.result[0] : {};
+				pr.productDetailForm.name.$setValidity('duplicate', !res.result.length > 0);
+				
+            });
+			
+		} 
+		
+		function updateSearchProducts(name){
+            ProductFactory.list({sysparm_query: 'name!=""^ORDERBYname^nameLIKE' + name, sysparm_limit: 20, preloader: false}).$promise.then(function(res){
+                pr.searchProducts = res.result;
+            });
+		}
+		
+        function searchProductByName(name, filter){
+			var sysparmQuery = 'nameLIKE' + name;
+			if(filter){
+				sysparmQuery += filter;
+			}
+            return ProductFactory.list({sysparm_query: sysparmQuery, sysparm_limit: 20, preloader: false}).$promise.then(function(res){
+                return res.result;
+            });
+        }
+
+        function searchUserByName(name){
+            return UserFactory.search({sysparm_query: 'nameLIKE' + name + '^' + 'ORemailLIKE' + name + '^active=true^sys_class_name=sys_user', sysparm_limit: 20, preloader: false}).$promise.then(function(res){
+                return res.result;
+            });
+        }
+
+		function searchDepartmentByName(name){
+            return ReferenceBookFactory.departmentSearch({sysparm_query: 'nameLIKE' + name, sysparm_limit: 20, preloader: false}).$promise.then(function(res){
+                return res.result;
+            });
+        }
+		
+		function searchBusinessGroupByName(name){
+            return ReferenceBookFactory.businessGroupSearch({sysparm_query: 'nameLIKE' + name, sysparm_limit: 20, preloader: false}).$promise.then(function(res){
+                return res.result;
+            });
+        }
+		
+		function searchBusinessServiceByName(name){
+            return RelationshipsFactory.get({sysparm_query: 'parent=' + pr.product.u_business_group.value + '^childLIKE' + name, sysparm_limit: 20, sysparm_display_value: 'all', preloader: false}).$promise.then(function(res){
+				var arr = [];
+				res.result.forEach(function(item){
+					arr.push({
+						name: item.child.display_value,
+						sys_id: item.child.value
+					});
+				});
+                return arr;
+            });
+        }
+
+		function searchAssignmentGroupByName(name){
+            return ReferenceBookFactory.assignmentGroupSearch({sysparm_query: 'nameLIKE' + name + '^typeNOT LIKE' + types.result[0].sys_id  + '^ORtypeISEMPTY^typeNOT LIKE' + types.result[1].sys_id + '^ORtypeISEMPTY', sysparm_limit: 20, preloader: false}).$promise.then(function(res){
+                return res.result;
+            });
+        }
+		
+		function locationByName(name){
+            return ReferenceBookFactory.locationSearch({sysparm_query: 'nameLIKE' + name + '^' + 'ORfull_nameLIKE' + name, sysparm_limit: 20, preloader: false}).$promise.then(function(res){
+                return res.result;
+            });
+        }
+
+		
+		function showBSMView(){
+			$window.open('/$ngbsm.do?id=' + pr.existProduct.sys_id.value + '&level=3&serviceView=false', '_blank');
+        }
+		
+		function isInvalid(field){
+			return field.$invalid && field.$dirty;
+		}
+
+	    function isValid(field){
+			return field.$valid && field.$dirty;
+		}
+
+		function isShowUpstreamProduct(){
+			return pr.product && pr.product.sys_class_name && pr.product.sys_class_name.value === 'x_wec_product_application' && !pr.product.sys_id;
+		}
+		
+	    function createUserGroup(field, mode){
+			var func = null;
+			if(field){
+				func = function(value){
+					pr.product[field] = value;
+				}
+			}
+			GroupsService.createSysUserGroup(mode === 'edit' ? pr.product[field] : null, func, isToc);
+		}
+
+		function createBusinessGroup(field, mode){
+			var func = null;
+			if(field){
+				func = function(value){
+					pr.product[field] = value;
+				}
+			}
+			GroupsService.createBusinessGroup(mode === 'edit' ? pr.product[field] : null, func);
+		}
+		
+		function createServiceGroup(field, mode){
+			var func = null;
+			if(field){
+				func = function(value){
+					pr.product[field] = value;
+				}
+			}
+			GroupsService.createServiceGroup(pr.product.u_business_group, mode === 'edit' ? pr.product[field] : null, func);
+		}
+		
+		function searchUser(field){
+			var func = function(value){
+				pr.product[field] = value;
+			}
+			SearchServiceHelper.createSimpleSearch(UserFactory.fullUsers, func, 'active=true^sys_class_name=sys_user^name!=""');
+		}
+		
+		function searchLocation(){
+			var func = function(value){
+				pr.product['location'] = value;
+			}
+			SearchServiceHelper.createSimpleSearch(ReferenceBookFactory.locationList, func, null);
+		}
+
+		function searchAssignmentGroup(field){
+			var func = function(value){
+				pr.product[field] = value;
+			}
+			SearchServiceHelper.createSimpleSearch(GroupFactory.fullSysGroupList, func, 'type!=' + types.result[0].sys_id + '^ORtype=^type!=' + types.result[1].sys_id + 'ORtype=');
+		}
+		
+		function loadProduct(id){
+			pr.showForm = true;
+			ProductFactory.get({id: id, sysparm_display_value: 'all'}).$promise.then(function(res){
+				var others = [],  
+					product = res.result;
+				
+				//pr.existProduct = product;
+				pr.existProduct = angular.copy(product);
+				pr.product = product;
+				
+				UtilService.timeToDuration(pr.product, 'u_primary_time');
+				UtilService.timeToDuration(pr.product, 'u_secondary_time');
+				
+				initRelationshipTable();
+				
+				$scope.$emit('navbar-brand', product.name.value);
+				
+				return SubscriptionsFactory.getGroup({sysparm_query: "u_group_sub=" + pr.product.assignment_group.value}).$promise;
+            }).then(function(res){
+				if(res.result && res.result.length > 0){
+					pr.notifications = res.result[0];
+				}
+			});
+	
+		}
+		
+		function initRelationshipTable(){
+			
+			var relationsTypeByName = ['Provides::Provided by', 'Runs on::Runs', 'Receives data from::Sends data to', 'Depends on::Used by'];
+			
+			ReferenceBookFactory.relationsType({sysparm_query: relationsTypeByName.map(function(item){return 'name=' + item}).join('^OR')}).$promise.then(function(res){
+				
+				pr.parentRelationsType = res.result;
+				pr.childRelationsType = res.result;
+
+            });	
+			
+			pr.deleteRelationships = [];
+			pr.relationshipProductTable = RelationshipsService.initProductsTable(pr, 'relationshipProductTableLoading');
+			pr.relationshipServerTable = RelationshipsService.initServerTable(pr, 'relationshipProductTableLoading');
+			RelationshipsService.getRelationshipDownstream(pr.existProduct.sys_id.value, pr);
+			RelationshipsService.getRelationshipUpstream(pr.existProduct.sys_id.value, pr);
+		}
+		
+		function upsertProduct(){
+			var model = {},
+			method = (pr.product.sys_id && pr.product.sys_id.value) ? 'update' : 'create';
+			
+			detailsFields.forEach(function(f, i){
+				if(pr.product.hasOwnProperty(f)){
+					model[f] = pr.product[f].value;
+				}
+			});
+			
+			if(!pr.product.sys_id){
+				var isToc = false;
+				productOwner.result.forEach(function(item){
+					if(item.group.display_value.indexOf('TOC') !== -1){
+						isToc = true;
+					}
+				});
+				
+				model['u_enrolled_by'] = isToc ? 'TOC Member' : 'User';
+			}
+			
+			ProductFactory[method]({id: (pr.product.sys_id && pr.product.sys_id.value) ? pr.product.sys_id.value : null}, model).$promise.then(function(res){
+				
+				$scope.$emit('products-enrolled');
+				
+				toastr.success('The product has been successfully ' + (pr.product.sys_id && pr.product.sys_id.value ? 'updated.' : 'created.'));
+				
+				if(isShowUpstreamProduct() && pr.product.upstreamProduct && pr.product.upstreamProduct.sys_id){
+					RelationshipsFactory.insert({child: res.result.sys_id, parent: pr.product.upstreamProduct.sys_id});
+				}
+				
+				UserFactory.update({id: pr.product.owned_by.value}, {u_organizational_unit: pr.product.u_organizational_unit.value}).$promise.then(function(){
+
+					if(!(pr.product.sys_id && pr.product.sys_id.value)){
+
+						var model = {
+							u_group_sub: pr.product.assignment_group.value,
+							u_low_email: true,
+							u_medium_email: true,
+							u_high_email: true,
+							u_problem_email: true
+						};
+
+						SubscriptionsFactory.createGroup(model).$promise.then(function(){
+							
+							var subscriptions = {
+								u_product_sub: res.result.sys_id,
+								u_name_sub: userService.sys_id,
+								u_name_sub_mobile_phone: userService.mobile_phone,
+								u_high_sms: true
+							}
+							
+							return SubscriptionsFactory.create(subscriptions).$promise;
+							
+						}).then(function(){
+							
+							$state.go('product', {id: res.result.sys_id});
+							
+						});
+						
+					}else{
+						pr.productDetailForm.$setPristine();
+						initRelationshipTable();
+					}
+					
+					
+				});
+				
+            });
+			
+		}
+		
+		function upsertSupport(){
+			var model = {
+				u_primary_time: UtilService.durationToTime(pr.product, 'u_primary_time'),
+				u_secondary_time: UtilService.durationToTime(pr.product, 'u_secondary_time'),
+				u_application_primary: pr.product.u_application_primary.value,
+				u_application_secondary: pr.product.u_application_secondary.value
+			};
+			supportFields.forEach(function(f, i){
+				if(pr.product.hasOwnProperty(f)){
+					model[f] = pr.product[f].value;
+				}
+				
+			});
+			
+			ProductFactory.update({id:  pr.product.sys_id.value}, model).$promise.then(function(res){
+				pr.productSupportForm.$setPristine();
+				toastr.success('The product has been successfully ' + (pr.product.sys_id && pr.product.sys_id.value ? 'updated.' : 'created.'));	
+            });
+			
+		}
+
+		function upsertNotifications(){
+			var model = {
+				u_group_sub: pr.product.assignment_group.value
+			};
+			notificationsFields.forEach(function(f, i){
+				if(pr.notifications.hasOwnProperty(f)){
+					model[f] = pr.notifications[f];
+				}
+				
+			});
+			
+			SubscriptionsFactory[pr.notifications.sys_id ? 'updateGroup' : 'createGroup']({id: pr.notifications.sys_id}, model).$promise.then(function(res){
+				pr.productNotificationsForm.$setPristine();
+				toastr.success('The product has been successfully ' + (pr.product.sys_id && pr.product.sys_id.value ? 'updated.' : 'created.'));	
+            });
+		}
+		
+		function openInfo(opt){
+			var modalInstance = $uibModal.open({
+					
+				templateUrl: '/x_wec_product_modal-info-' + opt.template + '-tpl.do',
+				size: 'lg',
+				controller: function ($scope, $uibModalInstance) {
+					var info = this;
+
+					info.ok = ok;
+					info.title = opt.title;
+
+					function ok () {
+						$uibModalInstance.close();
+					}
+
+				},
+				controllerAs: "info"
+			});			
+		}
+    }
+
+})();
+
+]]></script>
+        <script_name>product-ctrl</script_name>
+        <sys_class_name>sys_ui_script</sys_class_name>
+        <sys_created_by>andrey.zlatin@weather.com</sys_created_by>
+        <sys_created_on>2016-07-08 14:08:33</sys_created_on>
+        <sys_customer_update>true</sys_customer_update>
+        <sys_id>3dadb3e40fec62006c3005cce1050ee8</sys_id>
+        <sys_mod_count>270</sys_mod_count>
+        <sys_name>x_wec_product.product-ctrl</sys_name>
+        <sys_package display_value="Product" source="x_wec_product">daa7dccd0f44220034457d4ce1050e47</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Product">daa7dccd0f44220034457d4ce1050e47</sys_scope>
+        <sys_update_name>sys_ui_script_3dadb3e40fec62006c3005cce1050ee8</sys_update_name>
+        <sys_updated_by>anton.sychikov.contractor@weather.com</sys_updated_by>
+        <sys_updated_on>2016-10-17 09:06:38</sys_updated_on>
+        <use_scoped_format>false</use_scoped_format>
+    </sys_ui_script>
+</record_update>

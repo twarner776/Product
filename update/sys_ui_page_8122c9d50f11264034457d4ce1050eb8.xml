@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update table="sys_ui_page">
+    <sys_ui_page action="INSERT_OR_UPDATE">
+        <category>general</category>
+        <client_script/>
+        <description/>
+        <direct>true</direct>
+        <endpoint>x_wec_product_directive-incident-task-tpl.do</endpoint>
+        <html><![CDATA[<?xml version="1.0" encoding="utf-8" ?>
+<j:jelly trim="false" xmlns:j="jelly:core" xmlns:g="glide" xmlns:j2="null" xmlns:g2="null">
+
+	<div class="dummy"></div>
+
+	<div class="thumbnail purple">
+		<div ng-style="t.itemStyle">
+			<h5 style="margin-top: 0; margin-bottom: 0;">Created On: {{t.toJsDate(t.item.sys_created_on) | date : 'MM/dd/yyyy @ hh:mm a'}}</h5>
+			<h5 style="margin-top: 0; margin-bottom: 0;" ng-show="t.showUpdate(t.item.sys_updated_on)">Updated: {{t.dayAgo(t.item.sys_updated_on)}} days ago</h5>
+			<h5 style="margin-top: 0; margin-bottom: 0;" ng-show="!t.showUpdate(t.item.sys_updated_on)">Updated: {{t.toJsDate(t.item.sys_updated_on) | date : 'MM/dd/yyyy @ hh:mm a'}}</h5>
+		</div>
+		
+		
+		<div class="twc-panel-heading"><h4 class="number">{{t.item.number}}</h4></div>						
+		<div class="twc-panel-body">
+			<h4>{{t.item.short_description}}</h4>
+			<table class="table twc-table">
+				<tr>
+					<td style="text-align: right; width: 35%;">Assigned to:</td>
+					<td>{{t.item.assignment_group.display_value}}</td>
+				</tr>
+				<tr>
+					<td style="text-align: right;">Bridge:</td>
+					<td><span ng-if="!t.item.u_conf_bridge">None</span><a ng-if="t.item.u_conf_bridge" href="tel:{{t.item.u_conf_bridge}}">{{t.item.u_conf_bridge}}</a></td>
+				</tr>
+				<tr>
+					<td style="text-align: right;">Slack:</td>
+					<td><span ng-if="!t.item.u_slack_channel">None</span><a ng-if="t.item.u_slack_channel" href="https://theweather.slack.com/messages/{{t.item.u_slack_channel}}">{{t.item.u_slack_channel}}</a></td>
+				</tr>
+			</table>			
+		</div>
+		<div class="twc-panel-footer">
+			<h4 class="product" ng-if="t.item.cmdb_ci">{{t.item.cmdb_ci.display_value}}</h4>
+			<h4 class="product" ng-if="!t.item.cmdb_ci"><i class="fa fa-battery-empty" aria-hidden="true"></i></h4>
+
+		</div>						
+
+	</div>					
+	
+	
+</j:jelly>]]></html>
+        <name>directive-incident-task-tpl</name>
+        <processing_script/>
+        <sys_class_name>sys_ui_page</sys_class_name>
+        <sys_created_by>anton.sychikov.contractor@weather.com</sys_created_by>
+        <sys_created_on>2016-08-16 15:11:51</sys_created_on>
+        <sys_customer_update>true</sys_customer_update>
+        <sys_id>8122c9d50f11264034457d4ce1050eb8</sys_id>
+        <sys_mod_count>49</sys_mod_count>
+        <sys_name>directive-incident-task-tpl</sys_name>
+        <sys_package display_value="Product" source="x_wec_product">daa7dccd0f44220034457d4ce1050e47</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Product">daa7dccd0f44220034457d4ce1050e47</sys_scope>
+        <sys_update_name>sys_ui_page_8122c9d50f11264034457d4ce1050eb8</sys_update_name>
+        <sys_updated_by>anton.sychikov.contractor@weather.com</sys_updated_by>
+        <sys_updated_on>2016-09-30 08:15:01</sys_updated_on>
+    </sys_ui_page>
+</record_update>

@@ -1,0 +1,428 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update table="sys_ui_script">
+    <sys_ui_script action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <description>Dashboard controller for TOC</description>
+        <global>false</global>
+        <name>x_wec_product.toc-dashboard-ctrl</name>
+        <script><![CDATA[(function () {
+	'use strict';
+	
+	angular
+	.module('twc-product')
+	.controller('TocDashboardCtrl', TocDashboardCtrl);
+	
+	TocDashboardCtrl.$inject = ['$scope','$state', '$q','$interval', '$filter', '$timeout', 'GroupFactory',  'TaskFactory', 'ChartService', 'tocGroup', 'ProductFactory', 'NgTableParams', 'currentDate', 'ReferenceBookFactory'];
+	
+	function TocDashboardCtrl($scope, $state, $q, $interval, $filter, $timeout, GroupFactory, TaskFactory, ChartService, tocGroup, ProductFactory, NgTableParams, currentDate, ReferenceBookFactory) {
+		var tdb = this,
+		lessLimit = 8,
+		moreLimit = 10000;
+		
+		tdb.currentDate = currentDate.result;
+		
+		var taskPromise = {
+			critical: {
+				limit: lessLimit,
+				promise: function (){
+					return TaskFactory.fullListSLA({sysparm_query: 't_sys_class_name=incident^t_state!=7^t_state!=6^t_active=true^t_priority=1^ts_active=true^cs_name=P1- Critical Resolution', sysparm_display_value: 'all', preloader: false, sysparm_offset: 0, sysparm_limit: this.limit}).$promise
+				}
+			},
+			high: {
+				limit: lessLimit,
+				promise: function (){
+					return TaskFactory.fullListSLA({sysparm_query: 't_sys_class_name=incident^t_state!=7^t_state!=6^t_active=true^t_priority=2^ts_active=true^cs_name=P2- High Resolution', sysparm_display_value: 'all', preloader: false, sysparm_offset: 0, sysparm_limit: this.limit}).$promise
+				}
+			},
+			problem: {
+				limit: lessLimit,
+				promise: function (){
+					return TaskFactory.fullList({sysparm_query: 'sys_class_name=problem^state!=7^state!=6^active=true', sysparm_display_value: 'all', preloader: false, sysparm_offset: 0, sysparm_limit: this.limit}).$promise
+				}
+			},
+		};
+		
+		
+		tdb.state = $state;
+		tdb.getTooltip = getTooltip;
+		tdb.loadTask = loadTask;
+		
+		tdb.getCircleStyle = getCircleStyle;
+		
+		tdb.lessLimit = lessLimit;
+		tdb.moreLimit = moreLimit;
+		tdb.taskPromise = taskPromise;
+		tdb.isUpdated = isUpdated;
+		tdb.reminderClose = reminderClose;
+		
+		$interval(function(){
+			getTasks();
+			initTable();
+			loadChangeFreeze();
+		}, 1000 * 60);
+		
+		getTasks();
+		initTable();
+		loadChangeFreeze();
+		
+		$(window).resize(function() {
+			$scope.$apply(function () {
+				recalculateFont();
+			});
+		});
+
+		function loadChangeFreeze(){
+			TaskFactory.comm({sysparm_query: 'u_notification_type=Change Freeze^u_status=Sent^u_maintenance_projected_end_time>=javascript:gs.minutesAgoStart(0)^u_change_display=True', sysparm_display_value: 'all', preloader: false}).$promise.then(function(res){
+				tdb.changeFreeze = res.result;
+			});
+		}		
+		
+		function reminderClose(item){
+			
+			var items = [];
+			
+			if(localStorage.getItem("closedReminders")){
+				items = JSON.parse(localStorage.getItem("closedReminders"));
+			}
+			
+			items.push(item.sys_id.value);
+			
+			localStorage.setItem("closedReminders", JSON.stringify(items));
+			
+			_.remove(tdb.reminder, {sys_id: {value: item.sys_id.value}});
+		}
+		
+		function getTasks(){
+			tdb.loadTickets = true;
+			var now = new Date(),
+			next12Hours = new Date();
+			
+			next12Hours.setHours(now.getHours() + 12);
+			
+			var requests = [
+			taskPromise.critical.promise(),
+			taskPromise.high.promise(),
+			taskPromise.problem.promise(),
+			TaskFactory.change_request({sysparm_query: 'state!=7^state!=6^active=true^start_date<=javascript:gs.daysAgoEnd(0)^end_date>=javascript:gs.daysAgoStart(0)', sysparm_display_value: 'all', preloader: false}).$promise,
+			TaskFactory.change_request({sysparm_query: 'closed_atONLast 24 hours@javascript:gs.hoursAgo(24)@javascript:gs.hoursAgo(0)^state=3', sysparm_display_value: 'all', preloader: false}).$promise,
+			TaskFactory.change_request({sysparm_query: 'start_date>=javascript:gs.dateGenerate(\'' + $filter('date')(now, 'yyyy-MM-dd') + '\',\'' + $filter('date')(now, 'HH:mm:ss') + '\')^start_date<=javascript:gs.dateGenerate(\'' + $filter('date')(next12Hours, 'yyyy-MM-dd') + '\',\'' + $filter('date')(next12Hours, 'HH:mm:ss') + '\')', sysparm_display_value: 'all', preloader: false}).$promise
+				
+			];
+			
+			$q.all(requests).then(function (results) {
+				tdb.critical = results[0].data.result;
+				tdb.criticalTotal = results[0].headers['x-total-count'];
+				
+				tdb.high = results[1].data.result;
+				tdb.highTotal = results[1].headers['x-total-count'];
+				
+				tdb.problem = results[2].data.result;
+				tdb.problemTotal = results[2].headers['x-total-count'];
+				
+				tdb.change = results[3].result;
+				tdb.change_2 = results[4].result;
+				tdb.change_3 = results[5].result;
+				
+				tdb.loadTickets = false;
+				
+				$timeout(function () {
+					recalculateFont();
+				}, 0);
+				
+			});
+			
+			
+			ReferenceBookFactory.currentDate().$promise.then(function(res){
+				
+				tdb.currentDate = res.result;
+				
+				return TaskFactory.comm({sysparm_query: 'u_scheduled_timeBETWEENjavascript:gs.daysAgoStart(7)@javascript:gs.minutesAgoEnd(0)^u_status=Sent^u_reminder=true', sysparm_display_value: 'all', preloader: false}).$promise;
+				
+			}).then(function(res){
+				
+				var items = [];
+
+				if(localStorage.getItem("closedReminders")){
+					items = JSON.parse(localStorage.getItem("closedReminders"));
+				}
+				
+				
+				tdb.reminder = res.result.filter(function(el){
+					if(items.indexOf(el.sys_id.value) !== -1){
+						return false;
+					}
+					
+					var currentTime = new Date(tdb.currentDate.dateDisplay);
+
+					el['reminderTime'] = new Date(new Date(el.u_scheduled_time.display_value).getTime() + getTimeStampByType(el.u_reminder_time.value));
+					
+					if(currentTime.getTime() >= el.reminderTime.getTime() && currentTime.getTime() <= new Date(el.reminderTime.getTime() + 24 * 60 * 60 * 1000)){
+						return true
+					}
+					
+					return false;
+				});
+				
+				console.log(tdb.reminder);
+				
+			});
+			
+		};
+		
+		function initTable(){
+			tdb.productTblLoading = true;
+			tdb.decommissionedItemsTblLoading = true;
+			tdb.reqItemTblLoading = true;
+			tdb.scTaskTblLoading = true;
+			tdb.commTblLoading = true;
+			
+			tdb.productTbl = new NgTableParams({
+					count: 10
+				}, {
+					counts: [],
+					getData: function(params) {
+						var filtersArr = [];
+
+						filtersArr.push('ORDERBYDESCsys_created_on^active=true');
+						filtersArr.push('sys_created_onONLast 30 days@javascript:gs.daysAgoStart(30)@javascript:gs.daysAgoEnd(0)');
+
+						return ProductFactory.fullList({
+							sysparm_limit: params.count(),
+							sysparm_offset: (params.page() - 1) * params.count(),
+							sysparm_query: filtersArr.join('^'),
+							sysparm_display_value: 'all',
+							sysparm_suppress_pagination_header: true,
+							preloader: false
+						}).$promise.then(function(res) {
+							tdb.productTblLoading = false;
+							params.total(res.headers['x-total-count']);
+							return res.data.result;
+						});
+					}
+				});			
+
+			tdb.decommissionedItemsTbl = new NgTableParams({
+					count: 7
+				}, {
+					counts: [],
+					getData: function(params) {
+						var filtersArr = [];
+
+						filtersArr.push('ORDERBYDESCsys_updated_on^active=true');
+						filtersArr.push('operational_status=2^sys_updated_onONLast 7 days@javascript:gs.daysAgoStart(7)@javascript:gs.daysAgoEnd(0)');
+
+						return ProductFactory.fullList({
+							sysparm_limit: params.count(),
+							sysparm_offset: (params.page() - 1) * params.count(),
+							sysparm_query: filtersArr.join('^'),
+							sysparm_display_value: 'all',
+							sysparm_suppress_pagination_header: true,
+							preloader: false
+						}).$promise.then(function(res) {
+							tdb.decommissionedItemsTblLoading = false;
+							params.total(res.headers['x-total-count']);
+							return res.data.result;
+						});
+					}
+				});			
+			
+			tdb.reqItemTbl = new NgTableParams({
+					count: 10
+				}, {
+					counts: [],
+					getData: function(params) {
+						var filtersArr = [];
+
+						filtersArr.push('ORDERBYDESCsys_created_on^active=true');
+						filtersArr.push('assignment_group=' + tocGroup.result[0].sys_id);
+
+						return TaskFactory.fullListReqItem({
+							sysparm_limit: params.count(),
+							sysparm_offset: (params.page() - 1) * params.count(),
+							sysparm_query: filtersArr.join('^'),
+							sysparm_display_value: 'all',
+							sysparm_suppress_pagination_header: true,
+							preloader: false
+						}).$promise.then(function(res) {
+							tdb.reqItemTblLoading = false;
+							params.total(res.headers['x-total-count']);
+							return res.data.result;
+						});
+					}
+				});			
+			
+			tdb.scTaskTbl = new NgTableParams({
+					count: 10
+				}, {
+					counts: [],
+					getData: function(params) {
+						var filtersArr = [];
+
+						filtersArr.push('ORDERBYDESCsys_created_on^active=true');
+						filtersArr.push('assignment_group=' + tocGroup.result[0].sys_id);
+
+						return TaskFactory.fullListScTask({
+							sysparm_limit: params.count(),
+							sysparm_offset: (params.page() - 1) * params.count(),
+							sysparm_query: filtersArr.join('^'),
+							sysparm_display_value: 'all',
+							sysparm_suppress_pagination_header: true,
+							preloader: false
+						}).$promise.then(function(res) {
+							tdb.scTaskTblLoading = false;
+							params.total(res.headers['x-total-count']);
+							return res.data.result;
+						});
+					}
+				});			
+
+			tdb.commTbl = new NgTableParams({
+					count: 10,
+					sorting: {number: "desc"},
+				}, {
+					counts: [],
+					getData: function(params) {
+						var filtersArr = [];
+
+						filtersArr.push('u_scheduled_time>javascript:gs.minutesAgoEnd(0)');
+						filtersArr.push('assignment_group=' + tocGroup.result[0].sys_id);
+
+						return TaskFactory.fullListComm({
+							sysparm_limit: params.count(),
+							sysparm_offset: (params.page() - 1) * params.count(),
+							sysparm_query: filtersArr.join('^'),
+							sysparm_display_value: 'all',
+							sysparm_suppress_pagination_header: true,
+							preloader: false
+						}).$promise.then(function(res) {
+							tdb.commTblLoading = false;
+							params.total(res.headers['x-total-count']);
+							return res.data.result;
+						});
+					}
+				});			
+		}
+		
+		function recalculateFont(){
+			
+			var ticketWidth = $('.thumbnail').width();
+			if(ticketWidth >= 280){
+				tdb.font = 'font-size-1';
+			}else if(ticketWidth <= 280 && ticketWidth >= 235){
+				tdb.font = 'font-size-2';
+			}else if(ticketWidth <= 235 && ticketWidth >= 180){
+				tdb.font = 'font-size-3';
+			}else if(ticketWidth <= 180 && ticketWidth >= 100){
+				tdb.font = 'font-size-4';
+			}
+			
+		}
+		
+		function isUpdated(str){
+			var now = moment(new Date(tdb.currentDate.dateDisplay)),
+				update = moment(str)
+
+			return now.diff(update, 'minutes') <30 ? true : false;
+			
+		}
+		
+		function loadTask(type, operand){
+			tdb.loadTickets = true;
+			
+			taskPromise[type].limit = operand === 'more' ? moreLimit : lessLimit;
+			
+			taskPromise[type].promise().then(function(res){
+				tdb.loadTickets = false;
+				tdb[type] = res.data.result;
+				tdb[type + 'Total'] = res.headers['x-total-count'];
+				
+				$timeout(function () {
+					recalculateFont();
+				}, 0);
+				
+			});
+		}
+		
+		function getTooltip(item, prefix){
+			return '<strong><span style="display: block;">Number: </strong>'+item[prefix + 'number'].display_value+'</span><br/>' +
+			'<strong><span>Opened By: </strong>'+item[prefix + 'opened_by'].display_value+'</span><br/>' +
+			'<strong><span>Opened: </strong>'+item[prefix + 'opened_at'].display_value+'</span><br/>' +
+			'<strong><span>State: </strong>'+item[prefix + 'state'].display_value+'</span><br/>' +
+			'<strong><span>Priority: </strong>'+item[prefix + 'priority'].display_value+'</span><br/>' +
+			'<strong><span>Short Description: </strong>'+item[prefix + 'short_description'].display_value+'</span><br/><br/>' +
+			'<strong><span>Description: </strong>'+$filter('limitTo')(item[prefix + 'description'].display_value, 500) + (item[prefix + 'description'].display_value.length > 500 ? ' ...' : '') +'</span><br/><br/>' +
+			'<strong><span>Assignment Group: </strong>'+item[prefix + 'assignment_group'].display_value+'</span><br/><br/>' +
+			'<strong><span>Assigned To: </strong>'+item[prefix + 'assigned_to'].display_value+'</span><br/><br/>' +
+			'<strong><span>Work Notes: </strong>'+$filter('limitTo')(item[prefix + 'work_notes'].display_value, 500) + (item[prefix + 'work_notes'].display_value.length > 500 ? ' ...' : '')+'</span><br/>' +
+			'<strong><span>Last updated time: </strong>'+item[prefix + 'sys_updated_on'].display_value+'</span>';
+		}
+		
+		function getCircleStyle(item, prefix){
+			if(item[prefix + 'assignment_group'] && item[prefix + 'assignment_group'].display_value && item[prefix + 'assigned_to'] && item[prefix + 'assigned_to'].display_value){
+				return {color: 'green'};
+			}
+			
+			return {color: 'red'};
+		}
+		
+		function getTimeStampByType(type){
+			
+			switch(type) {
+			  case '10 min':
+				return 10 * 60 * 1000;
+				break;
+			  
+				case '15 min':
+				return 15 * 60 * 1000;
+				break;
+			
+			  case '30 min':
+				return 30 * 60 * 1000;
+				break;
+
+			  case '45 min':
+				return 45 * 60 * 1000;
+				break;
+
+			  case '1 Hour':
+				return 60 * 60 * 1000;
+				break;
+
+			  case '1 Day':
+				return 24 * 60 * 60 * 1000;
+				break;
+
+			  case '2 Days':
+				return 48 * 60 * 60 * 1000;
+				break;
+
+			  case '1 Week':
+				return 7 * 24 * 60 * 60 * 1000;
+				break;
+					
+			}			
+			
+		}
+	}
+	
+})();
+
+]]></script>
+        <script_name>toc-dashboard-ctrl</script_name>
+        <sys_class_name>sys_ui_script</sys_class_name>
+        <sys_created_by>anton.sychikov.contractor@weather.com</sys_created_by>
+        <sys_created_on>2016-08-02 14:46:26</sys_created_on>
+        <sys_customer_update>true</sys_customer_update>
+        <sys_id>1f24bcb00f8de6006c3005cce1050e59</sys_id>
+        <sys_mod_count>155</sys_mod_count>
+        <sys_name>x_wec_product.toc-dashboard-ctrl</sys_name>
+        <sys_package display_value="Product" source="x_wec_product">daa7dccd0f44220034457d4ce1050e47</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Product">daa7dccd0f44220034457d4ce1050e47</sys_scope>
+        <sys_update_name>sys_ui_script_1f24bcb00f8de6006c3005cce1050e59</sys_update_name>
+        <sys_updated_by>anton.sychikov.contractor@weather.com</sys_updated_by>
+        <sys_updated_on>2016-10-26 09:47:42</sys_updated_on>
+        <use_scoped_format>false</use_scoped_format>
+    </sys_ui_script>
+</record_update>

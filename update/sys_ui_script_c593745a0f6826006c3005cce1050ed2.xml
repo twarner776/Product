@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update table="sys_ui_script">
+    <sys_ui_script action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <description>Group Factory</description>
+        <global>false</global>
+        <name>x_wec_product.GroupFactory</name>
+        <script><![CDATA[(function () {
+    'use strict';
+
+    angular
+        .module('twc-product')
+        .factory('GroupFactory', GroupFactory);
+
+    GroupFactory.$inject = ['$resource'];
+
+    function GroupFactory($resource) {
+		return $resource('', {}, {
+			get: {method: 'GET', url: '/api/x_wec_product/table/sys_user_group/:id'},
+			create: {method: 'POST', url: '/api/x_wec_product/table/sys_user_group'},
+			update: {method: 'PATCH', url: '/api/x_wec_product/table/sys_user_group/:id'},
+			addMember: {method: 'POST', url: '/api/x_wec_product/table/sys_user_grmember'},
+			removeMember: {method: 'DELETE', url: '/api/x_wec_product/table/sys_user_grmember/:id'},
+			getMember: {method: 'GET', url: '/api/x_wec_product/table/sys_user_grmember'},
+			getBusiness: {method: 'GET', url: '/api/x_wec_product/table/cmdb_ci_group/:id'},
+			createBusiness: {method: 'POST', url: '/api/x_wec_product/table/cmdb_ci_group'},
+			updateBusiness: {method: 'PATCH', url: '/api/x_wec_product/table/cmdb_ci_group/:id'},
+			getService: {method: 'GET', url: '/api/x_wec_product/table/cmdb_ci_service/:id'},
+			createService: {method: 'POST', url: '/api/x_wec_product/table/cmdb_ci_service'},
+			updateService: {method: 'PATCH', url: '/api/x_wec_product/table/cmdb_ci_service/:id'},
+			addRole: {method: 'POST', url: '/api/x_wec_product/table/sys_group_has_role'},
+			getTypes: {method: 'GET', url: '/api/x_wec_product/table/sys_user_group_type'},
+			
+			fullSysGroupList: {
+				method: 'GET', 
+				url: '/api/x_wec_product/table/sys_user_group',
+				transformResponse: function(data, headers){
+					var response = {}
+					response.data = angular.fromJson(data);
+					response.headers = headers();
+					return response;
+				}
+			},
+			fullBusinessGroupList: {
+				method: 'GET', 
+				url: '/api/x_wec_product/table/cmdb_ci_group',
+				transformResponse: function(data, headers){
+					var response = {}
+					response.data = angular.fromJson(data);
+					response.headers = headers();
+					return response;
+				}
+			},			
+			fullBusinessServiceList: {
+				method: 'GET', 
+				url: '/api/x_wec_product/table/cmdb_rel_ci',
+				transformResponse: function(data, headers){
+					var response = {}
+					response.data = angular.fromJson(data);
+					response.headers = headers();
+					return response;
+				}
+			},			
+		})
+
+    }
+
+})();
+
+]]></script>
+        <script_name>GroupFactory</script_name>
+        <sys_class_name>sys_ui_script</sys_class_name>
+        <sys_created_by>andrey.zlatin@weather.com</sys_created_by>
+        <sys_created_on>2016-07-13 09:57:31</sys_created_on>
+        <sys_customer_update>true</sys_customer_update>
+        <sys_id>c593745a0f6826006c3005cce1050ed2</sys_id>
+        <sys_mod_count>13</sys_mod_count>
+        <sys_name>x_wec_product.GroupFactory</sys_name>
+        <sys_package display_value="Product" source="x_wec_product">daa7dccd0f44220034457d4ce1050e47</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Product">daa7dccd0f44220034457d4ce1050e47</sys_scope>
+        <sys_update_name>sys_ui_script_c593745a0f6826006c3005cce1050ed2</sys_update_name>
+        <sys_updated_by>anton.sychikov.contractor@weather.com</sys_updated_by>
+        <sys_updated_on>2016-09-27 08:57:13</sys_updated_on>
+        <use_scoped_format>false</use_scoped_format>
+    </sys_ui_script>
+</record_update>

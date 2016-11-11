@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update table="sys_ui_script">
+    <sys_ui_script action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <description>Products / applications list controller</description>
+        <global>false</global>
+        <name>x_wec_product.products-ctrl</name>
+        <script><![CDATA[(function () {
+    'use strict';
+
+    angular
+        .module('twc-product')
+        .controller('ProductsCtrl', ProductsCtrl);
+
+    ProductsCtrl.$inject = ['$scope', '$window', '$state', '$stateParams', '$http', '$q','UserFactory', 'ProductFactory', 'NgTableParams', 'ReferenceBookFactory', 'userService', 'userGroups'];
+
+    function ProductsCtrl($scope, $window, $state, $stateParams, $http, $q, UserFactory, ProductFactory, NgTableParams, ReferenceBookFactory, userService, userGroups) {
+		
+        var ps = this;
+		ps.label = $state.current.data.config.label;
+		ps.message = $state.current.data.config.message;
+		ps.table = initTable();
+		ps.reloadTable = reloadTable;
+		ps.searchAssignmentGroupByName = searchAssignmentGroupByName;
+
+		$scope.$emit('side-bar-show-info', true);
+		
+		var group = [];
+		userGroups.result.forEach(function(item){
+			group.push('assignment_group=' + item.group.value);
+		});
+		
+		function initTable() {
+			return new NgTableParams({
+				count: 25
+			}, {
+				counts: [25, 50, 100, 200],
+				getData: function(params) {
+
+					ps.loader = true;
+					
+					var filters = params.filter(),
+						filtersArr = [];
+
+					filtersArr.push('ORDERBYname');
+					
+					$state.current.data.config.criterion.forEach(function(c){
+						filtersArr.push(c);
+					});
+					
+					if(filters.hasOwnProperty('name') && filters.name !== ""){
+						filtersArr.push('nameLIKE' + filters.name);
+					}
+					if(filters.hasOwnProperty('owned_by') && filters.owned_by !== ""){
+						filtersArr.push('owned_byLIKE' + filters.owned_by);
+					}
+					if(filters.hasOwnProperty('assignment_group') && filters.assignment_group !== ""){
+						filtersArr.push('assignment_group=' + filters.assignment_group);
+					}
+					
+					filtersArr.push(group.join('^OR'));
+					
+					filtersArr.push('ORowned_by=' + userService.sys_id);
+					
+					return ProductFactory.fullList({
+						sysparm_limit: params.count(),
+						sysparm_offset: (params.page() - 1) * params.count(),
+						sysparm_query: filtersArr.join('^'),
+						sysparm_display_value: true,
+						preloader: false
+					}).$promise.then(function(res) {
+						ps.loader = false;
+						params.total(res.headers['x-total-count']);
+						return res.data.result;
+					});
+				}
+			});
+			
+		}
+
+		function searchAssignmentGroupByName(name){
+            return ReferenceBookFactory.assignmentGroupSearch({sysparm_query: 'nameLIKE' + name, sysparm_limit: 20}).$promise.then(function(res){
+                return res.result;
+            });
+        }
+
+		function reloadTable(model, key){
+			if(!model){
+				var filter = {};
+				filter[key] = "";
+				angular.extend(ps.table.filter(), filter);				
+			}
+        }
+
+		function capitalizeFirstLetter(string) {
+			return string[0].toUpperCase() + string.slice(1);
+		}
+		
+    }
+
+})();
+
+]]></script>
+        <script_name>products-ctrl</script_name>
+        <sys_class_name>sys_ui_script</sys_class_name>
+        <sys_created_by>andrey.zlatin@weather.com</sys_created_by>
+        <sys_created_on>2016-07-18 09:14:55</sys_created_on>
+        <sys_customer_update>true</sys_customer_update>
+        <sys_id>161a16b70fe4e60034457d4ce1050e8c</sys_id>
+        <sys_mod_count>41</sys_mod_count>
+        <sys_name>x_wec_product.products-ctrl</sys_name>
+        <sys_package display_value="Product" source="x_wec_product">daa7dccd0f44220034457d4ce1050e47</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Product">daa7dccd0f44220034457d4ce1050e47</sys_scope>
+        <sys_update_name>sys_ui_script_161a16b70fe4e60034457d4ce1050e8c</sys_update_name>
+        <sys_updated_by>anton.sychikov.contractor@weather.com</sys_updated_by>
+        <sys_updated_on>2016-09-16 07:43:39</sys_updated_on>
+        <use_scoped_format>false</use_scoped_format>
+    </sys_ui_script>
+</record_update>

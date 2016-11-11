@@ -1,0 +1,481 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update table="sys_ui_script">
+    <sys_ui_script action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <description>Angular main toc app config</description>
+        <global>false</global>
+        <name>x_wec_product.toc-app</name>
+        <script><![CDATA[(function () {
+    'use strict';
+
+angular
+    .module('twc-product', [
+        'ngResource',
+        'ngAnimate',
+        'ngSanitize',
+		'ngTable',
+        'blockUI',
+        'ui.bootstrap',
+		'ui.router',
+		'ui.select',
+		'highcharts-ng',
+		'toastr'
+    ])
+
+	.config(['$stateProvider', '$urlRouterProvider',  function($stateProvider, $urlRouterProvider) {
+		
+		$urlRouterProvider.when('', '/dashboard');
+		$stateProvider
+		
+		.state('dashboard', {
+            url: '/dashboard',
+			controller: 'TocDashboardCtrl',
+			controllerAs: 'tdb',
+            templateUrl: 'x_wec_product_toc-dahboard-tpl.do',
+			resolve:{
+				tocGroup: function (ReferenceBookFactory){
+					return ReferenceBookFactory.assignmentGroupSearch({sysparm_query: 'name=TOC'}).$promise;
+				},
+				currentDate: function (ReferenceBookFactory){
+					return ReferenceBookFactory.currentDate().$promise;
+				},
+			}
+        })
+
+		.state('dashboard-2', {
+            url: '/dashboard-2',
+			controller: 'TocDashboardCtrl',
+			controllerAs: 'tdb',
+            templateUrl: 'x_wec_product_toc-dahboard-2-tpl.do',
+			resolve:{
+				tocGroup: function (ReferenceBookFactory){
+					return ReferenceBookFactory.assignmentGroupSearch({sysparm_query: 'name=TOC'}).$promise;
+				}
+			}
+        })
+
+		.state('product', {
+            url: '/product/:id',
+			controller: 'ProductCtrl',
+			controllerAs: 'pr',
+            templateUrl: 'x_wec_product_product-tpl.do',
+			data: {isToc: true},
+			resolve:{
+				productOwner: function (ReferenceBookFactory, UserFactory, userService){
+					return ReferenceBookFactory.assignmentGroupSearch({sysparm_query: 'name=Product Owners^ORname=TOC'}).$promise.then(function(groups){
+						return ReferenceBookFactory.groupMemberSearch({sysparm_query: 'user=' + userService.sys_id + '^' + groups.result.map(function(item){return 'group=' + item.sys_id}).join('^OR'), sysparm_display_value: 'all'}).$promise;
+
+					});
+				},
+				types: function (GroupFactory){
+					return GroupFactory.getTypes({sysparm_query: 'name=administrative^ORname=Agile Team'}).$promise
+				}
+				
+			}
+        })
+
+		.state('new_group', {
+            url: '/group',
+			controller: 'AssigGroupCtrl',
+			controllerAs: 'gr',
+            templateUrl: 'x_wec_product_assig-group-tpl.do',
+			data: {
+				isToc: true,
+				label: 'Create New Assignment Group'
+			},
+			resolve:{
+				roles: function (ReferenceBookFactory){
+					return ReferenceBookFactory.userRoles({sysparm_query: 'sys_name=Dev Ops Support Group^ORsys_name=Support Group'}).$promise;
+				},
+				userGroups: function (){
+					return null;
+				},
+				types: function (GroupFactory){
+					return GroupFactory.getTypes({sysparm_query: 'name=administrative^ORname=Agile Team'}).$promise
+				}
+				
+				
+			}
+			
+        })
+
+		.state('edit_group', {
+            url: '/group/:id',
+			controller: 'AssigGroupCtrl',
+			controllerAs: 'gr',
+            templateUrl: 'x_wec_product_assig-group-tpl.do',
+			data: {
+				isToc: true,
+				label: 'Edit Existing Assignment Group'
+			},
+			resolve:{
+				roles: function (ReferenceBookFactory){
+					return ReferenceBookFactory.userRoles({sysparm_query: 'sys_name=Dev Ops Support Group^ORsys_name=Support Group'}).$promise;
+				},
+				userGroups: function (){
+					return null;
+				},
+				types: function (GroupFactory){
+					return GroupFactory.getTypes({sysparm_query: 'name=administrative^ORname=Agile Team'}).$promise
+				}
+				
+				
+			}
+			
+        })
+		
+		.state('my_groups', {
+            url: '/groups',
+			controller: 'AssigGroupsCtrl',
+			controllerAs: 'grs',
+            templateUrl: 'x_wec_product_assig-groups-tpl.do',
+			data: {
+				isToc: true,
+				label: 'Assignment Groups'
+			},
+			resolve:{
+				roles: function (ReferenceBookFactory){
+					return ReferenceBookFactory.userRoles({sysparm_query: 'sys_name=Dev Ops Support Group^ORsys_name=Support Group'}).$promise;
+				},
+				userGroups: function (){
+					return null;
+				},
+				types: function (GroupFactory){
+					return GroupFactory.getTypes({sysparm_query: 'name=administrative^ORname=Agile Team'}).$promise
+				}
+				
+				
+			}
+			
+        })
+		
+		.state('incidents', {
+            url: '/incidents',
+			controller: 'TocTasksCtrl',
+			controllerAs: 'tic',
+            templateUrl: 'x_wec_product_toc-tasks-tpl.do',
+			data: {
+				config: {
+					label: 'Incidents',
+					column: {priority: true, sys_updated_on: true, assignment_group: true, type: false, start_date: false, end_date: false},
+					orderBy: 'priority',
+					method: 'fullList',
+					criterion: ['sys_class_name=incident', 'state!=7^state!=6^active=true^priority=1^ORpriority=2^ORpriority=3']
+				}
+			},
+			resolve:{
+				tocGroup: function (){
+					return null;
+				}
+			}
+			
+        })
+		.state('problems', {
+            url: '/problems',
+			controller: 'TocTasksCtrl',
+			controllerAs: 'tic',
+            templateUrl: 'x_wec_product_toc-tasks-tpl.do',
+			data: {
+				config: {
+					label: 'Problems',
+					column: {priority: false, sys_updated_on: false, assignment_group: true, type: false, start_date: false, end_date: false},
+					orderBy: 'priority',
+					method: 'fullList',
+					criterion: ['sys_class_name=problem', 'state!=7^state!=6^active=true']
+				}
+			},
+			resolve:{
+				tocGroup: function (){
+					return null;
+				}
+			}
+			
+        })
+		.state('change_requests', {
+            url: '/change-requests',
+			controller: 'TocTasksCtrl',
+			controllerAs: 'tic',
+            templateUrl: 'x_wec_product_toc-tasks-tpl.do',
+			data: {
+				config: {
+					label: 'Change Requests',
+					orderBy: 'priority',
+					method: 'fullListСhangeRequest',
+					column: {priority: false, sys_updated_on: false, assignment_group: false, type: true, start_date: true, end_date: true},
+					criterion: ['state!=7^state!=6^active=true^start_date<=javascript:gs.daysAgoEnd(0)^end_date>=javascript:gs.daysAgoStart(0)']
+				}
+			},
+			resolve:{
+				tocGroup: function (){
+					return null;
+				}
+			}
+			
+			
+        })
+		.state('task', {
+			url: '/task/:id',
+			controller: 'TaskCtrl',
+			controllerAs: 't',
+			templateUrl: 'x_wec_product_task-tpl.do'
+		})		
+		
+		.state('my_incidents', {
+            url: '/my-incidents',
+			controller: 'TocTasksCtrl',
+			controllerAs: 'tic',
+            templateUrl: 'x_wec_product_toc-tasks-tpl.do',
+			data: {
+				config: {
+					label: 'My Incidents',
+					column: {priority: true, sys_updated_on: true, assignment_group: false, type: false, start_date: false, end_date: false},
+					orderBy: 'priority',
+					method: 'fullList',
+					criterion: ['sys_class_name=incident', 'state!=7^state!=6^active=true']
+				}
+			},
+			resolve:{
+				tocGroup: function (ReferenceBookFactory){
+					return ReferenceBookFactory.assignmentGroupSearch({sysparm_query: 'name=TOC'}).$promise;
+				}
+			}
+			
+        })
+		.state('my_problems', {
+            url: '/my-problems',
+			controller: 'TocTasksCtrl',
+			controllerAs: 'tic',
+            templateUrl: 'x_wec_product_toc-tasks-tpl.do',
+			data: {
+				config: {
+					label: 'My Problems',
+					column: {priority: false, sys_updated_on: false, assignment_group: false, type: false, start_date: false, end_date: false},
+					orderBy: 'priority',
+					method: 'fullList',
+					criterion: ['sys_class_name=problem', 'state!=7^state!=6^active=true']
+				}
+			},
+			resolve:{
+				tocGroup: function (ReferenceBookFactory){
+					return ReferenceBookFactory.assignmentGroupSearch({sysparm_query: 'name=TOC'}).$promise;
+				}
+			}
+			
+        })
+		.state('my_change_requests', {
+            url: '/my-change-requests',
+			controller: 'TocTasksCtrl',
+			controllerAs: 'tic',
+            templateUrl: 'x_wec_product_toc-tasks-tpl.do',
+			data: {
+				config: {
+					label: 'My Change Requests',
+					orderBy: 'priority',
+					method: 'fullListСhangeRequest',
+					column: {priority: false, sys_updated_on: false, assignment_group: false, type: true, start_date: true, end_date: true},
+					criterion: ['state!=7^state!=6^active=true^start_date<=javascript:gs.daysAgoEnd(0)^end_date>=javascript:gs.daysAgoStart(0)']
+				}
+			},
+			resolve:{
+				tocGroup: function (ReferenceBookFactory){
+					return ReferenceBookFactory.assignmentGroupSearch({sysparm_query: 'name=TOC'}).$promise;
+				}
+			}
+			
+			
+        })
+		.state('request-item', {
+            url: '/request-item/:id',
+			controller: function($scope, $sce, $stateParams){
+				var t = this;
+				t.label = 'Requested item';
+				t.url = $sce.trustAsResourceUrl('/sc_req_item.do?sys_id=' + $stateParams.id);
+			},
+			controllerAs: 't',
+            templateUrl: 'x_wec_product_iframe-tpl.do',
+			
+        })
+		.state('cat-item', {
+            url: '/cat_item/:id',
+			controller: function($scope, $sce, $stateParams){
+				var t = this;
+				t.label = 'Requested item';
+				t.url = $sce.trustAsResourceUrl('/sc_cat_item.do?sys_id=' + $stateParams.id);
+			},
+			controllerAs: 't',
+            templateUrl: 'x_wec_product_iframe-tpl.do',
+			
+        })
+		.state('request', {
+            url: '/request/:id',
+			controller: function($scope, $sce, $stateParams){
+				var t = this;
+				t.label = 'Requested item';
+				t.url = $sce.trustAsResourceUrl('/sc_request.do?sys_id=' + $stateParams.id);
+			},
+			controllerAs: 't',
+            templateUrl: 'x_wec_product_iframe-tpl.do',
+			
+        })
+		.state('knowledge', {
+            url: '/knowledge/:id',
+			controller: function($scope, $sce, $stateParams){
+				var t = this;
+				t.label = 'Knowledge';
+				t.url = $sce.trustAsResourceUrl('/kb_knowledge.do?sys_id=' + $stateParams.id);
+			},
+			controllerAs: 't',
+            templateUrl: 'x_wec_product_iframe-tpl.do',
+			
+        })
+		.state('calendar', {
+            url: '/calendar',
+			controller: function($scope, $sce){
+				var t = this;
+				t.label = 'TOC Schedule';
+				t.url = $sce.trustAsResourceUrl('https://calendar.google.com/calendar/embed?src=weather.com_aqntnttsehgoodfroovsos9d80%40group.calendar.google.com&ctz=America/New_York');
+			},
+			controllerAs: 't',
+            templateUrl: 'x_wec_product_iframe-tpl.do',
+			
+        })
+		
+		;
+	
+		
+	}])
+
+    .provider('userService', function () {
+		var options = {};
+		this.config = function (opt) {
+			angular.extend(options, opt);
+		};
+		this.$get = [function () {
+			if (!options) {
+				throw new Error('Config options must be configured');
+			}
+			return options;
+		}];
+	})
+
+    .config(['blockUIConfig', function(blockUIConfig) {
+        blockUIConfig.delay = 400;
+		
+        blockUIConfig.requestFilter = function(config) {
+			
+			if(config.params && config.params.hasOwnProperty('preloader')){
+				return false;
+			}
+        };
+		
+    }])
+
+	.config(function(toastrConfig) {
+	  angular.extend(toastrConfig, {
+
+		  positionClass: 'toast-top-center',
+		  timeOut: 2000,
+	  });
+	})
+
+	.config(['$provide', '$httpProvider', function($provide, $httpProvider) {
+        
+		$provide.factory('errHttpInterceptor', function($q, $rootScope, $injector) {
+            return {
+                'responseError': function(rejection) {
+					if(rejection.status !== 200) {
+                        var msg = 'An unexpected error occurred.',
+                            title = '<b>' + rejection.status + ' ' + rejection.statusText + '</b>',
+							uibModal = $injector.get('$uibModal');
+
+							uibModal.open({
+
+								templateUrl: '/x_wec_product_modal-dialog-tpl.do',
+								size: 'lg',
+								controller: function ($scope, $uibModalInstance) {
+									var dlg = this;
+
+									dlg.close = close;
+									
+									dlg.title = rejection.statusText;
+									dlg.body = rejection.data.error.message;
+
+									function close () {
+										$uibModalInstance.close();
+									}
+
+								},
+								controllerAs: "dlg"
+							});			
+
+                    }
+                    return $q.reject(rejection);
+                }
+
+
+            }
+        });
+
+        $httpProvider.interceptors.push('errHttpInterceptor');
+
+    }])
+
+
+	.run(function ($http, $templateCache) { 
+
+		$http.defaults.headers.common['X-UserToken'] = userToken; 
+
+
+		$templateCache.put('ng-table/filters/search-assignment-group-product.html', '<input type="text" class="form-control input-sm" placeholder="Please typeahead search value" uib-typeahead="agroup as agroup.name for agroup in pr.searchAssignmentGroupByName($viewValue)" ng-keyup="pr.reloadTable(\'relationshipProductTable\', searchAssignmentGroupProduct, \'assignment_group\')" typeahead-on-select="params.filter()[name] = $item.sys_id" typeahead-wait-ms="500" ng-model="searchAssignmentGroupProduct"/>');
+	    $templateCache.put('ng-table/filters/search-assignment-group.html', '<input type="text" class="form-control input-sm" placeholder="Please typeahead search value" uib-typeahead="agroup as agroup.name for agroup in ps.searchAssignmentGroupByName($viewValue)" ng-keyup="ps.reloadTable(searchAssignmentGroupProduct, \'assignment_group\')" typeahead-on-select="params.filter()[name] = $item.sys_id" typeahead-wait-ms="500" ng-model="searchAssignmentGroupProduct"/>');
+	    $templateCache.put('ng-table/filters/search-assignment-group-task.html', '<input type="text" class="form-control input-sm" placeholder="Please typeahead search value" uib-typeahead="agroup as agroup.name for agroup in tic.searchAssignmentGroupByName($viewValue)" ng-keyup="tic.reloadTable(searchAssignmentGroupProduct, \'assignment_group\')" typeahead-on-select="params.filter()[name] = $item.sys_id" typeahead-wait-ms="500" ng-model="searchAssignmentGroupProduct"/>');
+	    $templateCache.put('ng-table/filters/search-assignment-group-sub.html', '<input type="text" class="form-control input-sm" placeholder="Please typeahead search value" uib-typeahead="agroup as agroup.name for agroup in ss.searchAssignmentGroupByName($viewValue)" ng-keyup="ss.reloadTable(searchAssignmentGroupProduct, \'assignment_group\')" typeahead-on-select="params.filter()[name] = $item.sys_id" typeahead-wait-ms="500" ng-model="searchAssignmentGroupProduct"/>');
+	    $templateCache.put('ng-table/filters/search-assignment-group-server.html', '<input type="text" class="form-control input-sm" placeholder="Please typeahead search value" uib-typeahead="agroup as agroup.name for agroup in pr.searchAssignmentGroupByName($viewValue)" ng-keyup="pr.reloadTable(\'relationshipServerTable\', searchAssignmentGroupServer, \'assignment_group\')" typeahead-on-select="params.filter()[name] = $item.sys_id" typeahead-wait-ms="500" ng-model="searchAssignmentGroupServer"/>');
+	    
+		$templateCache.put('headerCheckbox.html', '<input type="checkbox" ng-model="ss.checkboxes.checked" class="select-all" value="" />');
+	
+	});
+
+	
+	
+	$.ajaxSetup({headers: {"X-UserToken": userToken}});
+	$.get('/api/now/table/sys_user/' + userId, function (userData) {
+		
+		$.get('/api/x_wec_product/table/sys_user_has_role?sysparm_query=user%3D' + userId, function (userRole) {
+
+			angular.module('twc-product').config(['userServiceProvider', function (userServiceProvider) {
+
+				userData.result['roles'] = userRole.result;
+				
+				userServiceProvider.config(userData.result);
+
+			}]);
+
+			angular.bootstrap(document, ['twc-product']);
+
+		});
+		
+    });
+	
+})();
+
+
+]]></script>
+        <script_name>toc-app</script_name>
+        <sys_class_name>sys_ui_script</sys_class_name>
+        <sys_created_by>anton.sychikov.contractor@weather.com</sys_created_by>
+        <sys_created_on>2016-08-02 08:07:13</sys_created_on>
+        <sys_customer_update>true</sys_customer_update>
+        <sys_id>cc2a1f600fc9e6006c3005cce1050e88</sys_id>
+        <sys_mod_count>67</sys_mod_count>
+        <sys_name>x_wec_product.toc-app</sys_name>
+        <sys_package display_value="Product" source="x_wec_product">daa7dccd0f44220034457d4ce1050e47</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Product">daa7dccd0f44220034457d4ce1050e47</sys_scope>
+        <sys_update_name>sys_ui_script_cc2a1f600fc9e6006c3005cce1050e88</sys_update_name>
+        <sys_updated_by>anton.sychikov.contractor@weather.com</sys_updated_by>
+        <sys_updated_on>2016-10-24 08:40:28</sys_updated_on>
+        <use_scoped_format>false</use_scoped_format>
+    </sys_ui_script>
+</record_update>

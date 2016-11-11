@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<database>
+    <element extends="sys_import_set_row" label="CMDB Software Product Model API" max_length="40" name="x_wec_product_cmdb_software_product_model_api" type="collection">
+        <element attributes="import_attribute_name=u_application_type,edge_encryption_enabled=true" label="Application type" max_length="40" name="u_application_type" type="string"/>
+        <element attributes="import_attribute_name=u_boolean_1,edge_encryption_enabled=true" label="Boolean 1" max_length="40" name="u_boolean_1" type="string"/>
+        <element attributes="import_attribute_name=display_name,edge_encryption_enabled=true" label="display_name" max_length="255" name="u_display_name" type="string"/>
+        <element attributes="import_attribute_name=u_fulfillment_group,edge_encryption_enabled=true" label="Fulfillment group" max_length="40" name="u_fulfillment_group" type="string"/>
+        <element attributes="import_attribute_name=owner,edge_encryption_enabled=true" label="owner" max_length="40" name="u_owner" type="string"/>
+    </element>
+</database>

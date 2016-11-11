@@ -1,0 +1,406 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update table="sys_ui_script">
+    <sys_ui_script action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <description>Product Factory Module</description>
+        <global>false</global>
+        <name>x_wec_product.factory-module</name>
+        <script><![CDATA[(function () {
+    'use strict';
+
+    angular
+        .module('twc-product-factory', [])
+		.factory('LogoutFactory', LogoutFactory)
+        .factory('ProductFactory', ProductFactory)
+		.factory('NotificationFactory', NotificationFactory)
+		.factory('NotificationLogFactory', NotificationLogFactory)
+		.factory('UnauthorizedUserFactory', UnauthorizedUserFactory)
+		.factory('UnauthorizedEntitlementFactory', UnauthorizedEntitlementFactory)
+		.factory('UnauthorizedRegistrationFactory', UnauthorizedRegistrationFactory)
+		.factory('UserFactory', UserFactory)
+		.factory('RegistrationFactory', RegistrationFactory)
+		.factory('ReferenceBookFactory', ReferenceBookFactory)
+		.factory('ProfileFactory', ProfileFactory)
+		.factory('PackageFactory', PackageFactory)
+		.factory('EntitlementFactory', EntitlementFactory);
+
+	
+	LogoutFactory.$inject = ['$resource'];
+	
+	function LogoutFactory($resource) {
+		return $resource('/angular.do', { sysparm_type: 'logout' }, { logout: { method:'GET' } });
+	}
+	
+	
+    ProductFactory.$inject = ['$resource'];
+	
+	
+    function ProductFactory($resource) {
+		return $resource('', {}, {
+			list: {method: 'GET', url: '/api/x_wec_product/table/x_wec_product_table'},
+			fullList: {
+				method: 'GET', 
+				url: '/api/x_wec_product/table/x_wec_product_table',
+				transformResponse: function(data, headers) {
+					var response = {};
+					response.data = angular.fromJson(data);
+					response.headers = headers();
+					return response;
+				}
+			},
+			get: {method: 'GET', url: '/api/x_wec_product/table/x_wec_product_table/:id'},
+			create: {method: 'POST', url: '/api/x_wec_product/table/x_wec_product_table'},
+			update: {method: 'PATCH', url: '/api/x_wec_product/table/x_wec_product_table/:id'},
+			
+		});
+    }
+	
+	
+	NotificationFactory.$inject = ['$http'];
+	
+	function NotificationFactory($http) {
+		return {
+			get: get,
+			search: search
+		};
+		
+		function get(params) {
+			var url = '/api/now/table/u_customer_notifications/' + params.sysId;
+
+			var config = {
+				method: 'GET',
+				url: url
+			};
+
+			return $http(config);
+		}
+		
+		function search(params) {
+			var config = {
+				method: 'GET',
+				url: '/api/wec/notification',
+				params: params
+			};
+
+			return $http(config);
+		}
+	}
+	
+	
+	NotificationLogFactory.$inject = ['$http'];
+	
+	function NotificationLogFactory($http) {
+		return {
+			list: list,
+			markAsRead: markAsRead,
+			markAsRemove: markAsRemove
+		};
+		
+		function list(params) {
+			var paramValue = 'u_is_deleted=false' + '^' + 'u_recepient.sys_id=' + params.userSysId;
+
+			var config = {
+				method: 'GET',
+				url: '/api/now/table/u_customer_notifications_log',
+				params: {
+					sysparm_query: paramValue
+				},
+				isArray: true
+			};
+
+			return $http(config);
+		}
+		
+		function markAsRead(params) {
+			var url = '/api/now/table/u_customer_notifications_log/' + params.sysId;
+
+			var config = {
+				method: 'PUT',
+				url: url,
+				data: {
+					u_is_read: true
+				}
+			};
+
+			return $http(config);			
+		}
+
+		function markAsRemove(params) {
+			var url = '/api/now/table/u_customer_notifications_log/' + params.sysId;
+
+			var config = {
+				method: 'PUT',
+				url: url,
+				data: {
+					u_is_deleted: true
+				}
+			};
+
+			return $http(config);			
+		}		
+	}
+	
+	
+	UnauthorizedUserFactory.$inject = ['$http'];
+	
+	function UnauthorizedUserFactory($http) {
+		return {
+			list: list,
+			query: query
+		};
+
+		function list(params) {
+			var paramValue = 'email=' + params.email;
+
+			var config = {
+				method: 'GET',
+				url: '/api/x_wec_product/table/filtered/sys_user',
+				params: {
+					sysparm_query: paramValue
+				},
+				isArray: true
+			};
+
+			return $http(config);
+		}	
+
+		
+		function query(str) {
+
+			var config = {
+				method: 'GET',
+				url: '/api/x_wec_product/table/filtered/sys_user',
+				params: {
+					sysparm_query: str
+				},
+				isArray: true
+			};
+
+			return $http(config);
+		}	
+	}
+
+
+	UnauthorizedEntitlementFactory.$inject = ['$http'];
+	
+	function UnauthorizedEntitlementFactory($http) {
+		return {
+			list: list
+		};
+
+		function list(params) {
+			var paramValue = '';
+			angular.isDefined(params.userSysId) && (paramValue += 'u_entitled_user.sys_id=' + params.userSysId);	
+			angular.isDefined(params.productSysId) && (paramValue += '^product.sys_id=' + params.productSysId);
+
+			var config = {
+				method: 'GET',
+				url: '/api/x_wec_product/table/filtered/service_entitlement',
+				params: {
+					sysparm_query: paramValue
+				},
+				isArray: true
+			};
+
+			return $http(config);
+		}	
+	}
+	
+
+	UnauthorizedRegistrationFactory.$inject = ['$resource'];
+	
+	function UnauthorizedRegistrationFactory($resource) {
+		return $resource('/api/x_wec_product/table/filtered/sn_customerservice_registration');
+	}
+
+	
+	UserFactory.$inject = ['$http'];
+	
+	function UserFactory($http) {
+		return {
+			get: get,
+			roles: roles
+		};
+		
+		function get(params) {
+			var url = '/api/x_wec_product/table/sys_user/' + params.userSysId;
+
+			var config = {
+				method: 'GET',
+				url: url
+			};
+
+			return $http(config);
+		}
+	
+		function roles(params) {
+			var paramValue = 'user=' + params.userSysId;
+
+			var config = {
+				method: 'GET',
+				url: '/api/x_wec_product/table/sys_user_has_role',
+				params: {
+					sysparm_query: paramValue
+				},
+				isArray: true
+			};
+
+			return $http(config);
+		}
+	}
+	
+	
+	RegistrationFactory.$inject = ['$http'];
+	
+	function RegistrationFactory($http) {
+		return {
+			get: get
+		};
+
+		function get(params) {
+			var paramValue = 'email=' + params.email;
+			
+			var config = {
+				method: 'GET',
+				url: '/api/x_wec_product/table/sn_customerservice_registration',
+				params: {
+					sysparm_query: paramValue
+				}
+			};
+
+			return $http(config);
+		}
+	}
+
+	
+	ReferenceBookFactory.$inject = ['$resource'];
+
+    function ReferenceBookFactory($resource) {
+		return $resource('', {}, {
+			departmentSearch: {method: 'GET', url: '/api/x_wec_product/table/cmn_department'},			
+			businessGroupSearch: {method: 'GET', url: '/api/x_wec_product/table/cmdb_ci_group'},
+			businessServiceSearch: {method: 'GET', url: '/api/x_wec_product/table/cmdb_ci_service'},
+			assignmentGroupSearch: {method: 'GET', url: '/api/x_wec_product/table/sys_user_group'},
+			groupMemberSearch: {method: 'GET', url: '/api/x_wec_product/table/sys_user_grmember'},
+			locationSearch: {method: 'GET', url: '/api/x_wec_product/table/cmn_location'},
+			applicationList: {method: 'GET', url: '/api/x_wec_product/table/x_wec_product_application'},
+			relationsType: {method: 'GET', url: '/api/x_wec_product/table/cmdb_rel_type'},
+			userRoles: {method: 'GET', url: '/api/x_wec_product/table/sys_user_role'},
+			boxItems: {method: 'GET', url: '/api/x_wec_product/table/x_wec_product_9box_items'},
+			sysСhoice: {method: 'GET', url: '/api/x_wec_product/table/sys_choice'},
+			serversList: {
+				method: 'GET', 
+				url: '/api/x_wec_product/table/cmdb_ci_server',
+				transformResponse: function(data, headers){
+					var response = {};
+					response.data = angular.fromJson(data);
+					response.headers = headers();
+					return response;
+				}
+			}
+			
+		});
+    }
+
+
+	ProfileFactory.$inject = ['$http'];
+	
+	function ProfileFactory($http) {
+		return {
+			get: get,
+			update: update,
+			languageChoice: languageChoice,
+			timeZoneChoice: timeZoneChoice
+		};
+
+		function get() {
+			var config = {
+				method: 'GET',
+				url: '/api/wec/profile',
+			};
+
+			return $http(config);
+		}
+		
+		function update(params) {
+			var config = {
+				method: 'PUT',
+				url: '/api/wec/profile',
+				data: params
+			};
+
+			return $http(config);
+		}
+
+		function languageChoice() {
+			var config = {
+				method: 'GET',
+				url: '/api/x_wec_product/table/sys_user/choice/preferred_language'
+			};
+
+			return $http(config);			
+		}
+
+		function timeZoneChoice() {
+			var config = {
+				method: 'GET',
+				url: '/api/x_wec_product/table/sys_user/choice/time_zone'
+			};
+
+			return $http(config);			
+		}
+	}
+	
+	
+	PackageFactory.$inject = ['$resource'];
+
+	function PackageFactory($resource) {
+		return $resource('', {}, {
+			list: {
+				method: 'GET', 
+				url: '/api/x_wec_product/table/cmdb_software_product_model'
+			},
+			get: {
+				method: 'GET', 
+				url: '/api/x_wec_product/table/cmdb_software_product_model/:sys_id'
+			},
+			childList: {
+				method: 'GET',
+				url: '/api/wec/portal/package/:sys_id/child'
+			}
+			
+		});
+	}
+	
+	
+	EntitlementFactory.$inject = ['$resource'];
+
+	function EntitlementFactory($resource) {
+		return $resource('', {}, {
+			portalList: {
+				method: 'GET', 
+				url: '/api/wec/portal/entitlement'
+			}
+		});
+	}
+	
+})();
+]]></script>
+        <script_name>factory-module</script_name>
+        <sys_class_name>sys_ui_script</sys_class_name>
+        <sys_created_by>oleg.voropayev.contractor@weather.com</sys_created_by>
+        <sys_created_on>2016-08-04 15:15:06</sys_created_on>
+        <sys_customer_update>true</sys_customer_update>
+        <sys_id>0b3f0b150fc16a006c3005cce1050ef8</sys_id>
+        <sys_mod_count>57</sys_mod_count>
+        <sys_name>x_wec_product.factory-module</sys_name>
+        <sys_package display_value="Product" source="x_wec_product">daa7dccd0f44220034457d4ce1050e47</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Product">daa7dccd0f44220034457d4ce1050e47</sys_scope>
+        <sys_update_name>sys_ui_script_0b3f0b150fc16a006c3005cce1050ef8</sys_update_name>
+        <sys_updated_by>oleg.voropayev.contractor@weather.com</sys_updated_by>
+        <sys_updated_on>2016-11-02 14:04:56</sys_updated_on>
+        <use_scoped_format>false</use_scoped_format>
+    </sys_ui_script>
+</record_update>

@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update sys_domain="global" table="sys_script">
+    <sys_script action="INSERT_OR_UPDATE">
+        <abort_action>false</abort_action>
+        <access>package_private</access>
+        <action_delete>false</action_delete>
+        <action_insert>true</action_insert>
+        <action_query>false</action_query>
+        <action_update>true</action_update>
+        <active>true</active>
+        <add_message>false</add_message>
+        <advanced>true</advanced>
+        <change_fields>false</change_fields>
+        <client_callable>false</client_callable>
+        <collection>x_wec_product_table</collection>
+        <condition/>
+        <description/>
+        <execute_function>false</execute_function>
+        <filter_condition/>
+        <is_rest>false</is_rest>
+        <message/>
+        <name>Upsert upstream relationship</name>
+        <order>100</order>
+        <priority>100</priority>
+        <rest_method/>
+        <rest_method_text/>
+        <rest_service/>
+        <rest_service_text/>
+        <rest_variables/>
+        <role_conditions/>
+        <script><![CDATA[(function executeRule(current, previous) {
+
+	if(current.sys_class_name == 'x_wec_product_table'){
+		
+		var relType = new GlideRecord('cmdb_rel_type');
+		relType.addEncodedQuery('sys_name=Provides::Provided by');
+		relType.query();
+		relType.next();
+
+		var relTypeSysId = relType.getValue('sys_id')
+
+		if(!previous.u_business_service.nil()){
+			var clear = new GlideRecord('cmdb_rel_ci');
+			clear.addQuery('child', current.sys_id);
+			clear.addQuery('parent', previous.u_business_service);
+			clear.addQuery('type', relTypeSysId);
+			clear.deleteMultiple();
+		}
+
+		if(!current.u_business_service.nil()){
+			var insert = new GlideRecord('cmdb_rel_ci');
+			insert.initialize(); 
+			insert.child = current.sys_id; 
+			insert.parent = current.u_business_service; 
+			insert.type = relTypeSysId; 
+
+			insert.insert();
+		}
+		
+	}
+	
+
+})(current, previous);]]></script>
+        <sys_class_name>sys_script</sys_class_name>
+        <sys_created_by>anton.sychikov.contractor@weather.com</sys_created_by>
+        <sys_created_on>2016-09-15 08:25:09</sys_created_on>
+        <sys_customer_update>true</sys_customer_update>
+        <sys_domain>global</sys_domain>
+        <sys_id>75744afa0fb12e006c3005cce1050e2e</sys_id>
+        <sys_mod_count>10</sys_mod_count>
+        <sys_name>Upsert upstream relationship</sys_name>
+        <sys_overrides/>
+        <sys_package display_value="Product" source="x_wec_product">daa7dccd0f44220034457d4ce1050e47</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Product">daa7dccd0f44220034457d4ce1050e47</sys_scope>
+        <sys_update_name>sys_script_75744afa0fb12e006c3005cce1050e2e</sys_update_name>
+        <sys_updated_by>andrey.zlatin@weather.com</sys_updated_by>
+        <sys_updated_on>2016-09-15 17:40:57</sys_updated_on>
+        <template/>
+        <when>after</when>
+    </sys_script>
+</record_update>

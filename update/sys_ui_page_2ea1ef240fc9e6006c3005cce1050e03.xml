@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update table="sys_ui_page">
+    <sys_ui_page action="INSERT_OR_UPDATE">
+        <category>general</category>
+        <client_script/>
+        <description>Toc tasks template</description>
+        <direct>true</direct>
+        <endpoint>x_wec_product_toc-tasks-tpl.do</endpoint>
+        <html><![CDATA[<?xml version="1.0" encoding="utf-8" ?>
+<j:jelly trim="false" xmlns:j="jelly:core" xmlns:g="glide" xmlns:j2="null" xmlns:g2="null">
+	
+	<ol class="breadcrumb">
+		<li><a href="https://service.weather.com">Home</a></li>
+		<li><a href="/x_wec_product_box-app.do#/dashboard">My Apps</a></li>
+		<li><a ui-sref="dashboard">TOC Dashboard</a></li>
+		<li class="active">{{tic.label}}</li>
+	</ol>
+	
+	<h1 class="page-header twc-header">{{tic.label}} list <i class="fa fa-refresh fa-spin fa-1x fa-fw" ng-show="tic.loader"></i></h1>
+	<div class="row">
+		<div class="col-sm-12">
+				<table ng-table="tic.table" class="table table-striped twc-table">
+					<tr ng-repeat="row in $data track by row.sys_id.value">
+						<td data-title="'Number'" filter="{number: 'text'}"><a ui-sref="task({id: row.sys_id.value})">{{row.number.display_value}}</a></td>
+						<td data-title="'Change Type'" ng-if="tic.column.type">{{row.type.display_value}}</td>
+						<td data-title="'Short Description'" filter="{short_description: 'text'}"><div uib-tooltip="{{row.short_description.display_value}}">{{row.short_description.display_value | limitTo: 80}}{{row.short_description.display_value.length > 80 ? '...' : ''}}</div></td>
+						<td data-title="'Assignment Group'" filter="{assignment_group: 'search-assignment-group-task'}" ng-if="tic.column.assignment_group">{{row.assignment_group.display_value}}</td>
+						<td data-title="'Assigned To'">{{row.assigned_to.display_value}}</td>
+						<td data-title="'Planned Start Date'" ng-if="tic.column.start_date">{{row.start_date.display_value}}</td>
+						<td data-title="'Planned End Date'" ng-if="tic.column.end_date">{{row.end_date.display_value}}</td>
+						<td data-title="'Priority'" filter="{priority: 'select'}" filter-data="tic.prioritys" ng-if="tic.column.priority">{{row.priority.display_value}}</td>
+						<td data-title="'Updated'" ng-if="tic.column.sys_updated_on">{{row.sys_updated_on.display_value}}</td>
+					</tr>
+				</table>
+			
+		</div>
+	</div>
+	<div ui-view=""></div>
+</j:jelly>]]></html>
+        <name>toc-tasks-tpl</name>
+        <processing_script/>
+        <sys_class_name>sys_ui_page</sys_class_name>
+        <sys_created_by>anton.sychikov.contractor@weather.com</sys_created_by>
+        <sys_created_on>2016-08-02 08:40:08</sys_created_on>
+        <sys_customer_update>true</sys_customer_update>
+        <sys_id>2ea1ef240fc9e6006c3005cce1050e03</sys_id>
+        <sys_mod_count>17</sys_mod_count>
+        <sys_name>toc-tasks-tpl</sys_name>
+        <sys_package display_value="Product" source="x_wec_product">daa7dccd0f44220034457d4ce1050e47</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Product">daa7dccd0f44220034457d4ce1050e47</sys_scope>
+        <sys_update_name>sys_ui_page_2ea1ef240fc9e6006c3005cce1050e03</sys_update_name>
+        <sys_updated_by>anton.sychikov.contractor@weather.com</sys_updated_by>
+        <sys_updated_on>2016-09-19 08:14:01</sys_updated_on>
+    </sys_ui_page>
+</record_update>

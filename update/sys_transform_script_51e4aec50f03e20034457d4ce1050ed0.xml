@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update table="sys_transform_script">
+    <sys_transform_script action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <map display_value="CMDB Software Product Model Pkg">ec5e6c0d0f4326006c3005cce1050e5d</map>
+        <order>100</order>
+        <script><![CDATA[// "Reverse Update"
+// Put the sys_id of the target CI on the source software model record.
+//
+(function runTransformScript(source, map, log, target /*undefined onStart*/ ) {
+	gs.info("Xform1 source.u_display_name="+source.u_display_name+", target.sys_id="+target.sys_id);
+	if (gs.nil(target.sys_id) || target.sys_id == "" || target.sys_id == undefined)
+	{
+		gs.warn("Xform2 cannot set CI on source "+source.u_display_name);
+		return;
+	}
+	var gr = new GlideRecord("cmdb_software_product_model");
+	if (gr.get("display_name", source.u_display_name) == false)
+	{
+		gs.warn("Xform2b cannot get cmdb_software_product_model with "+source.u_display_name);
+		return;
+	}
+	gs.debug("Xform3 get gr.sys_id="+gr.sys_id+", class="+gr.sys_class_name);
+	if ( gr.u_configuration_item != undefined && gr.u_configuration_item != "" && gs.nil(gr.u_configuration_item)==false )
+	{
+		if (gr.u_configuration_item.sys_id != target.sys_id)
+		{
+			gs.warn("Xform4 overwrites CI on source "+source.u_display_name
+				+", from "+gr.u_configuration_item.name
+				+ " to "+target.name
+			);
+			gs.info("Xform5 update CI gr.display_name="+gr.display_name+", gr.name="+gr.name);
+			gr.u_configuration_item = target.sys_id;
+			gr.update();
+		}
+		else
+			gs.info("Xform5 no need to update "+gr.name);
+	}
+
+	gs.info("Xform6 call updateSwModelRelationships("+source.u_display_name+")");
+	(new global.TwcCoreSwModelCmdb()).updateSwModelRelationships(source.u_display_name);
+
+})(source, map, log, target);
+]]></script>
+        <sys_class_name>sys_transform_script</sys_class_name>
+        <sys_created_by>Courtney.Richards@weather.com</sys_created_by>
+        <sys_created_on>2016-11-11 03:34:23</sys_created_on>
+        <sys_customer_update>true</sys_customer_update>
+        <sys_id>51e4aec50f03e20034457d4ce1050ed0</sys_id>
+        <sys_mod_count>4</sys_mod_count>
+        <sys_name>onAfter</sys_name>
+        <sys_package display_value="Product" source="x_wec_product">daa7dccd0f44220034457d4ce1050e47</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Product">daa7dccd0f44220034457d4ce1050e47</sys_scope>
+        <sys_update_name>sys_transform_script_51e4aec50f03e20034457d4ce1050ed0</sys_update_name>
+        <sys_updated_by>Courtney.Richards@weather.com</sys_updated_by>
+        <sys_updated_on>2016-11-11 13:55:12</sys_updated_on>
+        <when>onAfter</when>
+    </sys_transform_script>
+</record_update>

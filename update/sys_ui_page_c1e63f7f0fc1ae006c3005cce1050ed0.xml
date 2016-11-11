@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update table="sys_ui_page">
+    <sys_ui_page action="INSERT_OR_UPDATE">
+        <category>general</category>
+        <client_script/>
+        <description/>
+        <direct>true</direct>
+        <endpoint>x_wec_product_box-dahboard-tpl.do</endpoint>
+        <html><![CDATA[<?xml version="1.0" encoding="utf-8" ?>
+<j:jelly trim="false" xmlns:j="jelly:core" xmlns:g="glide" xmlns:j2="null" xmlns:g2="null">
+	<ol class="breadcrumb">
+		<li><a href="https://service.weather.com">Home</a></li>
+		<li class="active">My Apps</li>
+	</ol>
+	
+	<div class="row">
+		<div class="col-sm-6 col-sm-offset-3">
+		
+			<div ng-repeat="(key, value) in box.sections" class="row">
+				<div class="alert alert-info box-alert" ng-if="$index != 0" ng-show="value.length > 0">{{key}}</div>
+				
+				<div class="col-md-3 col-sm-4 col-xs-6" ng-repeat="item in value" ng-click="nav.open(item)" style="cursor: pointer; margin-top: 5px;">
+					<div class="box-item">
+						<h4>{{item.u_title.display_value}}</h4>
+						<img src="{{item['9_box_logo'].display_value}}" class="img-responsive center-block" height="80" width="80"/>  
+					</div>
+				</div>
+				
+				
+			
+			</div>
+			
+		</div>
+	</div>
+</j:jelly>]]></html>
+        <name>box-dahboard-tpl</name>
+        <processing_script/>
+        <sys_class_name>sys_ui_page</sys_class_name>
+        <sys_created_by>anton.sychikov.contractor@weather.com</sys_created_by>
+        <sys_created_on>2016-08-12 12:30:39</sys_created_on>
+        <sys_customer_update>true</sys_customer_update>
+        <sys_id>c1e63f7f0fc1ae006c3005cce1050ed0</sys_id>
+        <sys_mod_count>20</sys_mod_count>
+        <sys_name>box-dahboard-tpl</sys_name>
+        <sys_package display_value="Product" source="x_wec_product">daa7dccd0f44220034457d4ce1050e47</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Product">daa7dccd0f44220034457d4ce1050e47</sys_scope>
+        <sys_update_name>sys_ui_page_c1e63f7f0fc1ae006c3005cce1050ed0</sys_update_name>
+        <sys_updated_by>anton.sychikov.contractor@weather.com</sys_updated_by>
+        <sys_updated_on>2016-08-26 09:35:58</sys_updated_on>
+    </sys_ui_page>
+</record_update>

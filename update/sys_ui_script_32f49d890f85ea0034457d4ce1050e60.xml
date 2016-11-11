@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update table="sys_ui_script">
+    <sys_ui_script action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <description>Dashboard controller for Leadership</description>
+        <global>false</global>
+        <name>x_wec_product.leadership-dashboard-ctrl</name>
+        <script><![CDATA[(function () {
+	'use strict';
+	
+	angular
+	.module('twc-product')
+	.controller('LeadershipDashboardCtrl', LeadershipDashboardCtrl);
+	
+	LeadershipDashboardCtrl.$inject = ['$scope','$state', '$filter', '$q','UserFactory', 'userService', 'GroupFactory', 'ProductFactory', 'TaskFactory', 'ChartService'];
+	
+	function LeadershipDashboardCtrl($scope, $state, $filter, $q, UserFactory, userService, GroupFactory, ProductFactory, TaskFactory, ChartService) {
+		var ldb = this;
+
+		ldb.active = 0;
+		ldb.duration = 10000;
+		
+		loadCharts();
+		loadTrends();
+		
+		function changeState(state){
+			$state.go(state);
+		}
+		
+		$scope.$watch(function() {
+			return ldb.active;
+		}, function(value) {
+
+			setTimeout(function() { 
+				if(ldb.incidentTrendChartConfig && ldb.incidentTrendChartConfig.hasOwnProperty('getHighcharts')){
+					ldb.incidentTrendChartConfig.getHighcharts().reflow();
+				}
+				if(ldb.changeTrendChartConfig && ldb.changeTrendChartConfig.hasOwnProperty('getHighcharts')){
+					ldb.changeTrendChartConfig.getHighcharts().reflow();
+				}
+				if(ldb.problemTrendChartConfig && ldb.problemTrendChartConfig.hasOwnProperty('getHighcharts')){
+					ldb.problemTrendChartConfig.getHighcharts().reflow();
+				}
+			}, 500)
+
+		});
+		
+		function loadCharts(){
+			var requests = [];
+			
+			ldb.loadChart = true;
+			
+			requests.push(ChartService.openIncidentAssignedMyTeam(function(self, event){
+				$state.go('incidents', {filter: 'assignment_groupLIKE' + self.category + '^state=' + getStates()[self.series.name]});
+				
+			}));
+			
+			requests.push(ChartService.openChangeAssignedMyTeam(function(self, event){
+				$state.go('change_requests', {filter: 'assigned_toLIKE'+ self.category + '^type=' + self.series.name});
+			}));
+
+			requests.push(ChartService.openProblemAssignedMyTeam(function(self, event){
+				$state.go('problems', {filter: 'state=' + getProblemStates()[self.name]});
+			}));
+			
+			$q.all(requests).then(function(data){
+				ldb.incidentsChartConfig = data[0];
+				ldb.changeChartConfig = data[1];
+				ldb.problemChartConfig = data[2];
+				
+				ldb.loadChart = false;
+			});
+		};
+		
+		function loadTrends(){
+			ldb.incidentTrendChartConfig = {};
+			ldb.changeTrendChartConfig = {};
+			ldb.problemTrendChartConfig = {};
+			
+			ldb.loadIncident = true;
+			ldb.showIncident = false;
+			
+			ldb.loadChange = true;
+			ldb.showChange = false;
+
+			ldb.loadProblem = true;
+			ldb.showProblem = false;
+			
+			ChartService.incidentTrendByPriorityLeadership().then(function(data){
+				ldb.incidentTrendChartConfig = data;
+				
+				if(data){
+					ldb.showIncident = true;
+				}
+				ldb.loadIncident = false;
+
+				return ChartService.changeTrendByChangeTypeLeadership(); 
+			
+			}).then(function(data){
+				ldb.changeTrendChartConfig = data;
+				
+				if(data){
+					ldb.showChange = true;
+				}
+				ldb.loadChange = false;
+				
+				return ChartService.problemTrendReportLeadership(); 
+			}).then(function(data){
+				ldb.problemTrendChartConfig = data;
+				
+				if(data){
+					ldb.showProblem = true;
+				}
+				ldb.loadProblem = false;
+				
+			});
+
+			
+		}
+		
+		function getStates(){
+			return {
+				'New': 1,
+				'Routing': 110,
+				'Active': 2,
+				'Awaiting Problem': 3,
+				'Awaiting User Info': 4,
+				'Awaiting RFC': 8,
+				'Awaiting Hardware/Software': 120,
+				'Awaiting Vendor': 130,
+				'Resolved': 6,
+				'Closed': 7
+			}
+		}
+		
+		function getProblemStates(){
+			return {
+				'Active': 1,
+				'Known Error': 2,
+				'Pending Change': 3,
+				'Resolved': 4,
+				'On Hold': 5,
+				'Project': 6,
+				'Closed': 7
+			}
+		}
+
+	}
+	
+})();
+
+]]></script>
+        <script_name>leadership-dashboard-ctrl</script_name>
+        <sys_class_name>sys_ui_script</sys_class_name>
+        <sys_created_by>anton.sychikov.contractor@weather.com</sys_created_by>
+        <sys_created_on>2016-08-03 11:41:41</sys_created_on>
+        <sys_customer_update>true</sys_customer_update>
+        <sys_id>32f49d890f85ea0034457d4ce1050e60</sys_id>
+        <sys_mod_count>25</sys_mod_count>
+        <sys_name>x_wec_product.leadership-dashboard-ctrl</sys_name>
+        <sys_package display_value="Product" source="x_wec_product">daa7dccd0f44220034457d4ce1050e47</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Product">daa7dccd0f44220034457d4ce1050e47</sys_scope>
+        <sys_update_name>sys_ui_script_32f49d890f85ea0034457d4ce1050e60</sys_update_name>
+        <sys_updated_by>anton.sychikov.contractor@weather.com</sys_updated_by>
+        <sys_updated_on>2016-08-23 15:41:31</sys_updated_on>
+        <use_scoped_format>false</use_scoped_format>
+    </sys_ui_script>
+</record_update>

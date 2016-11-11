@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update>
+    <sys_ui_section caption="" section_id="5ca1a3400f42ae006c3005cce1050efe" sys_domain="global" table="x_wec_product_report_center" version="3" view="">
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>name</element>
+            <position>0</position>
+            <sys_created_by>anton.sychikov.contractor@weather.com</sys_created_by>
+            <sys_created_on>2016-09-19 12:22:54</sys_created_on>
+            <sys_id>5ca16b400f42ae006c3005cce1050e20</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="NULL" display_value="" name="x_wec_product_report_center" sys_domain="global" view="Default view">5ca1a3400f42ae006c3005cce1050efe</sys_ui_section>
+            <sys_updated_by>anton.sychikov.contractor@weather.com</sys_updated_by>
+            <sys_updated_on>2016-09-19 12:22:54</sys_updated_on>
+            <sys_user/>
+            <type/>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>group</element>
+            <position>1</position>
+            <sys_created_by>anton.sychikov.contractor@weather.com</sys_created_by>
+            <sys_created_on>2016-09-19 12:22:54</sys_created_on>
+            <sys_id>dca16b400f42ae006c3005cce1050e20</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="NULL" display_value="" name="x_wec_product_report_center" sys_domain="global" view="Default view">5ca1a3400f42ae006c3005cce1050efe</sys_ui_section>
+            <sys_updated_by>anton.sychikov.contractor@weather.com</sys_updated_by>
+            <sys_updated_on>2016-09-19 12:22:54</sys_updated_on>
+            <sys_user/>
+            <type/>
+        </sys_ui_element>
+        <sys_ui_element action="INSERT_OR_UPDATE">
+            <element>report_id</element>
+            <position>2</position>
+            <sys_created_by>anton.sychikov.contractor@weather.com</sys_created_by>
+            <sys_created_on>2016-09-19 12:22:54</sys_created_on>
+            <sys_id>50a16b400f42ae006c3005cce1050e21</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_ui_formatter/>
+            <sys_ui_section caption="NULL" display_value="" name="x_wec_product_report_center" sys_domain="global" view="Default view">5ca1a3400f42ae006c3005cce1050efe</sys_ui_section>
+            <sys_updated_by>anton.sychikov.contractor@weather.com</sys_updated_by>
+            <sys_updated_on>2016-09-19 12:22:54</sys_updated_on>
+            <sys_user/>
+            <type/>
+        </sys_ui_element>
+        <sys_ui_section action="INSERT_OR_UPDATE">
+            <caption/>
+            <header>false</header>
+            <name>x_wec_product_report_center</name>
+            <roles/>
+            <sys_class_name>sys_ui_section</sys_class_name>
+            <sys_created_by>anton.sychikov.contractor@weather.com</sys_created_by>
+            <sys_created_on>2016-09-19 12:22:54</sys_created_on>
+            <sys_customer_update>true</sys_customer_update>
+            <sys_domain>global</sys_domain>
+            <sys_id>5ca1a3400f42ae006c3005cce1050efe</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_name>x_wec_product_report_center</sys_name>
+            <sys_overrides/>
+            <sys_package display_value="Product" source="x_wec_product">daa7dccd0f44220034457d4ce1050e47</sys_package>
+            <sys_policy/>
+            <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+            <sys_scope display_value="Product">daa7dccd0f44220034457d4ce1050e47</sys_scope>
+            <sys_update_name>sys_ui_section_5ca1a3400f42ae006c3005cce1050efe</sys_update_name>
+            <sys_updated_by>anton.sychikov.contractor@weather.com</sys_updated_by>
+            <sys_updated_on>2016-09-19 12:22:54</sys_updated_on>
+            <sys_user/>
+            <title>true</title>
+            <view display_value="Default view" name="NULL">Default view</view>
+            <view_name/>
+        </sys_ui_section>
+    </sys_ui_section>
+</record_update>

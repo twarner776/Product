@@ -1,0 +1,323 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update table="sys_ui_page">
+    <sys_ui_page action="INSERT_OR_UPDATE">
+        <category>general</category>
+        <client_script/>
+        <description/>
+        <direct>true</direct>
+        <endpoint>x_wec_product_toc-dahboard-2-tpl.do</endpoint>
+        <html><![CDATA[<?xml version="1.0" encoding="utf-8" ?>
+<j:jelly trim="false" xmlns:j="jelly:core" xmlns:g="glide" xmlns:j2="null" xmlns:g2="null">
+	<ol class="breadcrumb">
+		<li><a href="https://service.weather.com">Home</a></li>
+		<li><a href="/x_wec_product_box-app.do#/dashboard">My Apps</a></li>
+		<li class="active">TOC Dashboard</li>
+	</ol>
+	<div class="row">
+		<div class="col-sm-12">
+			<div class="panel panel-primary">
+				<div class="panel-heading twc-panel-heading">TWC Overview</div>
+			</div>			
+		</div>
+	</div>
+	<style>
+		/* Specify styling for tooltip contents */
+		.tooltip.tooltipCustomClass .tooltip-inner {
+			max-width: 400px!important;
+			text-align: left;
+			background-color: #f5f5f5;
+			color: #000;
+		    border: 1px solid rgba(0,0,0,.2);
+		}
+		
+		.test_test:hover{
+			transform: translateY(-5px);
+		}
+		.test_test{
+			height: 200px!important;		
+		}
+
+		.test_panel{
+		}
+		
+.pricing-package-description {
+    line-height: 1.5rem;
+    color: #737f8b;
+    letter-spacing: .01625rem;
+    font-size: 14px;
+    font-weight: normal;
+		text-align: center;
+}		
+
+.pricing-package-description-2 {
+    line-height: 1.5rem;
+    color: #737f8b;
+    letter-spacing: .01625rem;
+    font-size: 13px;
+    font-weight: normal;
+		text-align: center;
+}		
+	</style>
+	<div class="row">
+		<div class="col-sm-4" id="panel">
+			<ul class="twc-tasks-list twc-tasks">
+				<li ng-repeat="item in tdb.critical track by $index" style="box-shadow: 0 1rem 1em 0 rgba(189,195,199,0.6); width: 45.5%; margin: 7px;" class="test_test" 
+					uib-tooltip-html="tdb.getTooltip(item)"
+					tooltip-placement="right"
+					tooltip-append-to-body="true"
+					tooltip-class="tooltipCustomClass"
+					ng-click="tdb.state.go('task', {id: item.sys_id.value});">
+					<div class="test_panel">
+						<div class="panel-heading twc-panel-heading" style="background-color:  #fb0202; color: white;"><strong>{{item.number.display_value}}</strong></div>
+						<div class="panel-body" style="padding: 2px;">
+							<h4 class="pricing-package-description">{{item.short_description.display_value | limitTo: 80}}{{item.short_description.display_value.length > 80 ? '...' : ''}}</h4>
+							<h4 class="pricing-package-description"><strong>{{item.state.display_value}}</strong></h4>
+							<h4 class="pricing-package-description">{{item.assignment_group.display_value}}</h4>
+							<h4 class="pricing-package-description" style="font-style: italic;">{{item.assigned_to.display_value}}</h4>
+							<h4 class="pricing-package-description">{{item.sys_updated_on.display_value}}</h4>
+
+						</div>
+					</div>			
+					
+				</li>
+			</ul>
+			
+		</div>
+		<!--
+		<div class="col-sm-4">
+			<div class="panel panel-warning">
+				<div class="panel-heading twc-panel-heading">Incident 2 - High <i class="fa fa-refresh fa-spin fa-1x fa-fw pull-right" ng-show="tdb.loadTickets"></i></div>
+				<div class="panel-body" style="padding: 2px;">
+
+					<ul class="twc-tasks-list twc-tasks">
+						<li ng-repeat="item in tdb.high track by $index" class="warning" 
+							uib-tooltip-html="tdb.getTooltip(item)"
+							tooltip-placement="bottom"
+							tooltip-append-to-body="true"
+							tooltip-class="tooltipCustomClass"
+							ng-style="tdb.blockStyle" ng-click="tdb.state.go('task', {id: item.sys_id.value});">
+							<span><strong>{{item.number.display_value}}</strong></span>
+							<span>{{item.short_description.display_value | limitTo: 60}}{{item.short_description.display_value.length > 60 ? '...' : ''}}</span>
+							<span style="font-size: 11px;">{{item.state.display_value}}</span>
+							<span style="font-size: 11px;">{{item.assignment_group.display_value}}</span>
+							<span style="font-size: 11px;">{{item.display_value.display_value}}</span>
+							<span style="font-size: 11px;">{{item.sys_updated_on.display_value}}</span>
+						</li>
+					</ul>
+			  </div>
+			</div>			
+		</div>
+		<div class="col-sm-4">
+			<div class="panel panel-info">
+				<div class="panel-heading twc-panel-heading">Problem <i class="fa fa-refresh fa-spin fa-1x fa-fw pull-right" ng-show="tdb.loadTickets"></i></div>
+				<div class="panel-body" style="padding: 2px;">
+
+					<ul class="twc-tasks-list twc-tasks">
+						<li ng-repeat="item in tdb.problem track by $index" class="info" 
+							uib-tooltip-html="tdb.getTooltip(item)"
+							tooltip-placement="left"
+							tooltip-append-to-body="true"
+							tooltip-class="tooltipCustomClass"
+							ng-style="tdb.blockStyle" ng-click="tdb.state.go('task', {id: item.sys_id.value});">
+							<span><strong>{{item.number.display_value}}</strong></span>
+							<span>{{item.short_description.display_value | limitTo: 60}}{{item.short_description.display_value.length > 60 ? '...' : ''}}</span>
+							<span style="font-size: 11px;">{{item.state.display_value}}</span>
+							<span style="font-size: 11px;">{{item.assignment_group.display_value}}</span>
+							<span style="font-size: 11px;">{{item.display_value.display_value}}</span>
+							<span style="font-size: 11px;">{{item.sys_updated_on.display_value}}</span>
+						</li>
+					</ul>
+			  </div>
+			</div>			
+		</div>
+		-->
+	</div>
+	<div class="row">
+		<div class="col-sm-12">
+			<div class="panel panel-primary">
+				<div class="panel-heading twc-panel-heading">Today's Scheduled Changes <i class="fa fa-refresh fa-spin fa-1x fa-fw pull-right" ng-show="tdb.loadTickets"></i></div>
+				<div class="panel-body" style="padding: 2px;">
+
+					<table class="table table-striped twc-dashboard-table-s">
+						<thead>
+							<tr>
+								<th>Change #</th>
+								<th>CHG Type</th>
+								<th>Short Desc</th>
+								<th>Assigned to</th>
+								<th>Start time</th>
+								<th>End time</th>
+								<th>State</th>
+							</tr>
+						</thead>  
+						<tr ng-repeat="item in tdb.change">
+							<td><a ui-sref="task({id: item.sys_id.value})">{{item.number.display_value}}</a></td>
+							<td>{{item.type.display_value}}</td>
+							<td><div uib-tooltip="{{item.short_description.display_value}}">{{item.short_description.display_value | limitTo: 40}}{{item.short_description.display_value.length > 40 ? '...' : ''}}</div></td>
+							<td>{{item.assigned_to.display_value}}</td>
+							<td>{{item.start_date.display_value}}</td>
+							<td>{{item.end_date.display_value}}</td>
+							<td>{{item.state.display_value}}</td>
+
+						</tr>
+					</table>
+				  
+				  
+			  </div>
+			</div>			
+
+			
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-sm-12">
+			<div class="panel panel-primary">
+				<div class="panel-heading twc-panel-heading">TOC Arena</div>
+				<div class="panel-body" style="padding: 2px;">
+
+				  <div class="row">
+					  <div class="col-sm-4" ng-if="tdb.incidentsChartConfig">
+						  <highchart config="tdb.incidentsChartConfig"></highchart>  
+					  </div>
+					  <div class="col-sm-4" ng-if="!tdb.incidentsChartConfig">
+						  <div class="alert alert-warning twc-alerts" role="alert">
+							  <i class="fa fa-refresh fa-spin fa-1x fa-fw" ng-show="tdb.loadCharts"></i>
+							  <span class="sr-only" ng-show="tdb.loadCharts">Loading...</span>
+							  There are no incidents for the products you own or support. Please check later. 
+						  </div>
+					  </div>
+					  
+					  <div class="col-sm-4" ng-if="tdb.changeRequestChartConfig">
+						  <highchart config="tdb.changeRequestChartConfig"></highchart>  
+					  </div>
+					  <div class="col-sm-4" ng-if="!tdb.changeRequestChartConfig">
+						  <div class="alert alert-warning twc-alerts" role="alert">
+							  <i class="fa fa-refresh fa-spin fa-1x fa-fw" ng-show="tdb.loadCharts"></i>
+							  <span class="sr-only" ng-show="tdb.loadCharts">Loading...</span>
+							  There are no changes for the products you own or support. Please check later.
+						  </div>
+					  </div>
+					  
+					  <div class="col-sm-4" ng-if="tdb.problemsChartConfig">
+						  <highchart config="tdb.problemsChartConfig"></highchart>  
+					  </div>
+					  <div class="col-sm-4" ng-if="!tdb.problemsChartConfig">
+						  <div class="alert alert-warning twc-alerts" role="alert">
+							  <i class="fa fa-refresh fa-spin fa-1x fa-fw" ng-show="tdb.loadCharts"></i>
+							  <span class="sr-only" ng-show="tdb.loadCharts">Loading...</span>
+							  There are no problems for the products you own or support. Please check later.
+						  </div>
+					  </div>
+
+					  
+				    </div>
+
+					<div class="row">
+					  <div class="col-sm-4">
+						  <table class="table table-striped twc-dashboard-table" ng-if="tdb.incidentsChartConfig">
+							  <thead>
+								  <tr>
+									  <th>Number</th>
+									  <th>Description</th>
+									  <th>Priority</th>
+									  <th>State</th>
+									  <th>Assigned to</th>
+								  </tr>
+							  </thead>  
+							  <tr ng-repeat="item in tdb.incidentsTableConfig">
+								  <td><a ui-sref="task({id: item.sys_id})">{{item.number}}</a></td>
+								  <td><div uib-tooltip="{{item.short_description}}">{{item.short_description | limitTo: 40}}{{item.short_description.length > 40 ? '...' : ''}}</div></td>
+								  <td>{{item.priority}}</td>
+								  <td>{{item.state}}</td>
+								  <td>{{item.assigned_to.display_value}}</td>
+							  </tr>
+						  </table>
+					  </div>
+					  <div class="col-sm-4">
+						  <table class="table table-striped twc-dashboard-table" ng-if="tdb.changeRequestChartConfig">
+							  <thead>
+								  <tr>
+									  <th>Number</th>
+									  <th>Description</th>
+									  <th>Priority</th>
+									  <th>State</th>
+									  <th>Assigned to</th>
+								  </tr>
+							  </thead>  
+							  <tr ng-repeat="item in tdb.changeRequestTableConfig">
+								  <td><a ui-sref="task({id: item.sys_id})">{{item.number}}</a></td>
+								  <td><div uib-tooltip="{{item.short_description}}">{{item.short_description | limitTo: 40}}{{item.short_description.length > 40 ? '...' : ''}}</div></td>
+								  <td>{{item.priority}}</td>
+								  <td>{{item.state}}</td>
+								  <td>{{item.assigned_to.display_value}}</td>
+							  </tr>
+						  </table>
+					  </div>
+					  <div class="col-sm-4">
+						  <table class="table table-striped twc-dashboard-table" ng-if="tdb.problemsChartConfig">
+							  <thead>
+								  <tr>
+									  <th>Number</th>
+									  <th>Description</th>
+									  <th>Priority</th>
+									  <th>State</th>
+									  <th>Assigned to</th>
+								  </tr>
+							  </thead>  
+							  <tr ng-repeat="item in tdb.problemsTableConfig">
+								  <td><a ui-sref="task({id: item.sys_id})">{{item.number}}</a></td>
+								  <td><div uib-tooltip="{{item.short_description}}">{{item.short_description | limitTo: 40}}{{item.short_description.length > 40 ? '...' : ''}}</div></td>
+								  <td>{{item.priority}}</td>
+								  <td>{{item.state}}</td>
+								  <td>{{item.assigned_to.display_value}}</td>
+							  </tr>
+						  </table>
+					  </div>
+				  
+				  </div>
+					
+				  <div class="row">
+					  <div class="col-sm-4" style="text-align: center;">
+						  <div ng-if="tdb.incidentsChartConfig">
+							  <button type="button" class="btn btn-link btn-xs" ng-click="tdb.state.go('my_incidents');">View All Incidents</button>
+						  </div>
+					  </div>
+					  <div class="col-sm-4" style="text-align: center;">
+						  <div ng-if="tdb.changeRequestChartConfig">
+							  <button type="button" class="btn btn-link btn-xs" ng-click="tdb.state.go('my_change_requests');">View All Changes</button>
+						  </div>
+					  </div>
+					  <div class="col-sm-4" style="text-align: center;">
+						  <div ng-if="tdb.problemsChartConfig">
+							  <button type="button" class="btn btn-link btn-xs" ng-click="tdb.state.go('my_problems');">View All Problems</button>
+						  </div>
+					  </div>
+				  </div>
+						
+				  
+			  </div>
+			</div>			
+
+			
+		</div>
+	</div>
+
+</j:jelly>]]></html>
+        <name>toc-dahboard-2-tpl</name>
+        <processing_script/>
+        <sys_class_name>sys_ui_page</sys_class_name>
+        <sys_created_by>anton.sychikov.contractor@weather.com</sys_created_by>
+        <sys_created_on>2016-08-08 14:20:04</sys_created_on>
+        <sys_customer_update>true</sys_customer_update>
+        <sys_id>a77967aa0fc5ea006c3005cce1050e1e</sys_id>
+        <sys_mod_count>24</sys_mod_count>
+        <sys_name>toc-dahboard-2-tpl</sys_name>
+        <sys_package display_value="Product" source="x_wec_product">daa7dccd0f44220034457d4ce1050e47</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Product">daa7dccd0f44220034457d4ce1050e47</sys_scope>
+        <sys_update_name>sys_ui_page_a77967aa0fc5ea006c3005cce1050e1e</sys_update_name>
+        <sys_updated_by>anton.sychikov.contractor@weather.com</sys_updated_by>
+        <sys_updated_on>2016-08-12 13:32:39</sys_updated_on>
+    </sys_ui_page>
+</record_update>

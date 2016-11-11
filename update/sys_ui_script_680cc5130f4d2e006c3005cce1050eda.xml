@@ -1,0 +1,260 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update table="sys_ui_script">
+    <sys_ui_script action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <description>Assign group controller</description>
+        <global>false</global>
+        <name>x_wec_product.group-ctrl</name>
+        <script><![CDATA[(function () {
+    'use strict';
+
+    angular
+        .module('twc-product')
+        .controller('AssigGroupCtrl', AssigGroupCtrl);
+
+    AssigGroupCtrl.$inject = ['$scope', '$state', '$stateParams', '$http', '$q', 'ReferenceBookFactory', 'GroupFactory', 'UserFactory', 'roles', 'toastr', 'userGroups', 'userService', 'types'];
+
+    function AssigGroupCtrl($scope, $state, $stateParams, $http, $q, ReferenceBookFactory, GroupFactory, UserFactory, roles, toastr, userGroups, userService, types) {
+		
+        var gr = this,
+			deleteMemberCollection = [];
+		
+		$scope.$emit('side-bar-show-info', true);
+		
+		gr.label = $state.current.data.label;
+		
+		//gr.isEdit = $state.current.name === 'edit_group';
+		gr.isEdit = $state.current.name = false;
+		
+		gr.isToc = $state.current.data.isToc;
+		gr.state = $state;
+		
+		gr.upsertGroup = upsertGroup;
+		gr.searchAssignmentGroupByName = searchAssignmentGroupByName;
+		gr.loadGroup = loadGroup;
+		gr.isInvalid = isInvalid;
+		gr.isValid = isValid;
+		gr.addUser = addUser;
+		gr.removeUser = removeUser;
+		gr.setModel = setModel;
+		gr.searchUserByName = searchUserByName;
+		
+		if(roles){
+			gr.roles = roles.result;
+		}
+		
+		gr.selectUsersCollection = [];
+		gr.memberCollection = [];
+		gr.userCollection = [];
+		gr.model = {};
+		gr.isDisabledName = isDisabledName;
+		gr.isDisabledSaveButton = isDisabledSaveButton;
+		gr.isShowRoles = isShowRoles;
+		
+		if($stateParams.id){
+			loadGroup($stateParams.id);
+		}
+		
+		function upsertGroup(){
+			if(gr.model.sys_id && gr.model.sys_id.value){
+
+				GroupFactory.update({id: gr.model.sys_id.value}, {name: gr.model.name.value, manager: gr.model.manager.value, description: gr.model.description.value}).$promise.then(function(res){
+
+					var requests = [];
+
+					gr.memberCollection.forEach(function(user){
+						if(!user.sys_id){
+							requests.push(GroupFactory.addMember({user: user.user_id, group: gr.model.sys_id.value}).$promise);
+						}
+					});
+
+					deleteMemberCollection.forEach(function(user){
+						requests.push(GroupFactory.removeMember({id: user.sys_id}).$promise);
+					});
+
+
+					$q.all(requests).then(function (results) {
+						toastr.success('The group has been successfully updated.');
+						$state.go('my_groups');	
+					});									
+
+				});									
+
+			}else{
+
+				GroupFactory.create({name: gr.model.name.value, manager: gr.model.manager.value, description: gr.model.description.value}).$promise.then(function(res){
+					var newGroup =  res.result;
+
+					var requests = [];
+
+					gr.memberCollection.forEach(function(user){
+						requests.push(GroupFactory.addMember({user: user.user_id, group: newGroup.sys_id}));
+					});
+
+					if(gr.isToc && gr.model.roles && gr.model.roles.length > 0){
+						gr.model.roles.forEach(function(role){
+							requests.push(GroupFactory.addRole({role: role.sys_id, group: newGroup.sys_id}));
+						});
+					}
+
+					$q.all(requests).then(function (results) {
+
+						toastr.success('The group has been successfully created.');
+						if(!gr.isEdit){
+							$state.go('my_groups');	
+						}
+						
+					});									
+
+				});									
+
+			}			
+		}
+
+		function searchAssignmentGroupByName(name){
+			var sysparmQuery;
+			
+			if(gr.isToc){
+				sysparmQuery = 'nameLIKE' + name + '^typeNOT LIKE' + types.result[0].sys_id  + '^ORtypeISEMPTY^typeNOT LIKE' + types.result[1].sys_id + '^ORtypeISEMPTY'; 
+			}else{
+				var group = [];
+				userGroups.result.forEach(function(item){
+					group.push('sys_id=' + item.group.value);
+				});
+				
+				sysparmQuery = group.join('^OR') + '^nameLIKE' + name + '^typeNOT LIKE' + types.result[0].sys_id  + '^ORtypeISEMPTY^typeNOT LIKE' + types.result[1].sys_id + '^ORtypeISEMPTY'; 
+				
+			}
+			return ReferenceBookFactory.assignmentGroupSearch({sysparm_query: sysparmQuery, sysparm_limit: 20}).$promise.then(function(res){
+				return res.result;
+			});
+		}
+
+		function loadGroup(id){
+			
+			GroupFactory.get({id: id, sysparm_display_value: 'all'}).$promise.then(function(res){
+				
+				gr.model = res.result;
+				return ReferenceBookFactory.groupMemberSearch({group: id, sysparm_display_value: 'all'}).$promise; 
+				
+			}).then(function(res){
+
+				res.result.forEach(function(member){
+					gr.memberCollection.push({
+						user_id: member.user.value,
+						sys_id: member.sys_id.value,
+						name: member.user.display_value
+					});
+				});
+			});
+		}
+		
+		function searchUsers(name){
+			UserFactory.search({sysparm_query: 'nameLIKE' + name + '^' + 'ORemailLIKE' + name + '^active=true^sys_class_name=sys_user', sysparm_limit: 40}).$promise.then(function(res){
+				var tmpResult = res.result;
+				gr.userCollection = [];
+
+				tmpResult.forEach(function(tmpUser){
+
+					if(!_.find(gr.memberCollection, { user_id: tmpUser.sys_id})){
+						gr.userCollection.push(tmpUser);
+					}
+
+
+				});
+			});
+		}
+		
+        function searchUserByName(name){
+            return UserFactory.search({sysparm_query: 'nameLIKE' + name + '^' + 'ORemailLIKE' + name + '^active=true^sys_class_name=sys_user', sysparm_limit: 20, preloader: false}).$promise.then(function(res){
+                return res.result;
+            });
+        }
+		
+
+		$scope.$watch('gr.userSearch', function (tmpStr){
+			if(tmpStr){
+				searchUsers(tmpStr);
+			}
+		});
+
+		function addUser(){
+			gr.selectUsersCollection.forEach(function(user){
+				gr.memberCollection.push({
+					user_id: user.sys_id,
+					name: user.name
+				});
+
+				_.remove(gr.userCollection, {sys_id: user.sys_id});
+			});
+
+
+		}
+
+		function removeUser(){
+
+			gr.selectMemberCollection.forEach(function(removeUser){
+
+				gr.userCollection.push(removeUser);
+
+				_.remove(gr.memberCollection, {user_id: removeUser.user_id});
+
+				if(removeUser.sys_id){
+					deleteMemberCollection.push(removeUser);
+				}
+
+			});
+		}
+		
+		
+		function isDisabledName(){
+			return gr.isToc && gr.model.sys_id;
+		}
+
+		function isShowRoles(){
+			return gr.isToc && !gr.model.sys_id;
+		}
+		
+		function isInvalid(field){
+			return field.$invalid && field.$dirty;
+		}
+
+		function isValid(field){
+			return field.$valid && field.$dirty;
+		}
+
+		function isDisabledSaveButton(){
+			return gr.groupForm.$invalid || (!gr.isToc && !gr.model.sys_id);
+		}
+
+        function setModel($item, $model, $label, $event, field){
+			gr.model[field] = {
+				display_value: $item.name,
+				value: $item.sys_id
+			}
+        }
+		
+		
+    }
+
+})();
+
+]]></script>
+        <script_name>group-ctrl</script_name>
+        <sys_class_name>sys_ui_script</sys_class_name>
+        <sys_created_by>anton.sychikov.contractor@weather.com</sys_created_by>
+        <sys_created_on>2016-08-10 10:48:21</sys_created_on>
+        <sys_customer_update>true</sys_customer_update>
+        <sys_id>680cc5130f4d2e006c3005cce1050eda</sys_id>
+        <sys_mod_count>52</sys_mod_count>
+        <sys_name>x_wec_product.group-ctrl</sys_name>
+        <sys_package display_value="Product" source="x_wec_product">daa7dccd0f44220034457d4ce1050e47</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Product">daa7dccd0f44220034457d4ce1050e47</sys_scope>
+        <sys_update_name>sys_ui_script_680cc5130f4d2e006c3005cce1050eda</sys_update_name>
+        <sys_updated_by>anton.sychikov.contractor@weather.com</sys_updated_by>
+        <sys_updated_on>2016-10-17 10:41:55</sys_updated_on>
+        <use_scoped_format>false</use_scoped_format>
+    </sys_ui_script>
+</record_update>

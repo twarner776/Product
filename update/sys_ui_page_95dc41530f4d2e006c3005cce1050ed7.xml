@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update table="sys_ui_page">
+    <sys_ui_page action="INSERT_OR_UPDATE">
+        <category>general</category>
+        <client_script/>
+        <description>Template for assign group</description>
+        <direct>true</direct>
+        <endpoint>x_wec_product_assig-group-tpl.do</endpoint>
+        <html><![CDATA[<?xml version="1.0" encoding="utf-8" ?>
+<j:jelly trim="false" xmlns:j="jelly:core" xmlns:g="glide" xmlns:j2="null" xmlns:g2="null">
+	<ol class="breadcrumb">
+		<li><a href="https://service.weather.com">Home</a></li>
+		<li><a href="/x_wec_product_box-app.do#/dashboard">My Apps</a></li>
+		<li><a ui-sref="dashboard">Dashboard</a></li>
+		<li class="active">{{gr.label}}</li>
+	</ol>
+	<h1 class="page-header twc-header">{{gr.label}}</h1>
+
+	<h4 ng-if="gr.isEdit">Find An Existing Group</h4>
+	<form role="form" ng-if="gr.isEdit">  
+		<div class="row">
+			<div class="col-xs-12">
+				<div class="input-group input-group-sm">
+					<div class="input-group-addon"><i class="fa fa-search" aria-hidden="true"></i></div>
+					<input type="text" class="form-control" 
+						   ng-model="gr.existGroup"
+						   placeholder="Please typeahead search value"
+						   typeahead-on-select="gr.state.go('edit_group', {id: $item.sys_id})"
+						   uib-typeahead="agroup as agroup.name for agroup in gr.searchAssignmentGroupByName($viewValue)"
+						   typeahead-wait-ms="500"/>
+				</div>
+			</div>
+		</div>
+	</form>
+	<hr ng-if="gr.isEdit"/>
+
+	<form class="form-horizontal twc-form" name="gr.groupForm" novalidate="true" autocomplete="off">
+		<div class="row">
+			<div class="col-sm-12">
+
+				<div class="form-group form-group-sm required" ng-class="{'has-error': gr.isInvalid(gr.groupForm['name'])}">
+					<label class="col-sm-2 control-label" uib-tooltip="The name of the assignment group">Assignment Group Name</label>
+					<div class="col-sm-10">
+						<input type="text" class="form-control" ng-model="gr.model.name.value" name="name" ng-required="true" ng-disabled="gr.isDisabledName()"/>
+					</div>
+				</div>
+
+				<div class="form-group form-group-sm required" ng-class="{'has-error': gr.isInvalid(gr.groupForm['manager'])}">
+					<label class="col-sm-2 control-label">Manager</label>
+					<div class="col-sm-10">
+						<div class="input-group">
+						  <div class="input-group-addon"><i class="fa fa-search" aria-hidden="true"></i></div>
+						  <input type="text" class="form-control" ng-required="true" name="manager"
+								 placeholder="Manager of the Assignment Group"
+								 uib-typeahead="user as (user.name + ' (' + user.email + ')') for user in gr.searchUserByName($viewValue)"
+								 typeahead-on-select="gr.setModel($item, $model, $label, $event, 'manager')"
+								 typeahead-wait-ms="500"
+								 typeahead-editable="false"
+								 ng-model="gr.model.manager.display_value" />
+
+						</div>
+						
+					</div>
+				</div>
+
+				<div class="form-group form-group-sm">
+					<label class="col-sm-2 control-label">Description</label>
+					<div class="col-sm-10">
+						<textarea name="description" class="form-control" ng-model="gr.model.description.value"></textarea>
+					</div>
+				</div>
+				
+				
+				<div class="form-group form-group-sm required" ng-class="{'has-error': gr.isInvalid(gr.groupForm['groups'])}" ng-if="gr.isShowRoles()">
+					<label class="col-sm-2 control-label">Roles</label>
+					<div class="col-sm-10">
+						<select class="form-control" 
+								multiple="multiple" 
+								ng-model="gr.model.roles"
+								ng-options="role as role.name for role in gr.roles"
+								ng-required="true"
+								name="groups"
+								size="3"></select>
+					</div>
+				
+				</div>
+				
+				<div class="form-group form-group-sm">
+					
+					<label class="col-sm-2 control-label">Search Users</label>
+					<div class="col-sm-4">
+
+						<div class="input-group input-group-sm">
+						  <div class="input-group-addon"><i class="fa fa-search" aria-hidden="true"></i></div>
+						  <input type="text" class="form-control" ng-model="gr.userSearch" ng-model-options="{debounce: 1000}"/>
+						</div>
+						
+					</div>
+
+					<label class="col-sm-2 control-label">Group Members List</label>
+					<div class="col-sm-3">
+						<p class="form-control-static">{{gr.model.name.display_value}}</p>
+					</div>
+					
+				
+				</div>
+
+				<div class="form-group form-group-sm">
+					
+					<div class="col-sm-4 col-sm-offset-2">
+
+						<select class="form-control input-sm" 
+								multiple="multiple" 
+								ng-model="gr.selectUsersCollection"
+								ng-options="user as user.name for user in gr.userCollection"
+								size="10"></select>
+						
+					</div>
+					<div class="col-sm-1" style="text-align: center; margin-top: 50px;">
+						<div class="btn-group-vertical">
+						  <button type="button" class="btn btn-primary" ng-click="gr.addUser();"><i class="fa fa-chevron-right" aria-hidden="true"></i></button>
+						  <button type="button" class="btn btn-primary" ng-click="gr.removeUser();"><i class="fa fa-chevron-left" aria-hidden="true"></i></button>
+						</div>					
+					</div>
+					<div class="col-sm-5">
+							<select class="form-control input-sm" 
+									multiple="multiple" 
+									ng-model="gr.selectMemberCollection"
+									ng-options="user as user.name for user in gr.memberCollection"
+									size="10"></select>
+					</div>
+						
+				
+				</div>
+				
+			</div>
+			<div class="col-sm-12">
+
+			  <div class="form-group">
+				<div class="col-sm-offset-2 col-sm-10">
+				  <button type="submit" 
+						  ng-disabled="gr.isDisabledSaveButton()"
+						  ng-click="gr.upsertGroup()"
+						  ng-class="{'btn-primary': gr.groupForm.$dirty, 'btn-default active': gr.groupForm.$pristine}"
+						  class="btn btn-sm">Save &amp; Proceed</button>
+
+					<button type="button" 
+						  class="btn btn-default btn-sm pull-right" ng-click="gr.state.go('my_groups')">Cancel</button>
+				</div>
+			  </div>				
+			</div>
+			
+		</div>
+		
+	</form> 			
+	
+	
+</j:jelly>]]></html>
+        <name>assig-group-tpl</name>
+        <processing_script/>
+        <sys_class_name>sys_ui_page</sys_class_name>
+        <sys_created_by>anton.sychikov.contractor@weather.com</sys_created_by>
+        <sys_created_on>2016-08-10 10:50:57</sys_created_on>
+        <sys_customer_update>true</sys_customer_update>
+        <sys_id>95dc41530f4d2e006c3005cce1050ed7</sys_id>
+        <sys_mod_count>39</sys_mod_count>
+        <sys_name>assig-group-tpl</sys_name>
+        <sys_package display_value="Product" source="x_wec_product">daa7dccd0f44220034457d4ce1050e47</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Product">daa7dccd0f44220034457d4ce1050e47</sys_scope>
+        <sys_update_name>sys_ui_page_95dc41530f4d2e006c3005cce1050ed7</sys_update_name>
+        <sys_updated_by>anton.sychikov.contractor@weather.com</sys_updated_by>
+        <sys_updated_on>2016-10-17 10:41:38</sys_updated_on>
+    </sys_ui_page>
+</record_update>

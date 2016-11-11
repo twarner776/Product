@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update table="sys_ui_page">
+    <sys_ui_page action="INSERT_OR_UPDATE">
+        <category>general</category>
+        <client_script/>
+        <description/>
+        <direct>true</direct>
+        <endpoint>x_wec_product_modal-create-subscriptions-tpl.do</endpoint>
+        <html><![CDATA[<?xml version="1.0" encoding="utf-8" ?>
+<j:jelly trim="false" xmlns:j="jelly:core" xmlns:g="glide" xmlns:j2="null" xmlns:g2="null">
+	<div class="modal-header">
+		<h3 class="modal-title">My Subscriptions</h3>
+	</div>
+	<div class="modal-body">
+		
+		
+	<form class="form-horizontal twc-form" name="vm.productSubscriptionsForm" novalidate="true" autocomplete="off">
+		<div class="form-group form-group-sm">
+			<label class="col-sm-6 control-label">Email:&#160;</label>
+			<div class="col-sm-6">
+				<input type="email" class="form-control" ng-model="vm.user.email" disabled="true" />
+			</div>
+			
+		</div>				
+		<div class="form-group form-group-sm required" ng-class="{'has-error': vm.isInvalid(vm.productSubscriptionsForm['u_name_sub_mobile_phone'])}">
+			<label class="col-sm-6 control-label">Mobile Phone:&#160;</label>
+			<div class="col-sm-6">
+				<input type="text" class="form-control" ng-model="vm.user.mobile_phone" name="u_name_sub_mobile_phone" ng-required="true"/>
+			</div>
+		</div>
+
+		<div class="form-group form-group-sm">
+			<label class="col-sm-6 control-label">Minor Event&#160;(P4, P5):&#160;</label>
+			<div class="col-sm-6">
+				<label class="checkbox-inline">
+					<input type="checkbox"  ng-true-value="'true'" ng-false-value="'false'" ng-model="vm.model.u_low_email" /> eMail
+				</label>
+				<label class="checkbox-inline">
+					<input type="checkbox"  ng-true-value="'true'" ng-false-value="'false'" ng-model="vm.model.u_low_sms" /> SMS
+				</label>						
+			</div>
+		</div>			
+
+		<div class="form-group form-group-sm">
+			<label class="col-sm-6 control-label">Degraded Performance&#160;(P2, P3):&#160;</label>
+			<div class="col-sm-6">
+				<label class="checkbox-inline">
+					<input type="checkbox"  ng-true-value="'true'" ng-false-value="'false'" ng-model="vm.model.u_medium_email" /> eMail
+				</label>
+				<label class="checkbox-inline">
+					<input type="checkbox"  ng-true-value="'true'" ng-false-value="'false'" ng-model="vm.model.u_medium_sms" /> SMS
+				</label>						
+			</div>
+		</div>				
+
+		<div class="form-group form-group-sm">
+			<label class="col-sm-6 control-label">Outage / Major Event&#160;(P1):&#160;</label>
+			<div class="col-sm-6">
+				<label class="checkbox-inline">
+					<input type="checkbox"  ng-true-value="'true'" ng-false-value="'false'" ng-model="vm.model.u_high_email" /> eMail
+				</label>
+				<label class="checkbox-inline">
+					<input type="checkbox"  ng-true-value="'true'" ng-false-value="'false'" ng-model="vm.model.u_high_sms" ng-disabled="vm.isOnwer"/> SMS
+				</label>						
+			</div>
+		</div>				
+
+		<div class="form-group form-group-sm">
+			<label class="col-sm-6 control-label">Problem Notifications:&#160;</label>
+			<div class="col-sm-6">
+				<label class="checkbox-inline">
+					<input type="checkbox"  ng-true-value="'true'" ng-false-value="'false'" ng-model="vm.model.u_problem_email" /> eMail
+				</label>
+				<label class="checkbox-inline">
+					<input type="checkbox"  ng-true-value="'true'" ng-false-value="'false'" ng-model="vm.model.u_problem_sms" /> SMS
+				</label>						
+			</div>
+		</div>				
+
+		<div class="form-group form-group-sm">
+			<label class="col-sm-6 control-label">Change Notifications:&#160;</label>
+			<div class="col-sm-6">
+				<label class="checkbox-inline">
+					<input type="checkbox"  ng-true-value="'true'" ng-false-value="'false'" ng-model="vm.model.u_change_email" /> eMail
+				</label>
+				<label class="checkbox-inline">
+					<input type="checkbox"  ng-true-value="'true'" ng-false-value="'false'" ng-model="vm.model.u_change_sms" /> SMS
+				</label>						
+			</div>
+		</div>				
+		
+		
+	</form>
+		
+	</div>
+	
+	<div class="modal-footer">
+		<button class="btn btn-default btn-sm" type="button" ng-click="vm.cancel()">Cancel</button>
+		<button class="btn btn-primary btn-sm" type="button" ng-click="vm.ok()" ng-disabled="vm.productSubscriptionsForm.$invalid">Save</button>
+	</div>
+	
+</j:jelly>]]></html>
+        <name>modal-create-subscriptions-tpl</name>
+        <processing_script/>
+        <sys_class_name>sys_ui_page</sys_class_name>
+        <sys_created_by>anton.sychikov.contractor@weather.com</sys_created_by>
+        <sys_created_on>2016-09-21 10:18:43</sys_created_on>
+        <sys_customer_update>true</sys_customer_update>
+        <sys_id>8f389df40fc2ee006c3005cce1050e8c</sys_id>
+        <sys_mod_count>12</sys_mod_count>
+        <sys_name>modal-create-subscriptions-tpl</sys_name>
+        <sys_package display_value="Product" source="x_wec_product">daa7dccd0f44220034457d4ce1050e47</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Product">daa7dccd0f44220034457d4ce1050e47</sys_scope>
+        <sys_update_name>sys_ui_page_8f389df40fc2ee006c3005cce1050e8c</sys_update_name>
+        <sys_updated_by>anton.sychikov.contractor@weather.com</sys_updated_by>
+        <sys_updated_on>2016-10-17 11:03:36</sys_updated_on>
+    </sys_ui_page>
+</record_update>

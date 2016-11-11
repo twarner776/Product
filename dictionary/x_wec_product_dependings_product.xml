@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<database>
+    <element label="dependings_product" max_length="40" name="x_wec_product_dependings_product" type="collection">
+        <element label="CI type" max_length="32" name="ci_type" reference="cmdb_rel_type" type="reference"/>
+        <element label="Dependent product id" max_length="32" name="dependent_id" reference="cmdb_ci" type="reference"/>
+        <element label="Operational status" max_length="40" name="operational_status" type="integer"/>
+        <element label="Owned by" max_length="32" name="owned_by" reference="sys_user" type="reference"/>
+        <element label="Product ID" max_length="256" name="product_id" reference="cmdb_ci" type="reference"/>
+        <element label="Product updated on" max_length="40" name="product_updated_on" type="glide_date_time"/>
+        <element label="type" max_length="8" name="type" type="string"/>
+        <element label="User ID" max_length="256" name="user_id" type="string"/>
+        <index name="index">
+            <element name="ci_type"/>
+        </index>
+        <index name="index2">
+            <element name="dependent_id"/>
+        </index>
+        <index name="index3">
+            <element name="owned_by"/>
+        </index>
+    </element>
+</database>

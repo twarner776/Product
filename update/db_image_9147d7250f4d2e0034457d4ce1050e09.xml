@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update table="db_image">
+    <db_image action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <category/>
+        <format>png</format>
+        <height>126</height>
+        <image/>
+        <name>notification.png</name>
+        <size_bytes>4884</size_bytes>
+        <sys_class_name>db_image</sys_class_name>
+        <sys_created_by>anton.sychikov.contractor@weather.com</sys_created_by>
+        <sys_created_on>2016-08-05 10:26:05</sys_created_on>
+        <sys_customer_update>true</sys_customer_update>
+        <sys_id>9147d7250f4d2e0034457d4ce1050e09</sys_id>
+        <sys_mod_count>1</sys_mod_count>
+        <sys_name>notification.png</sys_name>
+        <sys_package display_value="Product" source="x_wec_product">daa7dccd0f44220034457d4ce1050e47</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Product">daa7dccd0f44220034457d4ce1050e47</sys_scope>
+        <sys_update_name>db_image_9147d7250f4d2e0034457d4ce1050e09</sys_update_name>
+        <sys_updated_by>anton.sychikov.contractor@weather.com</sys_updated_by>
+        <sys_updated_on>2016-08-05 10:26:18</sys_updated_on>
+        <thumbnail/>
+        <width>128</width>
+    </db_image>
+    <sys_attachment action="INSERT_OR_UPDATE">
+        <average_image_color/>
+        <compressed>true</compressed>
+        <content_type>image/png</content_type>
+        <file_name>image</file_name>
+        <image_height/>
+        <image_width/>
+        <size_bytes>4884</size_bytes>
+        <size_compressed>4907</size_compressed>
+        <sys_created_by>anton.sychikov.contractor@weather.com</sys_created_by>
+        <sys_created_on>2016-08-05 10:26:18</sys_created_on>
+        <sys_id>e96797e10f4d2e0034457d4ce1050e69</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_updated_by>anton.sychikov.contractor@weather.com</sys_updated_by>
+        <sys_updated_on>2016-08-05 10:26:18</sys_updated_on>
+        <table_name>ZZ_YYdb_image</table_name>
+        <table_sys_id>9147d7250f4d2e0034457d4ce1050e09</table_sys_id>
+    </sys_attachment>
+    <sys_attachment_doc action="INSERT_OR_UPDATE">
+        <data>H4sIAAAAAAAAAA==</data>
+        <length>16</length>
+        <position>0</position>
+        <sys_attachment display_value="image" sys_id="e96797e10f4d2e0034457d4ce1050e69">e96797e10f4d2e0034457d4ce1050e69</sys_attachment>
+        <sys_created_by>anton.sychikov.contractor@weather.com</sys_created_by>
+        <sys_created_on>2016-08-05 10:26:18</sys_created_on>
+        <sys_id>2d6797e10f4d2e0034457d4ce1050e69</sys_id>
+    </sys_attachment_doc>
+    <sys_attachment_doc action="INSERT_OR_UPDATE">
+        <data>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</data>
+        <length>3736</length>
+        <position>1</position>
+        <sys_attachment display_value="image" sys_id="e96797e10f4d2e0034457d4ce1050e69">e96797e10f4d2e0034457d4ce1050e69</sys_attachment>
+        <sys_created_by>anton.sychikov.contractor@weather.com</sys_created_by>
+        <sys_created_on>2016-08-05 10:26:18</sys_created_on>
+        <sys_id>ad6797e10f4d2e0034457d4ce1050e69</sys_id>
+    </sys_attachment_doc>
+    <sys_attachment_doc action="INSERT_OR_UPDATE">
+        <data>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</data>
+        <length>2796</length>
+        <position>2</position>
+        <sys_attachment display_value="image" sys_id="e96797e10f4d2e0034457d4ce1050e69">e96797e10f4d2e0034457d4ce1050e69</sys_attachment>
+        <sys_created_by>anton.sychikov.contractor@weather.com</sys_created_by>
+        <sys_created_on>2016-08-05 10:26:18</sys_created_on>
+        <sys_id>216797e10f4d2e0034457d4ce1050e6a</sys_id>
+    </sys_attachment_doc>
+</record_update>

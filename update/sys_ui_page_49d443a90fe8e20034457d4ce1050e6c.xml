@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update table="sys_ui_page">
+    <sys_ui_page action="INSERT_OR_UPDATE">
+        <category>general</category>
+        <client_script/>
+        <description>Support information tab content</description>
+        <direct>true</direct>
+        <endpoint>x_wec_product_product-tab-1-tpl.do</endpoint>
+        <html><![CDATA[<?xml version="1.0" encoding="utf-8" ?>
+<j:jelly trim="false" xmlns:j="jelly:core" xmlns:g="glide" xmlns:j2="null" xmlns:g2="null">
+
+	<h4>{{pr.product.name.value ? pr.product.name.value + ' support information' : ' Support information'}} </h4>
+	<p>Please enter the initial assignment group to receive the incident&#160;<i class="fa fa-info-circle" aria-hidden="true" style="cursor: pointer; color: #1b809e" ng-click="pr.openInfo({template: 'support', title: 'Support information'})"></i></p>
+	<p ng-show="pr.canEdit()">If this is a new support group, please&#160;&#160;<button type="button" uib-tooltip="Create a new group if the group does not currently exist in the tool." ng-click="pr.createUserGroup();" class="btn btn-primary btn-xs">create a new group</button></p>
+	<p>If no assignment group is listed in any of the below fields, the ticket will automatically be routed to the TOC</p>
+	<form class="form-horizontal twc-form" name="pr.productSupportForm" novalidate="true" autocomplete="off">
+		<div class="row">
+			<div class="col-sm-12">
+				<div class="form-group form-group-sm required" ng-class="{'has-error': pr.isInvalid(pr.productSupportForm['u_low_group'])}">
+					<label class="col-sm-2 control-label" uib-tooltip="Any unplanned event interrupting a normal IT service operation">Minor Event&#160;(P4, P5)</label>
+					<div class="col-sm-10" ng-show="pr.canEdit()">
+						<div class="input-group input-group-sm">
+							<input type="text" class="form-control" ng-required="true" name="u_low_group"
+								   placeholder="Please typeahead search value"
+								   uib-typeahead="agroup as agroup.name for agroup in pr.searchAssignmentGroupByName($viewValue)"
+								   typeahead-on-select="pr.setModel($item, $model, $label, $event, 'u_low_group')"
+								   typeahead-wait-ms="500"
+								   typeahead-editable="false"
+								   ng-model="pr.product.u_low_group.display_value" />
+							<span class="input-group-btn">
+								<button class="btn btn-default" type="button" ng-click="pr.searchAssignmentGroup('u_low_group');"><i class="fa fa-search" aria-hidden="true"></i></button>
+							</span>
+						</div>
+
+					</div>
+					<div class="col-sm-10" ng-show="!pr.canEdit()">
+						<p class="form-control-static">{{pr.product.u_low_group.display_value}}</p>
+					</div>
+					
+				</div>
+
+				<div class="form-group form-group-sm required" ng-class="{'has-error': pr.isInvalid(pr.productSupportForm['u_med_group'])}">
+					<label class="col-sm-2 control-label" uib-tooltip="A decline in normal IT service levels, which does not entirely interrupt the IT service.">Degraded Performance&#160;(P2, P3)</label>
+					<div class="col-sm-10" ng-show="pr.canEdit()">
+						<div class="input-group input-group-sm">
+						  <input type="text" class="form-control" ng-required="true" name="u_med_group"
+								 placeholder="Please typeahead search value"
+								 uib-typeahead="agroup as agroup.name for agroup in pr.searchAssignmentGroupByName($viewValue)"
+								 typeahead-on-select="pr.setModel($item, $model, $label, $event, 'u_med_group')"
+								 typeahead-wait-ms="500"
+								 typeahead-editable="false"
+								 ng-model="pr.product.u_med_group.display_value" />
+							<span class="input-group-btn">
+								<button class="btn btn-default" type="button" ng-click="pr.searchAssignmentGroup('u_med_group');"><i class="fa fa-search" aria-hidden="true"></i></button>
+							</span>
+							
+						</div>
+
+					</div>
+					<div class="col-sm-10" ng-show="!pr.canEdit()">
+						<p class="form-control-static">{{pr.product.u_med_group.display_value}}</p>
+					</div>
+					
+				</div>
+
+				<div class="form-group form-group-sm required" ng-class="{'has-error': pr.isInvalid(pr.productSupportForm['u_high_group'])}">
+					<label class="col-sm-2 control-label" uib-tooltip="Any period of complete disruption or interruption of an IT service.">Outage / Major Event&#160;(P1)</label>
+					<div class="col-sm-10" ng-show="pr.canEdit()">
+						<div class="input-group input-group-sm">
+						  <input type="text" class="form-control" ng-required="true" name="u_high_group"
+								 placeholder="Please typeahead search value"
+								 uib-typeahead="agroup as agroup.name for agroup in pr.searchAssignmentGroupByName($viewValue)"
+								 typeahead-on-select="pr.setModel($item, $model, $label, $event, 'u_high_group')"
+								 typeahead-wait-ms="500"
+								 typeahead-editable="false"
+								 ng-model="pr.product.u_high_group.display_value" />
+							<span class="input-group-btn">
+								<button class="btn btn-default" type="button" ng-click="pr.searchAssignmentGroup('u_high_group');"><i class="fa fa-search" aria-hidden="true"></i></button>
+							</span>
+							
+						</div>
+
+					</div>
+					<div class="col-sm-10" ng-show="!pr.canEdit()">
+						<p class="form-control-static">{{pr.product.u_high_group.display_value}}</p>
+					</div>
+					
+				</div>
+
+				<hr />
+
+				<div class="form-group form-group-sm required" ng-class="{'has-error': pr.isInvalid(pr.productSupportForm['u_application_primary'])}">
+					<label class="col-sm-2 control-label">First Point of Contact</label>
+					<div class="col-sm-10" ng-show="pr.canEdit()">
+						<div class="input-group input-group-sm">
+						  <input type="text" class="form-control" ng-required="true" name="u_application_primary"
+								 placeholder="Please typeahead search value"
+								 uib-typeahead="user as (user.name + ' (' + user.email + ')') for user in pr.searchUserByName($viewValue)"
+								 typeahead-on-select="pr.setModel($item, $model, $label, $event, 'u_application_primary')"
+								 typeahead-wait-ms="500"
+								 typeahead-editable="false"
+								 ng-model="pr.product.u_application_primary.display_value" />
+							<span class="input-group-btn">
+								<button class="btn btn-default" type="button" ng-click="pr.searchUser('u_application_primary');"><i class="fa fa-search" aria-hidden="true"></i></button>
+							</span>
+							
+
+						</div>
+
+					</div>
+					<div class="col-sm-10" ng-show="!pr.canEdit()">
+						<p class="form-control-static">{{pr.product.u_application_primary.display_value}}</p>
+					</div>
+					
+				</div>
+
+				<div class="form-group form-group-sm required">
+					<label class="col-sm-2 control-label">Escalate to Second Point after</label>
+					<div class="col-sm-2" ng-show="pr.canEdit()"> 
+						<div class="input-group" ng-class="{'has-error': pr.isInvalid(pr.productSupportForm['u_primary_time_hours'])}">
+						  <span class="input-group-addon">Hours</span>
+						  <input type="number" min="0"  class="form-control" ng-model="pr.product.u_primary_time_hours" ng-required="true" name="u_primary_time_hours"/>
+						</div>					
+					</div>
+					<div class="col-sm-2" ng-show="!pr.canEdit()">
+						<p class="form-control-static">Hours: {{pr.product.u_primary_time_hours}}</p>
+					</div>
+					
+					<div class="col-sm-2" ng-show="pr.canEdit()">
+						<div class="input-group" ng-class="{'has-error': pr.isInvalid(pr.productSupportForm['u_primary_time_minutes'])}">
+						  <span class="input-group-addon">Minutes</span>
+						  <input type="number" min="0" class="form-control" ng-model="pr.product.u_primary_time_minutes" ng-required="true" name="u_primary_time_minutes"/>
+						</div>					
+					</div>
+					<div class="col-sm-2" ng-show="!pr.canEdit()">
+						<p class="form-control-static">Minutes: {{pr.product.u_primary_time_minutes}}</p>
+					</div>
+				</div>
+
+				<div class="form-group form-group-sm required" ng-class="{'has-error': pr.isInvalid(pr.productSupportForm['u_application_secondary'])}">
+					<label class="col-sm-2 control-label">Second Point of Contact</label>
+					<div class="col-sm-10" ng-show="pr.canEdit()">
+						<div class="input-group input-group-sm">
+						  <input type="text" class="form-control" ng-required="true" name="u_application_secondary"
+								 placeholder="Please typeahead search value"
+								 uib-typeahead="user as (user.name + ' (' + user.email + ')') for user in pr.searchUserByName($viewValue)"
+								 typeahead-on-select="pr.setModel($item, $model, $label, $event, 'u_application_secondary')"
+								 typeahead-wait-ms="500"
+								 typeahead-editable="false"
+								 ng-model="pr.product.u_application_secondary.display_value" />
+							<span class="input-group-btn">
+								<button class="btn btn-default" type="button" ng-click="pr.searchUser('u_application_secondary');"><i class="fa fa-search" aria-hidden="true"></i></button>
+							</span>
+
+						</div>
+						
+					</div>
+					<div class="col-sm-10" ng-show="!pr.canEdit()">
+						<p class="form-control-static">{{pr.product.u_application_secondary.display_value}}</p>
+					</div>
+					
+				</div>
+
+				<div class="form-group form-group-sm required">
+					<label class="col-sm-2 control-label">Escalate to Product Owner after</label>
+					<div class="col-sm-2" ng-show="pr.canEdit()">
+						<div class="input-group" ng-class="{'has-error': pr.isInvalid(pr.productSupportForm['u_secondary_time_hours'])}">
+						  <span class="input-group-addon">Hours</span>
+						  <input type="number" min="0"  class="form-control" ng-model="pr.product.u_secondary_time_hours" ng-required="true" name="u_secondary_time_hours"/>
+						</div>					
+					</div>
+					<div class="col-sm-2" ng-show="!pr.canEdit()">
+						<p class="form-control-static">Hours: {{pr.product.u_secondary_time_hours}}</p>
+					</div>
+					
+					<div class="col-sm-2" ng-show="pr.canEdit()">
+						<div class="input-group" ng-class="{'has-error': pr.isInvalid(pr.productSupportForm['u_secondary_time_minutes'])}">
+						  <span class="input-group-addon">Minutes</span>
+						  <input type="number" min="0" class="form-control" ng-model="pr.product.u_secondary_time_minutes" ng-required="true" name="u_secondary_time_minutes"/>
+						</div>					
+					</div>
+					<div class="col-sm-2" ng-show="!pr.canEdit()">
+						<p class="form-control-static">Minutes: {{pr.product.u_secondary_time_minutes}}</p>
+					</div>
+				</div>
+
+				<div class="form-group form-group-sm">
+					<label class="col-sm-2 control-label">Product Owner</label>
+					<div class="col-sm-4" ng-show="pr.canEdit()">
+						<input disabled="disabled" type="text" ng-model="pr.product.owned_by.display_value" class="form-control" />						
+					</div>
+					<div class="col-sm-4" ng-show="!pr.canEdit()">
+						<p class="form-control-static">{{pr.product.owned_by.display_value}}</p>
+					</div>
+					
+				</div>
+
+				  <div class="form-group" ng-show="pr.canEdit()">
+					<div class="col-sm-offset-2 col-sm-10">
+					  <button type="submit" 
+							  ng-disabled="pr.productSupportForm.$invalid"
+							  ng-click="pr.upsertSupport()"
+							  ng-class="{'btn-primary': pr.productSupportForm.$dirty, 'btn-default active': pr.productSupportForm.$pristine}"
+							  class="btn btn-sm">Save</button>
+
+					  <button type="submit" 
+						  ng-click="pr.tabActive = 2"
+						  ng-show="pr.existProduct.sys_id.value" 	
+						  ng-class="{'btn-info': pr.productSupportForm.$pristine, 'btn-default active': pr.productSupportForm.$dirty}"
+						  class="btn btn-sm" style="margin-left: 5px;">Next</button>
+
+						<button type="button" 
+							  class="btn btn-default btn-sm pull-right" ng-click="pr.state.go('dashboard')">Cancel</button>
+
+					</div>
+				  </div>				
+
+			</div>
+		</div>
+	</form>
+
+
+</j:jelly>]]></html>
+        <name>product-tab-1-tpl</name>
+        <processing_script/>
+        <sys_class_name>sys_ui_page</sys_class_name>
+        <sys_created_by>andrey.zlatin@weather.com</sys_created_by>
+        <sys_created_on>2016-07-11 12:34:10</sys_created_on>
+        <sys_customer_update>true</sys_customer_update>
+        <sys_id>49d443a90fe8e20034457d4ce1050e6c</sys_id>
+        <sys_mod_count>63</sys_mod_count>
+        <sys_name>product-tab-1-tpl</sys_name>
+        <sys_package display_value="Product" source="x_wec_product">daa7dccd0f44220034457d4ce1050e47</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Product">daa7dccd0f44220034457d4ce1050e47</sys_scope>
+        <sys_update_name>sys_ui_page_49d443a90fe8e20034457d4ce1050e6c</sys_update_name>
+        <sys_updated_by>anton.sychikov.contractor@weather.com</sys_updated_by>
+        <sys_updated_on>2016-10-04 10:23:42</sys_updated_on>
+    </sys_ui_page>
+</record_update>

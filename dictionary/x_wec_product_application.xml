@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<database>
+    <element extends="x_wec_product_table" label="Application" max_length="40" name="x_wec_product_application" type="collection">
+        <element label="Product" mandatory="true" max_length="32" name="product" reference="x_wec_product_table" reference_qual="sys_class_name=x_wec_product_table^EQ" reference_qual_condition="sys_class_name=x_wec_product_table^EQ" type="reference"/>
+        <index name="index">
+            <element name="product"/>
+        </index>
+    </element>
+</database>

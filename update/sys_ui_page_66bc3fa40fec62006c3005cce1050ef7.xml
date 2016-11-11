@@ -1,0 +1,418 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update table="sys_ui_page">
+    <sys_ui_page action="INSERT_OR_UPDATE">
+        <category>general</category>
+        <client_script/>
+        <description>Create / edit product or application template</description>
+        <direct>true</direct>
+        <endpoint>x_wec_product_product-tpl.do</endpoint>
+        <html><![CDATA[<?xml version="1.0" encoding="utf-8" ?>
+<j:jelly trim="false" xmlns:j="jelly:core" xmlns:g="glide" xmlns:j2="null" xmlns:g2="null">
+
+	<ol class="breadcrumb">
+		<li><a href="https://service.weather.com">Home</a></li>
+		<li><a href="/x_wec_product_box-app.do#/dashboard">My Apps</a></li>
+		<li><a ui-sref="dashboard">Dashboard</a></li>
+		<li class="active">Enrollment</li>
+	</ol>
+	
+	<div ng-if="!pr.canCreate()" class="row">
+		<div class="col-xs-12">
+			<p style="text-align:center;"><button class="btn btn-primary btn-lg" ng-click="pr.requestProductOwner();">Request To Become a Product Owner</button></p>
+			<p><h4 style="text-align:center;"><a href="#" ng-click="pr.openInfo({template: 'request-owner', title: 'Request To Become a Product Owner'}); $event.preventDefault();">Why did I get this message?</a></h4></p>
+		</div>
+	</div>
+	
+	<div>
+		<h4 uib-tooltip="Use this option to search for existing products or applications or to make changes to an existing product or application">Update An existing product or Application <i class="fa fa-refresh fa-spin fa-1x fa-fw ng-hide" ng-show="pr.loadingProductSearch"></i></h4>
+		<form role="form">  
+			<div class="row">
+			  <div class="col-xs-6">
+				<div class="input-group input-group-sm">
+				  <div class="input-group-addon"><i class="fa fa-search" aria-hidden="true"></i></div>
+				  <input type="text" class="form-control" 
+						 ng-model="pr.existProduct.name.display_value"
+						 typeahead-no-results="pr.noResultsProductSearch"
+						 typeahead-loading="pr.loadingProductSearch"
+						 placeholder="Please typeahead search value"
+						 typeahead-on-select="pr.state.go('product', {id: $item.sys_id})"
+						 uib-typeahead="product as product.name for product in pr.searchProductByName($viewValue)"
+						 typeahead-wait-ms="500"/>
+				</div>
+				<div ng-show="pr.noResultsProductSearch" class="alert alert-warning twc-side-nav-alert">
+					 No Results Found.&#160;<a href="" ng-click="pr.tabActive = 0; pr.showForm = true; pr.initNewProduct(); pr.existProduct = {}; pr.noResultsProductSearch = false;">Create a new product / application</a>			  
+				</div>			  
+			  </div>
+			  <div class="col-xs-6">
+				<button type="submit" class="btn btn-primary btn-sm pull-left" ng-if="pr.existProduct.sys_id.value" ng-click="pr.showBSMView()">View Hierarchy</button>			  
+				  <button type="submit" class="btn btn-primary pull-right" ng-click="pr.tabActive = 0; pr.showForm = true; pr.initNewProduct(); pr.existProduct = {}; pr.noResultsProductSearch = false;" ng-show="pr.canCreate()">Create a new product / application</button>			  
+			  </div>
+			</div>
+		</form>
+		
+		<hr />
+
+		<uib-tabset active="pr.tabActive" ng-class="{'disabled': !pr.showForm}">
+
+			<uib-tab index="0" heading="Product details">
+				 <div ng-include="'x_wec_product_product-tab-0-tpl.do'"></div>
+			</uib-tab>
+			<uib-tab index="1" heading="Support information" disable="!pr.existProduct.sys_id.value">
+				 <div ng-include="'x_wec_product_product-tab-1-tpl.do'"></div>
+			</uib-tab>
+			<uib-tab index="2" heading="Group Notifications" disable="!pr.existProduct.sys_id.value">
+				<div ng-include="'x_wec_product_product-tab-4-tpl.do'"></div>
+			</uib-tab>
+			<uib-tab index="3" heading="Relationships" disable="!pr.existProduct.sys_id.value">
+				<div ng-include="'x_wec_product_product-tab-2-tpl.do'"></div>
+			</uib-tab>
+		</uib-tabset>
+	
+	</div>
+	
+	<div ng-if="pr.showRequestProductOwner" class="row">
+		<div class="col-xs-12">
+			<iframe src="{{pr.urlRequestProductOwner}}" height="100%" width="100%" style="margin-top: 10px;"></iframe>
+		</div>
+	</div>
+	<!--
+	<div ng-if="pr.showProductInfo" class="row">
+		
+
+		<h4 class="page-header">Product details</h4>
+		<form class="form-horizontal twc-form">
+			<div class="col-xs-6">
+
+				<div class="form-group form-group-sm">
+					<label class="col-sm-4 control-label" uib-tooltip="Name of NEW product or application">Product Name</label>
+					<div class="col-sm-8">
+						<p class="form-control-static">{{pr.product.name.display_value}}</p>
+					</div>
+
+				</div>
+
+				<div class="form-group form-group-sm ">
+					<label class="col-sm-4 control-label" uib-tooltip="The owner of this product or application (Product Manager)">Product Owner</label>
+					<div class="col-sm-8">
+						<p class="form-control-static">{{pr.product.owned_by.display_value}}</p>
+					</div>
+				</div>
+
+				<div class="form-group form-group-sm">
+					<label class="col-sm-4 control-label" uib-tooltip="The Product Owner's Department">Department</label>
+					<div class="col-sm-8">
+						<p class="form-control-static">{{pr.product.department.display_value}}</p>
+					</div>
+				</div>
+
+				<div class="form-group form-group-sm ">
+					<label class="col-sm-4 control-label" uib-tooltip="The Product Owner's Organizational Unit">Organizational Unit</label>
+					<div class="col-sm-8">
+						<p class="form-control-static">{{pr.product.u_organizational_unit.display_value}}</p>
+
+					</div>
+				</div>
+
+				<div class="form-group form-group-sm ">
+					<label class="col-sm-4 control-label" uib-tooltip="A business unit or organization that owns business services.  Example: CTS">Business Group<i class="fa fa-question-circle-o" aria-hidden="true" style="position: absolute;right: 0;top: 8px;"></i></label>
+					<div class="col-sm-8">
+						<p class="form-control-static">{{pr.product.u_business_group.display_value}}</p>
+					</div>
+				</div>
+
+				<div class="form-group form-group-sm ">
+					<label class="col-sm-4 control-label" uib-tooltip="A high-level collection of IT products used by external customers or by internal users.  Example: Telephony, Web Services, Collaboration, Enterprise Services">Business Services<i class="fa fa-question-circle-o" aria-hidden="true" style="position: absolute;right: 0;top: 8px;"></i></label>
+					<div class="col-sm-8">
+						<p class="form-control-static">{{pr.product.u_business_service.display_value}}</p>
+					</div>
+				</div>
+
+			</div>
+
+			<div class="col-xs-6">
+
+				<div class="form-group form-group-sm ">
+					<label class="col-sm-4 control-label" uib-tooltip="What is the current operational status for the product or application">Operational Status</label>
+					<div class="col-sm-8">
+						<p class="form-control-static">{{pr.product.operational_status.display_value}}</p>
+					</div>
+				</div>
+
+				<div class="form-group form-group-sm ">
+					<label class="col-sm-4 control-label" uib-tooltip="Support team that owns the product or application.  If new, please leave blank and create a new group on the Support Information tab.">Assignment Group</label>
+					<div class="col-sm-8">
+						<p class="form-control-static">{{pr.product.assignment_group.display_value}}</p>
+					</div>
+				</div>
+
+				<div class="form-group form-group-sm ">
+					<label class="col-sm-4 control-label" uib-tooltip="Is this physical - On Prem or Virtual - SAAS?">Type</label>
+					<div class="col-sm-8">
+						<p class="form-control-static">{{pr.product.u_product_type.display_value}}</p>
+					</div>
+				</div>
+
+				<div class="form-group form-group-sm" ng-hide="pr.product.u_product_type.value === 'SAAS'">
+					<label class="col-sm-4 control-label" uib-tooltip="If On Prem, please select the location of this product">Location</label>
+					<div class="col-sm-8">
+						<p class="form-control-static">{{pr.product.location.display_value}}</p>
+					</div>
+				</div>
+
+				<div class="form-group form-group-sm ">
+					<label class="col-sm-4 control-label" uib-tooltip="Please notate whether this is a product or application">Class</label>
+					<div class="col-sm-8">
+						<p class="form-control-static">{{pr.product.sys_class_name.display_value}}</p>
+					</div>
+				</div>
+
+
+				<div class="form-group form-group-sm">
+					<div class="col-sm-offset-4 col-sm-8">
+						<div class="checkbox">
+							<label uib-tooltip="Is this product or application accessible by customers that purchase TWC products?">
+								<input type="checkbox" ng-model="pr.product.u_client_facing.value" ng-true-value="'true'" ng-false-value="'false'" disabled="true"/> Client Facing 
+							</label>
+						</div>
+					</div>
+				</div>	
+
+			</div>
+
+			<div class="col-sm-10">
+
+				<div class="form-group form-group-sm ">
+					<label class="col-sm-2 control-label" uib-tooltip="Provide a brief description for the buisness or consumer purpose for this product or application.">Description</label>
+					<div class="col-sm-10">
+						<p class="form-control-static">{{pr.product.short_description.display_value}}</p>
+					</div>
+				</div>
+
+			</div>			
+
+		</form>
+
+		
+		
+		<div class="col-sm-10">
+			<h4 class="page-header">Support Information</h4>
+			<form class="form-horizontal twc-form">
+				<div class="col-sm-12">
+
+					<div class="form-group form-group-sm">
+						<label class="col-sm-2 control-label" uib-tooltip="Any unplanned event interrupting a normal IT service operation">Minor Event&#160;(P4, P5)</label>
+						<div class="col-sm-10">
+							<p class="form-control-static">{{pr.product.u_low_group.display_value}}</p>
+						</div>
+					</div>
+
+					<div class="form-group form-group-sm">
+						<label class="col-sm-2 control-label" uib-tooltip="A decline in normal IT service levels, which does not entirely interrupt the IT service.">Degraded Performance&#160;(P2, P3)</label>
+						<div class="col-sm-10">
+							<p class="form-control-static">{{pr.product.u_med_group.display_value}}</p>
+						</div>
+					</div>
+
+					<div class="form-group form-group-sm ">
+						<label class="col-sm-2 control-label" uib-tooltip="Any period of complete disruption or interruption of an IT service.">Outage / Major Event&#160;(P1)</label>
+						<div class="col-sm-10">
+							<p class="form-control-static">{{pr.product.u_high_group.display_value}}</p>222
+						</div>
+					</div>
+
+					<hr />
+
+					<div class="form-group form-group-sm">
+						<label class="col-sm-2 control-label">First Point of Contact</label>
+						<div class="col-sm-10">
+							<p class="form-control-static">{{pr.product.u_application_primary.display_value}}</p>
+						</div>
+					</div>
+
+					<div class="form-group form-group-sm">
+						<label class="col-sm-2 control-label">Escalate to Second Point after</label>
+						<div class="col-sm-2">
+							<div class="input-group">
+							  <span class="input-group-addon">Hours</span>
+							  <input type="number" min="0"  class="form-control" ng-model="pr.product.u_primary_time_hours" ng-required="true" name="u_primary_time_hours" disabled="true"/>
+							</div>					
+						</div>
+						<div class="col-sm-2">
+							<div class="input-group">
+							  <span class="input-group-addon">Minutes</span>
+							  <input type="number" min="0" class="form-control" ng-model="pr.product.u_primary_time_minutes" ng-required="true" name="u_primary_time_minutes" disabled="true"/>
+							</div>					
+						</div>
+					</div>
+
+					<div class="form-group form-group-sm ">
+						<label class="col-sm-2 control-label">Second Point of Contact</label>
+						<div class="col-sm-10">
+							<p class="form-control-static">{{pr.product.u_application_secondary.display_value}}</p>
+						</div>
+					</div>
+
+					<div class="form-group form-group-sm">
+						<label class="col-sm-2 control-label">Escalate to Product Owner after</label>
+						<div class="col-sm-2">
+							<div class="input-group" ng-class="{'has-error': pr.isInvalid(pr.productSupportForm['u_secondary_time_hours'])}">
+							  <span class="input-group-addon">Hours</span>
+							  <input type="number" min="0"  class="form-control" ng-model="pr.product.u_secondary_time_hours" ng-required="true" name="u_secondary_time_hours" disabled="true"/>
+							</div>					
+						</div>
+						<div class="col-sm-2">
+							<div class="input-group" ng-class="{'has-error': pr.isInvalid(pr.productSupportForm['u_secondary_time_minutes'])}">
+							  <span class="input-group-addon">Minutes</span>
+							  <input type="number" min="0" class="form-control" ng-model="pr.product.u_secondary_time_minutes" ng-required="true" name="u_secondary_time_minutes" disabled="true"/>
+							</div>					
+						</div>
+					</div>
+
+				</div>
+			</form>	
+			
+		</div>
+		
+		<div class="col-sm-10">
+			<h4 class="page-header">Group Notifications</h4>
+			<form class="form-horizontal twc-form">
+				<div class="col-sm-4">
+
+					<div class="form-group form-group-sm">
+						<label class="col-sm-6 control-label">Minor Event&#160;(P4, P5)</label>
+						<div class="col-sm-6">
+							<label class="checkbox-inline">
+								<input type="checkbox"  ng-true-value="'true'" ng-false-value="'false'" ng-model="pr.notifications.u_low_email" disabled="disabled"/> eMail
+							</label>
+							<label class="checkbox-inline">
+								<input type="checkbox"  ng-true-value="'true'" ng-false-value="'false'" ng-model="pr.notifications.u_low_sms" disabled="disabled"/> SMS
+							</label>						
+						</div>
+					</div>				
+
+					<div class="form-group form-group-sm">
+						<label class="col-sm-6 control-label">Degraded Performance&#160;(P2, P3)</label>
+						<div class="col-sm-6">
+							<label class="checkbox-inline">
+								<input type="checkbox"  ng-true-value="'true'" ng-false-value="'false'" ng-model="pr.notifications.u_medium_email" disabled="disabled"/> eMail
+							</label>
+							<label class="checkbox-inline">
+								<input type="checkbox"  ng-true-value="'true'" ng-false-value="'false'" ng-model="pr.notifications.u_medium_sms" disabled="disabled"/> SMS
+							</label>						
+						</div>
+					</div>				
+
+					<div class="form-group form-group-sm">
+						<label class="col-sm-6 control-label">Outage / Major Event&#160;(P1)</label>
+						<div class="col-sm-6">
+							<label class="checkbox-inline">
+								<input type="checkbox"  ng-true-value="'true'" ng-false-value="'false'" ng-model="pr.notifications.u_high_email" disabled="disabled"/> eMail
+							</label>
+							<label class="checkbox-inline">
+								<input type="checkbox"  ng-true-value="'true'" ng-false-value="'false'" ng-model="pr.notifications.u_high_sms" disabled="disabled"/> SMS
+							</label>						
+						</div>
+					</div>				
+
+					<div class="form-group form-group-sm">
+						<label class="col-sm-6 control-label">Problem Notifications</label>
+						<div class="col-sm-6">
+							<label class="checkbox-inline">
+								<input type="checkbox"  ng-true-value="'true'" ng-false-value="'false'" ng-model="pr.notifications.u_problem_email" disabled="disabled"/> eMail
+							</label>
+							<label class="checkbox-inline">
+								<input type="checkbox"  ng-true-value="'true'" ng-false-value="'false'" ng-model="pr.notifications.u_problem_sms" disabled="disabled"/> SMS
+							</label>						
+						</div>
+					</div>				
+
+				</div>
+				
+			</form>	
+		</div>
+		<div class="col-sm-12">
+			<h4 class="page-header">Relationships</h4>
+		<div class="col-sm-6">
+			<div class="panel panel-default">
+			  <div class="panel-heading twc-panel-heading">Downstream Relationship</div>
+			  <div class="panel-body">
+
+				  <table class="table table-striped twc-table">
+					  <thead>
+						  <tr>
+							  <th>Child</th>
+							  <th>Type</th>
+							  <th>My Item</th>
+							  <th></th>
+						  </tr>
+					  </thead>
+					  <tbody>
+						  <tr ng-repeat="rel in pr.relationshipDownstream">
+							  <td>{{rel.child.display_value}}</td>
+							  <td>
+								  <span>{{rel.type.display_value.split('::')[0]}}</span>
+							  </td>
+							  <td>{{pr.product.name.value}}</td>
+						  </tr>
+					  </tbody>
+				  </table>
+				  
+			  </div>
+			</div>
+			
+		</div>
+		<div class="col-sm-6">
+			<div class="panel panel-default">
+			  <div class="panel-heading twc-panel-heading">
+				Upstream Relationship
+			  </div>
+			  <div class="panel-body">
+				  
+				  <table class="table table-striped twc-table">
+					  <thead>
+						  <tr>
+							  <th>Parent</th>
+							  <th>Type</th>							  
+							  <th>My Item</th>
+							  <th></th>
+						  </tr>
+					  </thead>
+					  <tbody>
+						  <tr ng-repeat="rel in pr.relationshipUpstream">
+							  <td>{{rel.parent.display_value}}</td>
+							  <td>
+								  <span>{{rel.type.display_value.split('::')[1]}}</span>
+							  </td>
+							  <td>{{pr.product.name.value}}</td>
+						  </tr>
+					  </tbody>
+				  </table>
+			  </div>
+			</div>
+			
+		</div>			
+			
+		</div>
+	</div>
+	-->
+	
+	
+</j:jelly>]]></html>
+        <name>product-tpl</name>
+        <processing_script/>
+        <sys_class_name>sys_ui_page</sys_class_name>
+        <sys_created_by>andrey.zlatin@weather.com</sys_created_by>
+        <sys_created_on>2016-07-08 14:04:38</sys_created_on>
+        <sys_customer_update>true</sys_customer_update>
+        <sys_id>66bc3fa40fec62006c3005cce1050ef7</sys_id>
+        <sys_mod_count>94</sys_mod_count>
+        <sys_name>product-tpl</sys_name>
+        <sys_package display_value="Product" source="x_wec_product">daa7dccd0f44220034457d4ce1050e47</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Product">daa7dccd0f44220034457d4ce1050e47</sys_scope>
+        <sys_update_name>sys_ui_page_66bc3fa40fec62006c3005cce1050ef7</sys_update_name>
+        <sys_updated_by>anton.sychikov.contractor@weather.com</sys_updated_by>
+        <sys_updated_on>2016-10-04 13:00:12</sys_updated_on>
+    </sys_ui_page>
+</record_update>

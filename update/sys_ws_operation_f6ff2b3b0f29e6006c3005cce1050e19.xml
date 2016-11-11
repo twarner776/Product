@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update table="sys_ws_operation">
+    <sys_ws_operation action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <consumes>application/json,application/xml,text/xml</consumes>
+        <consumes_customized>false</consumes_customized>
+        <default_operation_uri/>
+        <enforce_acl/>
+        <http_method>GET</http_method>
+        <name>Users products</name>
+        <operation_script><![CDATA[(function process(/*RESTAPIRequest*/ request, /*RESTAPIResponse*/ response) {
+	var queryParams = request.queryParams;
+    
+	var grmember = new GlideRecord('sys_user_grmember'), 
+		userProducts = new GlideRecord('x_wec_product_table'),
+		tasks = new GlideRecord('x_wec_product_table'),
+		grmemberIds = [];
+	grmember.addEncodedQuery('user=' + queryParams.user[0]);
+	grmember.query();
+	
+	
+	while (grmember.next()) {
+		grmemberIds.push('assignment_group=' + grmember.getValue('group'));
+	}
+	
+	userProducts.addEncodedQuery(grmemberIds.join('^OR') + '^ORowned_by=' + queryParams.user[0])
+	userProducts.query();
+	
+	var deleted = new GlideRecord('x_wec_product_dependings_product');
+	deleted.addQuery('user_id', queryParams.user[0]);
+	deleted.addQuery('type', 'user');
+	deleted.deleteMultiple();
+
+	while (userProducts.next()) {
+		var gr = new GlideRecord('x_wec_product_dependings_product');
+		gr.initialize(); 
+		gr.user_id = queryParams.user[0]; 
+		gr.product_id = userProducts.getValue('sys_id'); 
+		gr.type = 'user';
+		gr.insert();
+	}
+	
+	return {
+		status: 'ok'
+	}
+
+
+})(request, response);]]></operation_script>
+        <operation_uri>/api/x_wec_product/table/dependings/user</operation_uri>
+        <produces>application/json,application/xml,text/xml</produces>
+        <produces_customized>false</produces_customized>
+        <relative_path>/dependings/user</relative_path>
+        <request_example/>
+        <requires_acl_authorization>false</requires_acl_authorization>
+        <requires_authentication>true</requires_authentication>
+        <short_description/>
+        <sys_class_name>sys_ws_operation</sys_class_name>
+        <sys_created_by>anton.sychikov.contractor@weather.com</sys_created_by>
+        <sys_created_on>2016-09-06 08:33:58</sys_created_on>
+        <sys_customer_update>true</sys_customer_update>
+        <sys_id>f6ff2b3b0f29e6006c3005cce1050e19</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>Users products</sys_name>
+        <sys_package display_value="Product" source="x_wec_product">daa7dccd0f44220034457d4ce1050e47</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Product">daa7dccd0f44220034457d4ce1050e47</sys_scope>
+        <sys_update_name>sys_ws_operation_f6ff2b3b0f29e6006c3005cce1050e19</sys_update_name>
+        <sys_updated_by>anton.sychikov.contractor@weather.com</sys_updated_by>
+        <sys_updated_on>2016-09-06 08:33:58</sys_updated_on>
+        <web_service_definition display_value="Table API">365010a60ffce2006c3005cce1050e21</web_service_definition>
+        <web_service_version/>
+    </sys_ws_operation>
+</record_update>

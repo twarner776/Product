@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update table="sys_ws_operation">
+    <sys_ws_operation action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <consumes>application/json,application/xml,text/xml</consumes>
+        <consumes_customized>false</consumes_customized>
+        <default_operation_uri/>
+        <enforce_acl/>
+        <http_method>GET</http_method>
+        <name>Dependings products</name>
+        <operation_script><![CDATA[(function process(/*RESTAPIRequest*/ request, /*RESTAPIResponse*/ response) {
+	var queryParams = request.queryParams;
+    
+	var grmember = new GlideRecord('sys_user_grmember'), 
+		userProducts = new GlideRecord('x_wec_product_table'),
+		tasks = new GlideRecord('x_wec_product_table'),
+		grmemberIds = [];
+	grmember.addEncodedQuery('user=' + queryParams.user[0]);
+	grmember.query();
+	
+	
+	while (grmember.next()) {
+		grmemberIds.push('assignment_group=' + grmember.getValue('group'));
+	}
+	
+	
+	//userProducts.addEncodedQuery(grmemberIds.join('^OR') + '^owned_by!=' + queryParams.user[0])
+	userProducts.addEncodedQuery(grmemberIds.join('^OR'))
+	userProducts.query();
+	
+	var userProductsParent = [],
+		userProductsChild = [];
+
+	if(userProducts.getRowCount() > 0){
+		while (userProducts.next()) {
+			/*userProductsParent.push('parent=' + userProducts.getValue('sys_id'));*/
+			userProductsChild.push('child=' + userProducts.getValue('sys_id'));
+			
+		}
+
+		var /*upStreamProducts = getRecords(userProductsParent.join('^OR'), 'cmdb_rel_ci'),*/
+			downStreamProducts = getRecords(userProductsChild.join('^OR'), 'cmdb_rel_ci');
+
+
+		var deleted = new GlideRecord('x_wec_product_dependings_product');
+		deleted.addQuery('user_id', queryParams.user[0]);
+		deleted.addQuery('type', 'IN', 'up,down');
+		deleted.deleteMultiple();
+
+		var duplUp = [], duplDown = [];
+		
+		/*while (upStreamProducts.next()) {
+
+			if(duplUp.indexOf(upStreamProducts.getValue('child')) == -1){
+				var gr = new GlideRecord('x_wec_product_dependings_product');
+				gr.initialize(); 
+				gr.user_id = queryParams.user[0]; 
+				gr.product_id = upStreamProducts.getValue('child'); 
+				gr.dependent_id = upStreamProducts.getValue('parent'); 
+				gr.ci_type = upStreamProducts.getValue('type'); 
+				gr.operational_status = upStreamProducts.getValue('operational_status'); 
+				gr.type = 'down';
+
+				var productObj = new GlideRecord('x_wec_product_table');
+				productObj.get(gr.product_id);
+				gr.operational_status =  productObj.getValue('operational_status'); 
+				gr.product_updated_on = productObj.getValue('sys_updated_on'); 
+				gr.owned_by = productObj.getValue('owned_by'); 
+
+				gr.insert();
+
+				duplUp.push(upStreamProducts.getValue('child'));
+			}
+
+		};*/
+
+		while (downStreamProducts.next()) {
+
+			if(duplDown.indexOf(downStreamProducts.getValue('parent')) == -1){
+				var gr = new GlideRecord('x_wec_product_dependings_product');
+				gr.initialize(); 
+				gr.user_id = queryParams.user[0]; 
+				gr.product_id = downStreamProducts.getValue('parent'); 
+				gr.dependent_id = downStreamProducts.getValue('child'); 
+				gr.ci_type = downStreamProducts.getValue('type'); 
+				gr.type = 'up';
+
+				var productObj = new GlideRecord('x_wec_product_table');
+				productObj.get(gr.product_id);
+				gr.operational_status =  productObj.getValue('operational_status');
+				gr.product_updated_on = productObj.getValue('sys_updated_on'); 
+				gr.owned_by = productObj.getValue('owned_by'); 
+
+				gr.insert();
+
+				duplDown.push(downStreamProducts.getValue('parent'));
+			}
+
+		};
+	}
+	
+	return {
+		status: "ok"
+	}
+	
+	
+	function getRecords(query, table, field, retField){
+		var record = new GlideRecord(table);
+		record.addEncodedQuery(query);
+		
+		record.query();
+		
+		if(!field){
+			return record; 
+		}else{
+			var arr = [];
+			while (record.next()) {
+				if(retField){
+					arr.push(retField + '=' + record.getValue(field));
+				}else{
+					arr.push(record.getValue(field));
+				}
+				
+			}
+			
+			return arr;
+		}
+		
+	}
+
+})(request, response);]]></operation_script>
+        <operation_uri>/api/x_wec_product/table/dependings/relation</operation_uri>
+        <produces>application/json,application/xml,text/xml</produces>
+        <produces_customized>false</produces_customized>
+        <relative_path>/dependings/relation</relative_path>
+        <request_example/>
+        <requires_acl_authorization>false</requires_acl_authorization>
+        <requires_authentication>true</requires_authentication>
+        <short_description/>
+        <sys_class_name>sys_ws_operation</sys_class_name>
+        <sys_created_by>anton.sychikov.contractor@weather.com</sys_created_by>
+        <sys_created_on>2016-09-05 12:48:10</sys_created_on>
+        <sys_customer_update>true</sys_customer_update>
+        <sys_id>b0be5b2b0f61e6006c3005cce1050e46</sys_id>
+        <sys_mod_count>77</sys_mod_count>
+        <sys_name>Dependings products</sys_name>
+        <sys_package display_value="Product" source="x_wec_product">daa7dccd0f44220034457d4ce1050e47</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Product">daa7dccd0f44220034457d4ce1050e47</sys_scope>
+        <sys_update_name>sys_ws_operation_b0be5b2b0f61e6006c3005cce1050e46</sys_update_name>
+        <sys_updated_by>anton.sychikov.contractor@weather.com</sys_updated_by>
+        <sys_updated_on>2016-09-19 14:46:47</sys_updated_on>
+        <web_service_definition display_value="Table API">365010a60ffce2006c3005cce1050e21</web_service_definition>
+        <web_service_version/>
+    </sys_ws_operation>
+</record_update>

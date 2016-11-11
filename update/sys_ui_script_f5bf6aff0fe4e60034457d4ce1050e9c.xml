@@ -1,0 +1,441 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update table="sys_ui_script">
+    <sys_ui_script action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <description>Subscriptions controller</description>
+        <global>false</global>
+        <name>x_wec_product.subscriptions-ctrl</name>
+        <script><![CDATA[(function () {
+    'use strict';
+
+    angular
+        .module('twc-product')
+        .controller('SubscriptionsCtrl', SubscriptionsCtrl);
+
+    SubscriptionsCtrl.$inject = ['$scope', '$element', '$state', '$stateParams', '$http', '$q', '$filter', '$uibModal', 'SubscriptionsFactory', 'userService', 'NgTableParams', 'ProductFactory', 'ReferenceBookFactory', 'RelationshipsService', 'UserFactory'];
+
+    function SubscriptionsCtrl($scope, $element, $state, $stateParams, $http, $q, $filter, $uibModal, SubscriptionsFactory, userService, NgTableParams, ProductFactory, ReferenceBookFactory, RelationshipsService, UserFactory) {
+	
+		var ss = this, 
+			initData = [],
+			allSubForProducts = [],
+			fields = ['u_low_email', 'u_low_sms', 'u_medium_email', 'u_medium_sms', 'u_high_email', 'u_high_sms', 'u_problem_email', 'u_problem_sms', 'u_change_email', 'u_change_sms'], 
+			subscriptions = [];
+
+		$scope.$emit('side-bar-show-info', true);
+		
+        ss.checkboxes = {
+            checked: false,
+            items: {},
+            getCheckedItems: function(){
+                var result = [];
+                _.forIn(this.items, function(value, key) {
+                    if(value){
+                        result.push(_.find(ss.productsTable.data, {sys_id: key}))
+                    }
+                });
+
+                return result;
+            }			
+        };
+		
+		ss.updateSubscriptions = updateSubscriptions;
+		ss.searchAssignmentGroupByName = searchAssignmentGroupByName;
+		ss.reloadTable = reloadTable;
+		ss.classFilters = RelationshipsService.getClassProducts();
+		ss.createSubscriptions = createSubscriptions;
+		ss.deleteSubscriptions = deleteSubscriptions;
+		ss.isInvalid = isInvalid;
+		ss.isValid = isValid;
+		ss.showMassChecked = showMassChecked;
+		ss.changeRow = changeRow;
+		
+		ss.user = userService;
+		ss.productOwned = {};
+		
+		getAllSubForProducts(function(){
+			ss.subscriptionsTable = initSubscriptionsTable();
+			ss.productsTable = initProductTable();
+			initProductTableCheckBox();
+		})
+		
+		function reloadTable(model, key){
+			if(!model){
+				var filter = {};
+				filter[key] = "";
+				angular.extend(ss.productsTable.filter(), filter);				
+			}
+        }
+
+		
+		function getAllSubForProducts(clb){
+			SubscriptionsFactory.get({sysparm_exclude_reference_link: true, sysparm_fields: 'u_product_sub', sysparm_query: 'is_deleted=false^u_name_sub=' + userService.sys_id}).$promise.then(function(res){
+				allSubForProducts = res.result;
+				
+				return ProductFactory.list({sysparm_query: allSubForProducts.map(function(item){return 'sys_id=' + item.u_product_sub}).join('^OR')}).$promise;
+				
+			}).then(function(pr){
+				ss.productOwned = {};
+
+				pr.result.forEach(function(p){
+					ss.productOwned[p.sys_id] = p.owned_by.value === userService.sys_id;
+				});
+				
+				if(clb){
+					clb.call(ss);
+				}
+			});			  
+ 
+		}
+
+		function initSubscriptionsTable() {
+			return new NgTableParams({
+				count: 10
+			}, {
+				counts: [10, 30, 60, 100],
+				getData: function(params) {
+
+					var filters = params.filter(),
+						filtersArr = [];
+
+					filtersArr.push('ORDERBYu_product_sub');
+					filtersArr.push('is_deleted=false');
+					
+					return SubscriptionsFactory.fullList({
+						sysparm_limit: params.count(),
+						sysparm_offset: (params.page() - 1) * params.count(),
+						sysparm_query: filtersArr.join('^'),
+						sysparm_display_value: 'all',
+						u_name_sub: userService.sys_id
+					}).$promise.then(function(res) {
+						params.total(res.headers['x-total-count']);
+						initData = angular.copy(res.data.result);
+						return res.data.result;
+					});
+				}
+			});
+			
+		}
+
+		
+		function initProductTable(){
+			return new NgTableParams({
+				count: 10
+			}, {
+				counts: [10, 30, 60, 100],
+				getData: function(params) {
+
+					ss.loader = true;
+					
+					var filters = params.filter(),
+						filtersArr = [];
+
+					filtersArr.push('ORDERBYname');
+					
+					filtersArr.push('nameISNOTEMPTY');
+
+					if(filters.hasOwnProperty('sys_class_name') && filters.sys_class_name !== ""){
+						filtersArr.push('sys_class_name=' + filters.sys_class_name);
+					}
+					if(filters.hasOwnProperty('name') && filters.name !== ""){
+						filtersArr.push('nameLIKE' + filters.name);
+					}
+					if(filters.hasOwnProperty('assignment_group') && filters.assignment_group !== ""){
+						filtersArr.push('assignment_group=' + filters.assignment_group);
+					}
+
+					allSubForProducts.forEach(function(item){
+						filtersArr.push('sys_id!=' + item.u_product_sub);
+					});
+					
+					return ProductFactory.fullList({
+						sysparm_limit: params.count(),
+						sysparm_offset: (params.page() - 1) * params.count(),
+						sysparm_query: filtersArr.join('^'),
+						sysparm_display_value: true,
+						preloader: false
+					}).$promise.then(function(res) {
+						ss.loader = false;
+						
+						params.total(res.headers['x-total-count']);
+						
+						ss.checkboxes.checked = false;
+						ss.checkboxes.items = {};
+						ss.massModel = {};
+						
+						return res.data.result;
+					});
+				}
+			});			
+		}
+		
+		function initProductTableCheckBox(){
+			$scope.$watch(function() {
+			  return ss.checkboxes.checked;
+			}, function(value) {
+				angular.forEach(ss.productsTable.data, function(item) {
+					ss.checkboxes.items[item.sys_id] = value;
+				});
+			});
+			
+			
+			$scope.$watch(function() {
+			  return ss.checkboxes.items;
+			}, function(values) {
+			  var checked = 0, unchecked = 0,
+				  total = ss.productsTable.data.length;
+			  angular.forEach(ss.productsTable.data, function(item) {
+				checked   +=  (ss.checkboxes.items[item.sys_id]) || 0;
+				unchecked += (!ss.checkboxes.items[item.sys_id]) || 0;
+			  });
+			  if ((unchecked == 0) || (checked == 0)) {
+				ss.checkboxes.checked = (checked == total);
+			  }
+			  // grayed checkbox
+			  angular.element($element[0].getElementsByClassName("select-all")).prop("indeterminate", (checked != 0 && unchecked != 0));
+			}, true);			
+			
+		}
+
+		function searchAssignmentGroupByName(name){
+            return ReferenceBookFactory.assignmentGroupSearch({sysparm_query: 'nameLIKE' + name, sysparm_limit: 20}).$promise.then(function(res){
+                return res.result;
+            });
+        }
+		
+		
+		function updateSubscriptions(){
+			var request = [];
+			
+			ss.subscriptionsTable.data.forEach(function(tableItem){
+				if(compareItem(tableItem, _.find(initData, { 'sys_id': {value: tableItem.sys_id.value} }))){
+					var model = {};
+					fields.forEach(function(f){
+						model[f] = tableItem[f].value;
+					});
+					
+					var isDeleted = fields.some(function(f){
+						return model[f] === "true";
+					});
+					
+					model.is_deleted = !isDeleted;
+					
+					model.u_name_sub_mobile_phone = ss.user.mobile_phone;
+					
+					request.push(SubscriptionsFactory.update({id: tableItem.sys_id.value}, model).$promise);
+				}
+				
+			});
+			
+			if(request.length > 0){
+				$q.all(request).then(function (results) {
+					UserFactory.update({id: userService.sys_id}, {mobile_phone: ss.user.mobile_phone}).$promise;
+					getAllSubForProducts(function(){
+						ss.subscriptionsTable = initSubscriptionsTable();
+						ss.productsTable = initProductTable();
+						ss.massModel = {};
+					})
+
+				});
+
+			}
+			
+		}
+
+		function createSubscriptions(){
+			var request = [];
+			
+			ss.checkboxes.getCheckedItems().forEach(function(item){
+				var model = {};
+				fields.forEach(function(f){
+					model[f] = item[f] ? item[f] : false;
+				});
+				
+				model.u_product_sub = item.sys_id;
+				model.u_name_sub = userService.sys_id;
+				model.u_name_sub_mobile_phone = ss.user.mobile_phone;
+				
+				request.push(
+					SubscriptionsFactory.get({sysparm_exclude_reference_link: true, sysparm_fields: 'sys_id', sysparm_query: 'u_name_sub=' + userService.sys_id + '^u_product_sub=' + item.sys_id}).$promise.then(function(res){
+						if(res.result && res.result.length > 0){
+							model.is_deleted = false;
+
+							return SubscriptionsFactory.update({id: res.result[0].sys_id}, model).$promise;
+						}else{
+							return SubscriptionsFactory.create(model).$promise;
+						}
+					})		  
+				);
+				
+			});
+			
+			if(request.length > 0){
+				$q.all(request).then(function (results) {
+					UserFactory.update({id: userService.sys_id}, {mobile_phone: ss.user.mobile_phone}).$promise;
+					
+					ss.createNew = false;
+					
+					getAllSubForProducts(function(){
+						ss.subscriptionsTable = initSubscriptionsTable();
+						ss.productsTable = initProductTable();
+						ss.massModel = {};
+					})
+
+				});
+
+			}
+			
+		}
+
+		function deleteSubscriptions(row){
+			
+			var modalInstance = $uibModal.open({
+					
+				templateUrl: '/x_wec_product_modal-confirm-delete-subscriptions-tpl.do',
+				controller: function ($scope, $uibModalInstance) {
+					var mc = this;
+
+					mc.model = {};
+					mc.ok = ok;
+					mc.cancel = cancel;
+
+					function ok () {
+						$uibModalInstance.close(row);
+					}
+
+					function cancel() {
+						$uibModalInstance.dismiss('cancel');
+					}
+
+				},
+				controllerAs: "mc"
+			});
+			
+		
+			modalInstance.result.then(function (row) {
+				
+				var model = {
+					is_deleted: true
+				};
+				fields.forEach(function(f){
+					model[f] = false;
+				});
+
+				SubscriptionsFactory.update({id: row.sys_id.value}, model).$promise.then(function(){
+
+					getAllSubForProducts(function(){
+						ss.subscriptionsTable = initSubscriptionsTable();
+						ss.productsTable = initProductTable();
+						ss.massModel = {};
+					})
+					
+				});
+	
+			  
+			});					
+		}
+		
+		function compareItem(a, b){
+			var aHash = getHash(a), bHash = getHash(b);
+			
+			if(aHash !== bHash){
+				return true;
+			}
+			
+			if(a.u_name_sub_mobile_phone.value !== ss.user.mobile_phone){
+				return true;
+			}
+			
+			return false;
+			
+			function getHash(obj){
+				var fieldsValue = [];
+				fields.forEach(function(f){
+					fieldsValue.push(obj[f].value);
+				});
+				
+				return fieldsValue.join('_');
+			}
+		}
+		
+		function isInvalid(field){
+			return field.$invalid && field.$dirty;
+		}
+
+	    function isValid(field){
+			return field.$valid && field.$dirty;
+		}
+		
+		function showMassChecked(){
+			var modalInstance = $uibModal.open({
+					
+				templateUrl: '/x_wec_product_modal_subscriptions_table_mass_checked_tpl.do',
+				controller: function ($scope, $uibModalInstance) {
+					var mc = this;
+
+					mc.model = {};
+					mc.ok = ok;
+					mc.cancel = cancel;
+
+					function ok () {
+						$uibModalInstance.close(mc.model);
+					}
+
+					function cancel() {
+						$uibModalInstance.dismiss('cancel');
+					}
+
+				},
+				controllerAs: "mc"
+			});
+			
+		
+			modalInstance.result.then(function (model) {
+				
+				ss.checkboxes.getCheckedItems().forEach(function(item){
+					
+					fields.forEach(function(f){
+						item[f] = model[f] ? model[f] : false;
+					});
+					
+				});
+				
+			  
+			});			
+			
+			
+		}
+		
+		function changeRow(row){
+			
+			var isChange = fields.some(function(f){
+				return row[f];
+			});
+	
+			ss.checkboxes.items[row.sys_id] = isChange;
+        }
+		
+
+    }
+
+})();
+
+]]></script>
+        <script_name>subscriptions-ctrl</script_name>
+        <sys_class_name>sys_ui_script</sys_class_name>
+        <sys_created_by>andrey.zlatin@weather.com</sys_created_by>
+        <sys_created_on>2016-07-18 10:49:10</sys_created_on>
+        <sys_customer_update>true</sys_customer_update>
+        <sys_id>f5bf6aff0fe4e60034457d4ce1050e9c</sys_id>
+        <sys_mod_count>116</sys_mod_count>
+        <sys_name>x_wec_product.subscriptions-ctrl</sys_name>
+        <sys_package display_value="Product" source="x_wec_product">daa7dccd0f44220034457d4ce1050e47</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Product">daa7dccd0f44220034457d4ce1050e47</sys_scope>
+        <sys_update_name>sys_ui_script_f5bf6aff0fe4e60034457d4ce1050e9c</sys_update_name>
+        <sys_updated_by>anton.sychikov.contractor@weather.com</sys_updated_by>
+        <sys_updated_on>2016-09-08 11:15:40</sys_updated_on>
+        <use_scoped_format>false</use_scoped_format>
+    </sys_ui_script>
+</record_update>

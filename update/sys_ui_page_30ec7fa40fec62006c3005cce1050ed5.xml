@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update table="sys_ui_page">
+    <sys_ui_page action="INSERT_OR_UPDATE">
+        <category>general</category>
+        <client_script/>
+        <description>Dahboard tpl</description>
+        <direct>true</direct>
+        <endpoint>x_wec_product_dahboard-tpl.do</endpoint>
+        <html><![CDATA[<?xml version="1.0" encoding="utf-8" ?>
+<j:jelly trim="false" xmlns:j="jelly:core" xmlns:g="glide" xmlns:j2="null" xmlns:g2="null">
+
+	<ol class="breadcrumb">
+		<li><a href="https://service.weather.com">Home</a></li>
+		<li><a href="/x_wec_product_box-app.do#/dashboard">My Apps</a></li>
+		<li class="active">Dashboard</li>
+	</ol>
+
+	<div class="row" ng-if="db.changeFreeze.length > 0">
+		<div class="col-sm-12">
+			<div class="alert alert-danger" role="alert" ng-repeat="item in db.changeFreeze">
+				<strong><i class="fa fa-ban" aria-hidden="true"></i></strong>&#160;&#160;Change Freeze in Effect from {{item.u_maintenance_start_time.display_value}} to {{item.u_maintenance_projected_end_time.display_value}}
+				<span class="pull-right">#{{item.number.display_value}}</span>
+			</div>
+		</div>
+	</div>	
+	<depending view="dashboard"></depending>
+	
+	<div class="row">
+		<div class="col-lg-12">
+			<div class="panel panel-info">
+			  <div class="panel-heading twc-panel-heading">MY ARENA</div>
+			  <div class="panel-body">
+				  <div class="row">
+					  <div class="col-sm-4" ng-if="db.incidentsChartConfig">
+						  <highchart config="db.incidentsChartConfig"></highchart>  
+					  </div>
+					  <div class="col-sm-4" ng-if="!db.incidentsChartConfig">
+						  <div class="alert alert-warning twc-alerts" role="alert">
+							  <i class="fa fa-refresh fa-spin fa-1x fa-fw" ng-show="db.loadArea"></i>
+							  <span class="sr-only" ng-show="db.loadArea">Loading...</span>
+							  There are no incidents for the products you own or support. Please check later. 
+						  </div>
+					  </div>
+					  
+					  <div class="col-sm-4" ng-if="db.changeRequestTableConfig.length > 0">
+						  <h4 style="text-align: center;">Scheduled Changes</h4>
+						  <a type="button" class="btn btn-primary btn-block" href="/x_wec_product_report-app.do#/report/4875b140c611227b0182454ee743c7d7">View Change Calendar</a>
+					  </div>
+					  <div class="col-sm-4" ng-if="db.changeRequestTableConfig.length == 0">
+						  <div class="alert alert-warning twc-alerts" role="alert">
+							  <i class="fa fa-refresh fa-spin fa-1x fa-fw" ng-show="db.loadArea"></i>
+							  <span class="sr-only" ng-show="db.loadArea">Loading...</span>
+							  There are no changes for the products you own or support. Please check later.
+						  </div>
+					  </div>
+					  
+					  <div class="col-sm-4" ng-if="db.problemsChartConfig">
+						  <highchart config="db.problemsChartConfig"></highchart>  
+					  </div>
+					  <div class="col-sm-4" ng-if="!db.problemsChartConfig">
+						  <div class="alert alert-warning twc-alerts" role="alert">
+							  <i class="fa fa-refresh fa-spin fa-1x fa-fw" ng-show="db.loadArea"></i>
+							  <span class="sr-only" ng-show="db.loadArea">Loading...</span>
+							  There are no problems for the products you own or support. Please check later.
+						  </div>
+					  </div>
+				  </div>
+				  <div class="row">
+					  <div class="col-sm-4">
+						  <table class="table table-striped twc-dashboard-table" ng-if="db.incidentsChartConfig">
+							  <thead>
+								  <tr>
+									  <th>Number</th>
+									  <th>Description</th>
+									  <th>Priority</th>
+									  <th>State</th>
+									  <th>Assigned to</th>
+								  </tr>
+							  </thead>  
+							  <tr ng-repeat="item in db.incidentsTableConfig">
+								  <td><a ui-sref="task({id: item.t_sys_id})">{{item.t_number}}</a></td>
+								  <td><div uib-tooltip="{{item.t_short_description}}">{{item.t_short_description | limitTo: 40}}{{item.t_short_description.length > 40 ? '...' : ''}}</div></td>
+								  <td>{{item.t_priority}}</td>
+								  <td>{{item.t_state}}</td>
+								  <td>{{item.t_assigned_to.display_value}}</td>
+							  </tr>
+						  </table>
+					  </div>
+					  <div class="col-sm-4">
+						  <table class="table table-striped twc-dashboard-table" ng-if="db.changeRequestTableConfig.length > 0">
+							  <thead>
+								  <tr>
+									  <th>Number</th>
+									  <th>Description</th>
+									  <th>Start date</th>
+									  <th>End date</th>
+									  <th>Assigned to</th>
+								  </tr>
+							  </thead>  
+							  <tr ng-repeat="item in db.changeRequestTableConfig">
+								  <td><a ui-sref="task({id: item.t_sys_id})">{{item.t_number}}</a></td>
+								  <td><div uib-tooltip="{{item.t_short_description}}">{{item.t_short_description | limitTo: 40}}{{item.t_short_description.length > 40 ? '...' : ''}}</div></td>
+								  <td>{{item.t_start_date}}</td>
+								  <td>{{item.t_end_date}}</td>
+								  <td>{{item.t_assigned_to.display_value}}</td>
+							  </tr>
+						  </table>
+					  </div>
+					  <div class="col-sm-4">
+						  <table class="table table-striped twc-dashboard-table" ng-if="db.problemsChartConfig">
+							  <thead>
+								  <tr>
+									  <th>Number</th>
+									  <th>Description</th>
+									  <th>Priority</th>
+									  <th>State</th>
+									  <th>Assigned to</th>
+								  </tr>
+							  </thead>  
+							  <tr ng-repeat="item in db.problemsTableConfig">
+								  <td><a ui-sref="task({id: item.t_sys_id})">{{item.t_number}}</a></td>
+								  <td><div uib-tooltip="{{item.t_short_description}}">{{item.t_short_description | limitTo: 40}}{{item.t_short_description.length > 40 ? '...' : ''}}</div></td>
+								  <td>{{item.t_priority}}</td>
+								  <td>{{item.t_state}}</td>
+								  <td>{{item.t_assigned_to.display_value}}</td>
+							  </tr>
+						  </table>
+					  </div>
+					  
+				  
+				  </div>
+				  <div class="row">
+					  <div class="col-sm-4" style="text-align: center;">
+						  <div ng-if="db.incidentsChartConfig">
+							  <button type="button" class="btn btn-link btn-xs" ng-click="db.changeState('incidents');">View All Incidents</button>
+							  <button type="button" class="btn btn-link btn-xs" ng-click="db.changeState('incident_new');">Open An Incident</button>
+						  </div>
+					  </div>
+					  <div class="col-sm-4" style="text-align: center;">
+						  <div ng-if="db.changeRequestTableConfig.length > 0">
+							  <button type="button" class="btn btn-link btn-xs" ng-click="db.changeState('change-requests');">View All Changes</button>
+							  <button type="button" class="btn btn-link btn-xs" ng-click="db.changeState('change_requests_new');">Create Change Request</button>
+						  </div>
+					  </div>
+					  <div class="col-sm-4" style="text-align: center;">
+						  <div ng-if="db.problemsChartConfig">
+							  <button type="button" class="btn btn-link btn-xs" ng-click="db.changeState('problems');">View All Problems</button>
+							  <button type="button" class="btn btn-link btn-xs" ng-click="db.changeState('problem_new');">Open A Problem</button>
+						  </div>
+					  </div>
+				  </div>
+			  </div>
+			</div>
+		</div>
+		
+	</div>
+	
+		<div class="row">
+		<div class="col-lg-12">
+			<div class="panel panel-info">
+			  <div class="panel-heading twc-panel-heading">PRODUCT ACTIVITIES</div>
+			  <div class="panel-body">
+				  <div class="twc-carousel" uib-carousel="true" active="db.active" interval="db.duration">
+					  <div uib-slide="true" index="0">
+						  <div class="row">
+							  <div class="col-sm-12" ng-if="db.showIncidentHeatmap">
+								  <style>
+									  .highcharts-container{
+										margin: 0px auto;  
+									  }
+								  </style>
+								  <highchart config="db.openIncidentsByPriorityHeatmapConfig"></highchart>
+							  </div>
+							  <div class="col-sm-12" ng-if="!db.showIncidentHeatmap">
+								  <div class="alert alert-warning twc-alerts" role="alert">
+									  <i class="fa fa-refresh fa-spin fa-1x fa-fw" ng-if="db.loadIncidentHeatmap"></i>
+									  <span class="sr-only" ng-show="db.loadIncidentHeatmap">Loading...</span>
+									  Open Incidents By Priority Product (Heatmap)
+								  </div>  
+							  </div>						  
+						  
+						  </div> 	
+					  </div>
+					  <!--
+					  <div uib-slide="true" index="0">
+						  <div class="row">
+							  <div class="col-sm-12" ng-if="db.showIncident">
+								  <highchart config="db.incidentTrendChartConfig"></highchart>
+							  </div>
+							  <div class="col-sm-12" ng-if="!db.showIncident">
+								  <div class="alert alert-warning twc-alerts" role="alert">
+									  <i class="fa fa-refresh fa-spin fa-1x fa-fw" ng-if="db.loadIncident"></i>
+									  <span class="sr-only" ng-show="db.loadIncident">Loading...</span>
+									  No data for Incident Trend By Priority
+								  </div>  
+							  </div>						  
+						  
+						  </div> 	
+					  </div>
+					  <div uib-slide="true" index="1">
+						  <div class="row">
+							  <div class="col-sm-12" ng-if="db.showChange">
+								  <highchart config="db.changeTrendChartConfig"></highchart>
+							  </div>
+							  <div class="col-sm-12" ng-if="!db.showChange">
+								  <div class="alert alert-warning twc-alerts" role="alert">
+									  <i class="fa fa-refresh fa-spin fa-1x fa-fw" ng-if="db.loadChange"></i>
+									  <span class="sr-only" ng-show="db.loadChange">Loading...</span>
+									  No data for Incident Trend By Priority
+								  </div>  
+							  </div>
+						  </div> 	
+					  </div>
+					  
+					  <div uib-slide="true" index="2">
+						  <div class="row">
+							  <div class="col-sm-12" ng-if="db.showProblem">
+								  <highchart config="db.problemChartConfig"></highchart>
+							  </div>
+							  <div class="col-sm-12" ng-if="!db.showProblem">
+								  <div class="alert alert-warning twc-alerts" role="alert">
+									  <i class="fa fa-refresh fa-spin fa-1x fa-fw" ng-if="db.loadProblem"></i>
+									  <span class="sr-only" ng-show="db.loadProblem">Loading...</span>
+									  No data for Monthly Problem Trend Report
+								  </div>  
+							  </div>
+						  </div> 	
+					  </div>
+					  -->
+				  </div>
+				  
+			  </div>
+			</div>
+		</div>
+		
+	</div>
+
+</j:jelly>]]></html>
+        <name>dahboard-tpl</name>
+        <processing_script/>
+        <sys_class_name>sys_ui_page</sys_class_name>
+        <sys_created_by>andrey.zlatin@weather.com</sys_created_by>
+        <sys_created_on>2016-07-08 14:05:08</sys_created_on>
+        <sys_customer_update>true</sys_customer_update>
+        <sys_id>30ec7fa40fec62006c3005cce1050ed5</sys_id>
+        <sys_mod_count>147</sys_mod_count>
+        <sys_name>dahboard-tpl</sys_name>
+        <sys_package display_value="Product" source="x_wec_product">daa7dccd0f44220034457d4ce1050e47</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Product">daa7dccd0f44220034457d4ce1050e47</sys_scope>
+        <sys_update_name>sys_ui_page_30ec7fa40fec62006c3005cce1050ed5</sys_update_name>
+        <sys_updated_by>anton.sychikov.contractor@weather.com</sys_updated_by>
+        <sys_updated_on>2016-11-02 09:15:12</sys_updated_on>
+    </sys_ui_page>
+</record_update>

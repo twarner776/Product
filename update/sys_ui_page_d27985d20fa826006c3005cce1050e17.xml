@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update table="sys_ui_page">
+    <sys_ui_page action="INSERT_OR_UPDATE">
+        <category>general</category>
+        <client_script/>
+        <description>Relationships tab</description>
+        <direct>true</direct>
+        <endpoint>x_wec_product_product-tab-2-tpl.do</endpoint>
+        <html><![CDATA[<?xml version="1.0" encoding="utf-8" ?>
+<j:jelly trim="false" xmlns:j="jelly:core" xmlns:g="glide" xmlns:j2="null" xmlns:g2="null">
+	<style>
+		
+		.ui-select-match{
+		    display: none;
+		}
+	</style>
+	
+	
+	<h4>{{pr.product.name.value ? pr.product.name.value + ' relationships' : ' Relationships'}} </h4>
+	<p>Please indicate what other products, applications, and/or servers depend or are dependent upon the operational status of your item&#160;<i class="fa fa-info-circle" aria-hidden="true" style="cursor: pointer; color: #1b809e" ng-click="pr.openInfo({template: 'relationships', title: 'Relationships'})"></i></p>
+	<div class="row">
+		<div class="col-sm-6">
+			<div class="panel panel-default">
+			  <div class="panel-heading twc-panel-heading">Downstream Relationship</div>
+			  <div class="panel-body">
+
+				  <ui-select ng-show="pr.canEdit()" multiple="true" ng-model="pr.relationshipDownSelected" theme="bootstrap" close-on-select="false" on-select="pr.addToDownstream(pr, $model);">
+					  <ui-select-match placeholder="Type to add a new relationship...">{{$item.name}}</ui-select-match>
+					  <ui-select-choices repeat="product in pr.searchProducts"
+										 refresh="pr.updateSearchProducts($select.search)"
+										 refresh-delay="30">
+						  <div ng-bind-html="product.name | highlight: $select.search"></div>
+					  </ui-select-choices>
+					  
+				  </ui-select>				  
+
+				  <table class="table table-striped twc-table">
+					  <thead>
+						  <tr>
+							  <th>Child</th>
+							  <th>Type</th>
+							  <th>My Item</th>
+							  <th></th>
+						  </tr>
+					  </thead>
+					  <tbody>
+						  <tr ng-repeat="rel in pr.relationshipDownstream">
+							  <td>{{rel.child.display_value}}</td>
+							  <td>
+								  <span ng-if="!rel.edit">{{rel.type.display_value.split('::')[0]}}</span>
+								  <span ng-if="rel.edit">
+									  <select class="form-control input-sm"
+                                        ng-options="type.sys_id as type.parent_descriptor for type in pr.parentRelationsType"
+                                        ng-model="rel.type.value" ng-change="pr.userSubscriptions(rel, rel.child.value)"></select>
+
+								  </span>
+							  </td>
+							  <td>{{pr.product.name.value}}</td>
+							  <td style="text-align: right;" ng-show="pr.canEdit()">
+								  <div class="btn-group btn-group-xs" role="group">
+									  <button type="button" class="btn btn-info" title="Edit item" ng-click="rel.edit = true" ng-if="!rel.edit"><i class="fa fa-pencil" aria-hidden="true"></i></button>
+									  <button type="button" class="btn btn-warning" title="Delete item" ng-click="pr.deleteFromRelationship(pr, rel, 'relationshipDownstream', $index)"><i class="fa fa-trash" aria-hidden="true"></i></button>
+								  </div>
+							  </td>
+						  </tr>
+					  </tbody>
+				  </table>
+				  
+			  </div>
+			</div>
+			
+		</div>
+		<div class="col-sm-6">
+			<div class="panel panel-default">
+			  <div class="panel-heading twc-panel-heading">
+				Upstream Relationship
+			  </div>
+			  <div class="panel-body">
+				  
+				  <ui-select ng-show="pr.canEdit()" multiple="true" ng-model="pr.relationshipUpSelected" theme="bootstrap" close-on-select="false" on-select="pr.addToUpstream(pr, $model);">
+					  <ui-select-match placeholder="Type to add a new relationship...">{{$item.name}}</ui-select-match>
+					  <ui-select-choices repeat="product in pr.searchProducts"
+										 refresh="pr.updateSearchProducts($select.search)"
+										 refresh-delay="30">
+						  <div ng-bind-html="product.name | highlight: $select.search"></div>
+					  </ui-select-choices>
+					  
+				  </ui-select>				  
+				  
+				  <table class="table table-striped twc-table">
+					  <thead>
+						  <tr>
+							  <th>Parent</th>
+							  <th>Type</th>							  
+							  <th>My Item</th>
+							  <th></th>
+						  </tr>
+					  </thead>
+					  <tbody>
+						  <tr ng-repeat="rel in pr.relationshipUpstream">
+							  <td>{{rel.parent.display_value}}</td>
+							  <td>
+								  <span ng-if="!rel.edit">{{rel.type.display_value.split('::')[1]}}</span>
+								  <span ng-if="rel.edit">
+									  <select class="form-control input-sm"
+                                        ng-options="type.sys_id as type.child_descriptor for type in pr.childRelationsType"
+                                        ng-model="rel.type.value" ng-change="pr.userSubscriptions(rel, rel.parent.value)"></select>
+
+								  </span>
+							  </td>
+							  <td>{{pr.product.name.value}}</td>
+							  <td style="text-align: right;" ng-show="pr.canEdit()">
+								  <div class="btn-group btn-group-xs" role="group">
+									  <button type="button" class="btn btn-info" title="Edit item" ng-click="rel.edit = true" ng-if="!rel.edit"><i class="fa fa-pencil" aria-hidden="true"></i></button>
+									  <button type="button" class="btn btn-warning" title="Delete item" ng-click="pr.deleteFromRelationship(pr, rel, 'relationshipUpstream', $index)"><i class="fa fa-trash" aria-hidden="true"></i></button>
+								  </div>
+							  </td>
+						  </tr>
+					  </tbody>
+				  </table>
+			  </div>
+			</div>
+			
+		</div>
+		
+	</div>
+	<div class="row" ng-show="pr.canEdit()">
+		<div class="col-sm-12">
+			<div class="form-group">
+				<button type="button" 
+						ng-click="pr.relationshipProductTCreateNew = true" ng-show="!pr.relationshipProductTCreateNew"
+						class="btn btn-sm btn-info"><i class="fa fa-plus" aria-hidden="true"></i>&#160; Create New Relationship</button>
+			</div>				
+		</div>
+
+	</div>
+	
+	<div class="row" ng-show="pr.relationshipProductTCreateNew">
+		<div class="col-sm-12">
+			<div class="panel panel-default">
+			  <div class="panel-heading">
+			  <div class="btn-group pull-right" ng-init="pr.relationshipTab = 'product'">
+				<a class="btn btn-primary btn-xs" ng-class="{'active': pr.relationshipTab === 'product'}" ng-click="pr.relationshipTab = 'product'">Product, Application</a>
+				<a class="btn btn-primary btn-xs" ng-class="{'active': pr.relationshipTab === 'server'}" ng-click="pr.relationshipTab = 'server'">Servers</a>
+			  </div>
+				  
+				<h3 class="panel-title">Items <i class="fa fa-refresh fa-spin fa-1x fa-fw" ng-show="pr.relationshipProductTableLoading"></i></h3> 
+			  </div>
+			  <div class="panel-body" ng-show="pr.relationshipTab === 'product'">
+				<table ng-table="pr.relationshipProductTable" class="table table-striped twc-table">
+					<tr ng-repeat="row in $data track by row.sys_id">
+						<td data-title="'Name'" filter="{name: 'text'}">{{row.name}}</td>
+						<td data-title="'Assignment group'" filter="{assignment_group: 'search-assignment-group-product'}">{{row.assignment_group.display_value}}</td>
+						<td data-title="'Class'" filter="{sys_class_name: 'select'}" filter-data="pr.classFilters">{{row.sys_class_name}}</td>
+						<td style="text-align: right;">
+							<div class="btn-group btn-group-sm" role="group">
+								<button type="button" class="btn btn-default" title="Add item to Downstream Relationship" ng-click="pr.addToDownstream(pr, row)"><i class="fa fa-level-down" aria-hidden="true"></i></button>
+								<button type="button" class="btn btn-default" title="Add item to Upstream Relationship" ng-click="pr.addToUpstream(pr, row)"><i class="fa fa-level-up" aria-hidden="true"></i></button>
+							</div>							
+						</td>
+					</tr>
+				</table>
+			  </div>
+			  <div class="panel-body" ng-show="pr.relationshipTab === 'server'">
+				  
+				<table ng-table="pr.relationshipServerTable" class="table table-striped twc-table">
+					<tr ng-repeat="row in $data track by row.sys_id">
+						<td data-title="'Name'" filter="{name: 'text'}">{{row.name}}</td>
+						<td data-title="'Assignment group'" filter="{assignment_group: 'search-assignment-group-server'}">{{row.assignment_group.display_value}}</td>
+						<td data-title="'Class'" filter="{sys_class_name: 'select'}" filter-data="pr.classServerFilters">{{row.sys_class_name}}</td>
+						<td style="text-align: right;">
+							<div class="btn-group btn-group-sm" role="group">
+								<button type="button" class="btn btn-default" title="Add item to Downstream Relationship" ng-click="pr.addToDownstream(pr, row)"><i class="fa fa-level-down" aria-hidden="true"></i></button>
+								<button type="button" class="btn btn-default" title="Add item  Upstream Relationship" ng-click="pr.addToUpstream(pr, row)"><i class="fa fa-level-up" aria-hidden="true"></i></button>
+							</div>							
+						</td>
+					</tr>
+				</table>
+				  
+				
+				</div>
+			</div>
+			
+		</div>
+	</div>
+	
+	<div class="row" ng-show="pr.canEdit()">
+		<div class="col-sm-12">
+
+			<div class="form-group">
+				<button type="submit" 
+						ng-disabled="pr.upsertRelationshipBtn(pr)"
+						ng-click="pr.upsertRelationship(pr)"
+						class="btn btn-primary btn-sm">Save</button>
+
+					<button type="button" 
+						  class="btn btn-default btn-sm pull-right" ng-click="pr.state.go('dashboard')">Cancel</button>
+			</div>				
+		</div>
+	
+	</div>
+	
+
+</j:jelly>]]></html>
+        <name>product-tab-2-tpl</name>
+        <processing_script/>
+        <sys_class_name>sys_ui_page</sys_class_name>
+        <sys_created_by>andrey.zlatin@weather.com</sys_created_by>
+        <sys_created_on>2016-07-13 11:31:40</sys_created_on>
+        <sys_customer_update>true</sys_customer_update>
+        <sys_id>d27985d20fa826006c3005cce1050e17</sys_id>
+        <sys_mod_count>143</sys_mod_count>
+        <sys_name>product-tab-2-tpl</sys_name>
+        <sys_package display_value="Product" source="x_wec_product">daa7dccd0f44220034457d4ce1050e47</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Product">daa7dccd0f44220034457d4ce1050e47</sys_scope>
+        <sys_update_name>sys_ui_page_d27985d20fa826006c3005cce1050e17</sys_update_name>
+        <sys_updated_by>anton.sychikov.contractor@weather.com</sys_updated_by>
+        <sys_updated_on>2016-10-04 12:39:10</sys_updated_on>
+    </sys_ui_page>
+</record_update>

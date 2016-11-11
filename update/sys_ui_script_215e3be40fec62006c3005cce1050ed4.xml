@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update table="sys_ui_script">
+    <sys_ui_script action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <description>Dashboard controller</description>
+        <global>false</global>
+        <name>x_wec_product.dashboard-ctrl</name>
+        <script><![CDATA[(function () {
+    'use strict';
+
+    angular
+        .module('twc-product')
+        .controller('DashboardCtrl', DashboardCtrl);
+
+    DashboardCtrl.$inject = ['$scope','$state', '$filter', '$q', '$interval', 'UserFactory', 'userService', 'GroupFactory', 'ProductFactory', 'TaskFactory', 'ChartService'];
+
+    function DashboardCtrl($scope, $state, $filter, $q, $interval, UserFactory, userService, GroupFactory, ProductFactory, TaskFactory, ChartService) {
+        
+		var db = this, state = [{id: "1", label: 'New'}, {id: "110", label: 'Routing'},{id: "2", label: 'Active'},{id: "3", label: 'Awaiting Problem'},{id: "4", label: 'Awaiting User Info'},{id: "8", label: 'Awaiting RFC'},{id: "120", label: 'Awaiting Hardware/Software'},{id: "130", label: 'Awaiting Vendor'},];
+		
+		db.changeRequestTableConfig = [];
+		db.changeState = changeState;
+
+		db.active = 0;
+		db.duration = 10000;
+		
+		$scope.$emit('side-bar-show-info', false);
+		
+		$interval(function(){
+			loadMyArea();
+			loadTrends();
+			loadChangeFreeze();
+		}, 1000 * 60);		
+		
+		loadMyArea();
+		loadTrends();
+		loadChangeFreeze();
+		
+		function changeState(state){
+			$state.go(state);
+		}
+		
+		$scope.$watch(function() {
+			return db.active;
+		}, function(value) {
+
+			setTimeout(function() { 
+				if(db.openIncidentsByPriorityHeatmapConfig && db.openIncidentsByPriorityHeatmapConfig.hasOwnProperty('getHighcharts')){
+					db.openIncidentsByPriorityHeatmapConfig.getHighcharts().reflow();
+				}				
+			}, 500)
+
+		});
+		
+		function loadChangeFreeze(){
+			TaskFactory.comm({sysparm_query: 'u_notification_type=Change Freeze^u_status=Sent^u_maintenance_projected_end_time>=javascript:gs.minutesAgoStart(0)^u_change_display=True', sysparm_display_value: 'all', preloader: false}).$promise.then(function(res){
+				db.changeFreeze = res.result;
+			});
+		}
+		
+		function loadTrends(){
+			db.openIncidentsByPriorityHeatmapConfig = {};
+			db.loadIncidentHeatmap = true;
+			db.showIncidentHeatmap = false;
+
+			ChartService.openIncidentsByPriorityHeatmap().then(function(data){
+				db.openIncidentsByPriorityHeatmapConfig = data;
+				
+				if(data.series[0].data.length > 0){
+					db.showIncidentHeatmap = true;
+				}
+
+				db.loadIncidentHeatmap = false;
+			});
+			
+		}
+		
+		ChartService.openIncidentsByPriorityHeatmap();
+		
+		
+		function loadMyArea(){
+			db.loadArea = true;
+			
+			$q.all([
+					TaskFactory.dependingsTasksIncidentView({sysparm_query: 't_stateNOT IN7,6^d_user_id=' + userService.sys_id, preloader: false, sysparm_display_value: 'true'}).$promise,
+					TaskFactory.dependingsTasksProblemView({sysparm_query: 't_stateNOT IN7,4^d_user_id=' + userService.sys_id, preloader: false, sysparm_display_value: 'true'}).$promise,
+					TaskFactory.dependingsTasksChangeView({sysparm_query: 't_stateNOT IN3^d_user_id=' + userService.sys_id, preloader: false, sysparm_display_value: 'true'}).$promise,
+				]).then(function(res){
+
+					createChartAndTable(res[0].result, 'incidentsChartConfig', 'incidentsTableConfig', 'Incidents');
+					createChartAndTable(res[1].result, 'problemsChartConfig', 'problemsTableConfig', 'Problems');
+
+					db.changeRequestTableConfig = _.orderBy(res[2].result, ['number'], ['desc']).slice(0, 5);
+				
+					db.loadArea = false;
+				
+			});
+			
+		};
+		
+		function createChartAndTable(data, chart, table, label){
+			var groupByState = _.chain(data).groupBy("t_state").value(), chartData = [];
+			
+			db[table] = _.orderBy(data, ['t_number'], ['desc']).slice(0, 5);
+			
+			_.forOwn(groupByState, function(value, key) {
+
+				chartData.push({
+					name: key,
+					y: value.length
+				});
+
+				db[chart] = {
+					options: {
+						chart: {
+							plotBackgroundColor: null,
+							plotBorderWidth: null,
+							plotShadow: false,
+							type: 'pie',
+							spacingBottom: 0,
+							spacingTop: 0,
+							marginTop: 10
+						},
+						plotOptions: {
+							pie: {
+								allowPointSelect: true,
+								cursor: 'pointer',
+								dataLabels: {
+									enabled: false
+								},
+								showInLegend: false
+							}
+						},
+					},
+					title: {
+						text: label,
+						style: {
+								fontFamily: 'sans-serif'
+						}
+					},
+					subtitle: {
+						text: '',
+						style: {
+							display: 'none'
+						}
+					},
+					size: {
+						height: 160
+					},						
+
+					series: [{
+						name: 'States',
+						colorByPoint: true,
+						data: chartData,
+						point:{
+							events:{
+								click: function (event) {
+									var newData = [];
+									if(this.state === "hover"){
+										newData = _.filter(_.orderBy(data, ['t_number'], ['desc']), {state: this.name}).slice(0, 5);
+										
+									}else{
+										newData = _.orderBy(data, ['t_number'], ['desc']).slice(0, 5);
+										
+									}
+									$scope.$apply(function () {
+										$scope.db[table] = newData;
+
+									});
+									
+								}
+							}
+						}          
+						
+					}]
+				}
+
+			});
+			
+		}
+    }
+
+})();
+
+]]></script>
+        <script_name>dashboard-ctrl</script_name>
+        <sys_class_name>sys_ui_script</sys_class_name>
+        <sys_created_by>andrey.zlatin@weather.com</sys_created_by>
+        <sys_created_on>2016-07-08 14:11:19</sys_created_on>
+        <sys_customer_update>true</sys_customer_update>
+        <sys_id>215e3be40fec62006c3005cce1050ed4</sys_id>
+        <sys_mod_count>194</sys_mod_count>
+        <sys_name>x_wec_product.dashboard-ctrl</sys_name>
+        <sys_package display_value="Product" source="x_wec_product">daa7dccd0f44220034457d4ce1050e47</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Product">daa7dccd0f44220034457d4ce1050e47</sys_scope>
+        <sys_update_name>sys_ui_script_215e3be40fec62006c3005cce1050ed4</sys_update_name>
+        <sys_updated_by>anton.sychikov.contractor@weather.com</sys_updated_by>
+        <sys_updated_on>2016-10-26 09:35:21</sys_updated_on>
+        <use_scoped_format>false</use_scoped_format>
+    </sys_ui_script>
+</record_update>

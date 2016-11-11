@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update table="sys_ws_operation">
+    <sys_ws_operation action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <consumes>application/json,application/xml,text/xml</consumes>
+        <consumes_customized>false</consumes_customized>
+        <default_operation_uri/>
+        <enforce_acl/>
+        <http_method>GET</http_method>
+        <name>Upstream relationship migrator</name>
+        <operation_script><![CDATA[(function process(/*RESTAPIRequest*/ request, /*RESTAPIResponse*/ response) {
+	
+	var relType = new GlideRecord('cmdb_rel_type');
+	relType.addEncodedQuery('sys_name=Provides::Provided by');
+	relType.query();
+	relType.next();
+
+	var relTypeSysId = relType.getValue('sys_id')
+	
+	
+	var products = new GlideRecord('x_wec_product_table');
+	products.query();
+
+	while (products.next()) {
+	
+		if(products.getValue('sys_class_name') == "x_wec_product_table"){
+			
+		
+			if(!products.u_business_service.nil()){
+
+				var sysService = products.getValue('u_business_service');
+
+				var cmdbRelCi = new GlideRecord('cmdb_rel_ci');
+				cmdbRelCi.addQuery('child', products.getValue('sys_id'));
+				cmdbRelCi.addQuery('parent', sysService);
+				cmdbRelCi.addQuery('type', relTypeSysId);
+				cmdbRelCi.query();
+
+				if(cmdbRelCi.getRowCount() == 0){
+					var insert = new GlideRecord('cmdb_rel_ci');
+					insert.initialize(); 
+					insert.child = products.getValue('sys_id'); 
+					insert.parent = sysService; 
+					insert.type = relTypeSysId; 
+
+					insert.insert();
+				}
+
+			}
+			
+		}
+	
+	}
+
+})(request, response);]]></operation_script>
+        <operation_uri>/api/x_wec_product/table/upstream_relationship_migrator</operation_uri>
+        <produces>application/json,application/xml,text/xml</produces>
+        <produces_customized>false</produces_customized>
+        <relative_path>/upstream_relationship_migrator</relative_path>
+        <request_example/>
+        <requires_acl_authorization>false</requires_acl_authorization>
+        <requires_authentication>true</requires_authentication>
+        <short_description/>
+        <sys_class_name>sys_ws_operation</sys_class_name>
+        <sys_created_by>anton.sychikov.contractor@weather.com</sys_created_by>
+        <sys_created_on>2016-09-15 09:10:51</sys_created_on>
+        <sys_customer_update>true</sys_customer_update>
+        <sys_id>08bd0efe0fb12e006c3005cce1050e10</sys_id>
+        <sys_mod_count>2</sys_mod_count>
+        <sys_name>Upstream relationship migrator</sys_name>
+        <sys_package display_value="Product" source="x_wec_product">daa7dccd0f44220034457d4ce1050e47</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Product">daa7dccd0f44220034457d4ce1050e47</sys_scope>
+        <sys_update_name>sys_ws_operation_08bd0efe0fb12e006c3005cce1050e10</sys_update_name>
+        <sys_updated_by>anton.sychikov.contractor@weather.com</sys_updated_by>
+        <sys_updated_on>2016-09-15 09:14:15</sys_updated_on>
+        <web_service_definition display_value="Table API">365010a60ffce2006c3005cce1050e21</web_service_definition>
+        <web_service_version/>
+    </sys_ws_operation>
+</record_update>

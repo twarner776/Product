@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update>
+    <sys_documentation element="name" label="Application Name" language="en" table="x_wec_product_application">
+        <sys_documentation action="INSERT_OR_UPDATE">
+            <element>name</element>
+            <help/>
+            <hint>Name of application</hint>
+            <label>Application Name</label>
+            <language>en</language>
+            <name>x_wec_product_application</name>
+            <plural>Application Names</plural>
+            <sys_class_name>sys_documentation</sys_class_name>
+            <sys_created_by>Courtney.Richards@weather.com</sys_created_by>
+            <sys_created_on>2016-07-07 13:56:29</sys_created_on>
+            <sys_customer_update>true</sys_customer_update>
+            <sys_id>d541be540f28620034457d4ce1050edb</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_name>Application Name</sys_name>
+            <sys_package display_value="Product" source="x_wec_product">daa7dccd0f44220034457d4ce1050e47</sys_package>
+            <sys_policy/>
+            <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+            <sys_scope display_value="Product">daa7dccd0f44220034457d4ce1050e47</sys_scope>
+            <sys_update_name>sys_documentation_x_wec_product_application_name_en</sys_update_name>
+            <sys_updated_by>Courtney.Richards@weather.com</sys_updated_by>
+            <sys_updated_on>2016-07-07 13:56:29</sys_updated_on>
+            <url/>
+            <url_target/>
+        </sys_documentation>
+    </sys_documentation>
+</record_update>

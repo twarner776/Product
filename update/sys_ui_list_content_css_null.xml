@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update>
+    <sys_ui_list parent="" relationship="" sys_domain="global" table="content_css" version="2" view="">
+        <sys_ui_list_element action="INSERT_OR_UPDATE">
+            <average_value>false</average_value>
+            <element>name</element>
+            <list_id display_value="content_css" element="NULL" name="content_css" parent="NULL" relationship="NULL" sys_domain="global" view="Default view">2558617e0a0a0b8d0083c43b2151684d</list_id>
+            <max_value>false</max_value>
+            <min_value>false</min_value>
+            <position>0</position>
+            <sum>false</sum>
+            <sys_created_by>pat.casey</sys_created_by>
+            <sys_created_on>2010-07-30 21:53:23</sys_created_on>
+            <sys_id>255861940a0a0b8d00862efe737ba537</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_updated_by>pat.casey</sys_updated_by>
+            <sys_updated_on>2010-07-30 21:53:23</sys_updated_on>
+        </sys_ui_list_element>
+        <sys_ui_list_element action="INSERT_OR_UPDATE">
+            <average_value>false</average_value>
+            <element>type</element>
+            <list_id display_value="content_css" element="NULL" name="content_css" parent="NULL" relationship="NULL" sys_domain="global" view="Default view">2558617e0a0a0b8d0083c43b2151684d</list_id>
+            <max_value>false</max_value>
+            <min_value>false</min_value>
+            <position>1</position>
+            <sum>false</sum>
+            <sys_created_by>pat.casey</sys_created_by>
+            <sys_created_on>2010-07-30 21:53:23</sys_created_on>
+            <sys_id>255861a60a0a0b8d000d246014a77a67</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_updated_by>pat.casey</sys_updated_by>
+            <sys_updated_on>2010-07-30 21:53:23</sys_updated_on>
+        </sys_ui_list_element>
+        <sys_ui_list_element action="INSERT_OR_UPDATE">
+            <average_value>false</average_value>
+            <element>description</element>
+            <list_id display_value="content_css" element="NULL" name="content_css" parent="NULL" relationship="NULL" sys_domain="global" view="Default view">2558617e0a0a0b8d0083c43b2151684d</list_id>
+            <max_value>false</max_value>
+            <min_value>false</min_value>
+            <position>2</position>
+            <sum>false</sum>
+            <sys_created_by>pat.casey</sys_created_by>
+            <sys_created_on>2010-07-30 21:53:23</sys_created_on>
+            <sys_id>255861ab0a0a0b8d009ff0533522cc26</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_updated_by>pat.casey</sys_updated_by>
+            <sys_updated_on>2010-07-30 21:53:23</sys_updated_on>
+        </sys_ui_list_element>
+        <sys_ui_list action="INSERT_OR_UPDATE">
+            <average_value>false</average_value>
+            <element/>
+            <max_value>false</max_value>
+            <min_value>false</min_value>
+            <name>content_css</name>
+            <parent/>
+            <position/>
+            <relationship/>
+            <sum>false</sum>
+            <sys_class_name>sys_ui_list</sys_class_name>
+            <sys_created_by>anton.sychikov.contractor@weather.com</sys_created_by>
+            <sys_created_on>2016-08-29 11:11:13</sys_created_on>
+            <sys_customer_update>false</sys_customer_update>
+            <sys_domain>global</sys_domain>
+            <sys_id>e1d78bd50fe1e2006c3005cce1050e0f</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_name/>
+            <sys_package/>
+            <sys_policy/>
+            <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+            <sys_scope display_value="Product">daa7dccd0f44220034457d4ce1050e47</sys_scope>
+            <sys_update_name/>
+            <sys_updated_by>anton.sychikov.contractor@weather.com</sys_updated_by>
+            <sys_updated_on>2016-08-29 11:11:13</sys_updated_on>
+            <sys_user display_value="Anton Sychikov">702f4b510f67c6406aa57d4ce1050e7b</sys_user>
+            <view display_value="Default view" name="NULL">Default view</view>
+            <view_name/>
+        </sys_ui_list>
+    </sys_ui_list>
+</record_update>

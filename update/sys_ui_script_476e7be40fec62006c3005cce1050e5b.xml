@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update table="sys_ui_script">
+    <sys_ui_script action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <description>Side panel directive</description>
+        <global>false</global>
+        <name>x_wec_product.side-panel-directive</name>
+        <script><![CDATA[(function () {
+    'use strict';
+
+    angular
+        .module('twc-product')
+        .directive('sidePanel', SidePanel)
+        .controller('SidePanelCtrl', SidePanelCtrl);
+
+    SidePanelCtrl.$inject = ['$scope', '$state', '$q', 'DashboardFactory', 'ProductFactory', 'userService', 'GroupFactory', 'UserFactory', 'ReferenceBookFactory', 'TaskFactory'];
+
+    function SidePanel() {
+        var directive = {
+            bindToController: true,
+            transclude: true,
+            controller: 'SidePanelCtrl',
+            controllerAs: 'sp',
+            restrict: 'EA',
+            templateUrl: 'x_wec_product_side-panel-tpl.do'
+        };
+        return directive;
+    }
+
+    function SidePanelCtrl($scope, $state, $q, DashboardFactory, ProductFactory, userService, GroupFactory, UserFactory, ReferenceBookFactory, TaskFactory) {
+        var sp = this,
+			type = ['problem', 'incident', 'change_request'];
+		
+		sp.product = {};
+		
+		type.forEach(function(t){
+			sp.product[t] = 0;
+		});
+		
+		sp.groupEdit = false;
+		sp.showInfo = false;
+		sp.abandonedItems = false;
+
+		
+		ReferenceBookFactory.userRoles({sysparm_query: 'sys_name=Support Group Manager'}).$promise.then(function(roles){
+			
+			UserFactory.userHasRole({sysparm_query: 'user=' + userService.sys_id + '^' + 'role=' + roles.result[0].sys_id}).$promise.then(function(res){
+				if(res.result.length > 0){
+					sp.groupEdit = true; 
+				}
+			});
+			
+		});
+
+		(function init(){
+			getProductsEnrolled();
+			getTaskCounts();
+			getAbandonedItems();
+		})();
+		
+		function getProductsEnrolled(){
+			GroupFactory.getMember({sysparm_query: 'user=' + userService.sys_id}).$promise.then(function(res){
+				var group = [];
+				res.result.forEach(function(item){
+					group.push('assignment_group=' + item.group.value);
+				});
+
+				return DashboardFactory.product({sysparm_query: 'operational_status!=2^' + group.join('^OR')  + '^ORowned_by=' + userService.sys_id, sysparm_count: true}).$promise;
+			}).then(function(res){
+				sp.productsEnrolled = res.result.stats.count;
+			});			  
+		}; 
+
+		
+		function getTaskCounts(){
+			sp.productCountsLoading = true;
+			
+			TaskFactory.dependingsTasks({user: userService.sys_id, preloader: false}).$promise.then(function(res){
+				getKnowledge();
+				
+				return $q.all([
+						TaskFactory.dependingsTasksIncidentViewStat({sysparm_query: 't_stateNOT IN7,6^d_user_id=' + userService.sys_id, sysparm_group_by: 't_sys_class_name', sysparm_count: true, preloader: false}).$promise,
+						TaskFactory.dependingsTasksProblemViewStat({sysparm_query: 't_stateNOT IN7,4^d_user_id=' + userService.sys_id, sysparm_group_by: 't_sys_class_name', sysparm_count: true, preloader: false}).$promise,
+						TaskFactory.dependingsTasksChangeViewStat({sysparm_query: 't_stateNOT IN3^d_user_id=' + userService.sys_id, sysparm_group_by: 't_sys_class_name', sysparm_count: true, preloader: false}).$promise,
+				]);
+				
+			}).then(function(res){
+				
+				sp.productCountsLoading = false;
+
+				res[0].result.forEach(function(item){
+					sp.product[item.groupby_fields[0].value] = item.stats.count;
+				});
+				res[1].result.forEach(function(item){
+					sp.product[item.groupby_fields[0].value] = item.stats.count;
+				});
+				res[2].result.forEach(function(item){
+					sp.product[item.groupby_fields[0].value] = item.stats.count;
+				});
+					
+			});		  
+			
+		};
+		/*function getTaskCounts(){
+			sp.productCountsLoading = true;
+			
+			TaskFactory.dependingsProductUser({user: userService.sys_id, preloader: false}).$promise.then(function(res){
+				getKnowledge();
+				
+				return TaskFactory.dependingsProductViewStat({sysparm_query: 't_active=true^t_sys_class_name=incident^ORt_sys_class_name=problem^ORt_sys_class_name=change_request^t_state!=6^d_type=user^t_stateNOT IN3,4,7,8^d_user_id=' + userService.sys_id, sysparm_group_by: 't_sys_class_name', sysparm_count: true, preloader: false}).$promise; 
+			}).then(function(res){
+				
+				sp.productCountsLoading = false;
+				res.result.forEach(function(item){
+
+					sp.product[item.groupby_fields[0].value] = item.stats.count;
+
+				});
+					
+			});		  
+			
+		};*/
+		
+		function getKnowledge(){
+			sp.knowledgeLoad = true;
+			TaskFactory.dependingsProductUser({user: userService.sys_id, preloader: false}).$promise.then(function(res){
+				ReferenceBookFactory.knowledgeBase({sysparm_query: 'title=Knowledge', preloader: false}).$promise.then(function(knowledgeBases){
+					ReferenceBookFactory.knowledgeDependingsView({sysparm_query: 'k_author=' + userService.sys_id + '^k_sys_updated_onMORETHANk_sys_updated_on@month@before@6^k_workflow_state=published^k_kb_knowledge_base=' + knowledgeBases.result[0].sys_id, sysparm_display_value: true, preloader: false}).$promise.then(function(res){
+						sp.knowledgeLoad = false;
+						sp.knowledge = res.result;
+					});
+
+				});
+				
+			});
+			
+		} 
+
+		function getAbandonedItems(){
+			sp.abandonedItems = false;
+			ProductFactory.prepareAbandonedItems({user: userService.sys_id, preloader: false}).$promise.then(function(){
+				ProductFactory.prepareAbandonedCount({sysparm_query: 'd_user_id=' + userService.sys_id, sysparm_count: true, preloader: false}).$promise.then(function(res){
+					if(res.result.stats.count > 0){
+						sp.abandonedItems = true;
+					}
+					
+				});
+
+			});
+			
+		} 
+		
+		
+		$scope.$on('products-enrolled', function() {
+			getProductsEnrolled();			
+		});		
+
+		$scope.$on('product-task-counts', function() {
+			getTaskCounts();			
+		});		
+
+		$scope.$on('side-bar-show-info', function(event, data) {
+			sp.showInfo = data;
+		});		
+
+    }
+
+})();
+
+]]></script>
+        <script_name>side-panel-directive</script_name>
+        <sys_class_name>sys_ui_script</sys_class_name>
+        <sys_created_by>andrey.zlatin@weather.com</sys_created_by>
+        <sys_created_on>2016-07-08 14:11:42</sys_created_on>
+        <sys_customer_update>true</sys_customer_update>
+        <sys_id>476e7be40fec62006c3005cce1050e5b</sys_id>
+        <sys_mod_count>66</sys_mod_count>
+        <sys_name>x_wec_product.side-panel-directive</sys_name>
+        <sys_package display_value="Product" source="x_wec_product">daa7dccd0f44220034457d4ce1050e47</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Product">daa7dccd0f44220034457d4ce1050e47</sys_scope>
+        <sys_update_name>sys_ui_script_476e7be40fec62006c3005cce1050e5b</sys_update_name>
+        <sys_updated_by>anton.sychikov.contractor@weather.com</sys_updated_by>
+        <sys_updated_on>2016-09-29 15:31:30</sys_updated_on>
+        <use_scoped_format>false</use_scoped_format>
+    </sys_ui_script>
+</record_update>

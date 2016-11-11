@@ -1,0 +1,677 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update table="sys_ui_script">
+    <sys_ui_script action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <description/>
+        <global>false</global>
+        <name>x_wec_product.GroupsService</name>
+        <script><![CDATA[(function () {
+    'use strict';
+
+    angular
+        .module('twc-product')
+        .factory('GroupsService', GroupsService);
+
+    GroupsService.$inject = ['$q', '$filter', '$uibModal', 'ReferenceBookFactory', 'UserFactory', 'GroupFactory', 'RelationshipsFactory', 'NgTableParams'];
+
+    function GroupsService($q, $filter, $uibModal, ReferenceBookFactory, UserFactory, GroupFactory, RelationshipsFactory, NgTableParams) {
+		return {
+			createSysUserGroup: function(group, callback, isToc){
+				var modalInstance = $uibModal.open({
+					
+					templateUrl: '/x_wec_product_modal-create-sys-group-tpl.do',
+					size: 'lg',
+					controller: function ($scope, $uibModalInstance, userGroups, types) {
+						var ug = this,
+							deleteMemberCollection = [];
+
+						ug.isToc = isToc;
+						ug.ok = ok;
+						ug.cancel = cancel;
+						ug.isInvalid = isInvalid;
+						ug.isValid = isValid ;
+						ug.searchAssignmentGroupByName = searchAssignmentGroupByName;
+						ug.searchUserByName = searchUserByName;
+						ug.loadGroupDetails = loadGroupDetails;
+						ug.addUser = addUser;
+						ug.removeUser = removeUser;
+						ug.setModel = setModel;
+						ug.table = initTable();
+						ug.tableItemSelect = tableItemSelect;
+						
+						
+						ug.selectUsersCollection = [];
+						ug.memberCollection = [];
+						ug.userCollection = [];
+						ug.model = {};
+						ug.isDisabledName = isDisabledName;
+						ug.isShowRoles = isShowRoles;
+						if(userGroups){
+							ug.userGroups = userGroups.result;
+						}
+						
+						if(group){
+							GroupFactory.get({id: group.value, sysparm_display_value: 'all'}).$promise.then(function(res){
+								loadGroupDetails(res.result);	
+								ug.mode = 'upsert';
+							});
+							
+						}else{
+							searchUsers("");
+							ug.mode = 'search';
+						}
+						
+						setTimeout(function() { 
+							$('input').attr('autocomplete', 'off'); 
+						}, 1000);
+						
+						function ok () {
+							
+							if(ug.model.sys_id && ug.model.sys_id.value){
+
+								GroupFactory.update({id: ug.model.sys_id.value}, {name: ug.model.name.value, manager: ug.model.manager.value, description: ug.model.description.value}).$promise.then(function(res){
+									
+									var requests = [];
+									
+									ug.memberCollection.forEach(function(user){
+										if(!user.sys_id){
+											requests.push(GroupFactory.addMember({user: user.user_id, group: ug.model.sys_id.value}).$promise);
+										}
+									});
+
+									deleteMemberCollection.forEach(function(user){
+										requests.push(GroupFactory.removeMember({id: user.sys_id}).$promise);
+									});
+									
+									
+									$q.all(requests).then(function (results) {
+										if(callback){
+											callback({
+												display_value: ug.model.name.value,
+												value: ug.model.sys_id.value 
+											});
+										}
+										$uibModalInstance.close();
+									});									
+									
+								});									
+								
+							}else{
+								
+								GroupFactory.create({name: ug.model.name.value, manager: ug.model.manager.value, description: ug.model.description.value}).$promise.then(function(res){
+									var newGroup =  res.result;
+									
+									var requests = [];
+									
+									ug.memberCollection.forEach(function(user){
+										requests.push(GroupFactory.addMember({user: user.user_id, group: newGroup.sys_id}));
+									});
+									
+									if(isToc && ug.model.groups && ug.model.groups.length > 0){
+										ug.model.groups.forEach(function(gr){
+											requests.push(GroupFactory.addRole({role: gr.sys_id, group: newGroup.sys_id}));
+										});
+									}
+									
+									$q.all(requests).then(function (results) {
+										if(callback){
+											callback({
+												display_value: newGroup.name,
+												value: newGroup.sys_id 
+											});
+										}
+									    $uibModalInstance.close();
+									});									
+									
+								});									
+								
+							}
+						}
+
+						function tableItemSelect(item){
+							
+							if(callback){
+								callback({
+									display_value: item.name.value,
+									value: item.sys_id.value 
+								});
+							}
+							$uibModalInstance.close();
+	
+						}
+						
+						function initTable() {
+							return new NgTableParams({
+								count: 10
+							}, {
+								counts: [25, 50, 100, 200],
+								getData: function(params) {
+
+									var filters = params.filter(),
+										filtersArr = [];
+
+									filtersArr.push('ORDERBYname');
+
+									if(filters.hasOwnProperty('name') && filters.name !== ""){
+										filtersArr.push('nameLIKE' + filters.name);
+									}
+									
+									filtersArr.push('typeNOT LIKE' + types.result[0].sys_id  + '^ORtypeISEMPTY^typeNOT LIKE' + types.result[1].sys_id + '^ORtypeISEMPTY');
+
+									return GroupFactory.fullSysGroupList({
+										sysparm_limit: params.count(),
+										sysparm_offset: (params.page() - 1) * params.count(),
+										sysparm_query: filtersArr.join('^'),
+										sysparm_display_value: 'all',
+										preloader: false
+									}).$promise.then(function(res) {
+										params.total(res.headers['x-total-count']);
+										return res.data.result;
+									});
+								}
+							});
+
+						}
+						
+						
+						function cancel() {
+							$uibModalInstance.dismiss('cancel');
+						}
+
+						function searchAssignmentGroupByName(name){
+							return ReferenceBookFactory.assignmentGroupSearch({sysparm_query: 'nameLIKE' + name + '^type!=' + types.result[0].sys_id + '^ORtype=', sysparm_limit: 20, sysparm_display_value: 'all'}).$promise.then(function(res){
+								return res.result;
+							});
+						}
+
+						function searchUserByName(name){
+							return UserFactory.search({sysparm_query: 'nameLIKE' + name + '^' + 'ORemailLIKE' + name + '^active=true^sys_class_name=sys_user', sysparm_limit: 20, preloader: false}).$promise.then(function(res){
+								return res.result;
+							});
+						}
+
+						function loadGroupDetails($item){
+							ReferenceBookFactory.groupMemberSearch({group: $item.sys_id.value, sysparm_display_value: 'all'}).$promise.then(function(res){
+								ug.memberCollection = [];
+								res.result.forEach(function(member){
+									ug.memberCollection.push({
+										user_id: member.user.value,
+										sys_id: member.sys_id.value,
+										name: member.user.display_value
+									});
+								});
+								
+								ug.model = $item;
+								ug.mode = 'upsert';
+							});
+						}
+
+						function isInvalid(field){
+							return field.$invalid && field.$dirty;
+						}
+
+						function isValid(field){
+							return field.$valid && field.$dirty;
+						}
+						
+						function searchUsers(name){
+							UserFactory.search({sysparm_query: 'nameLIKE' + name + '^' + 'ORemailLIKE' + name + '^active=true^sys_class_name=sys_user^nameISNOTEMPTY', sysparm_limit: 40}).$promise.then(function(res){
+								var tmpResult = res.result;
+								ug.userCollection = [];
+								
+								tmpResult.forEach(function(tmpUser){
+								
+									if(!_.find(ug.memberCollection, { user_id: tmpUser.sys_id})){
+										ug.userCollection.push(tmpUser);
+									}
+									
+									
+								});
+							});
+						}
+						
+						$scope.$watch('ug.userSearch', function (tmpStr){
+							if(tmpStr){
+								searchUsers(tmpStr);
+							}
+						});
+						
+						function addUser(){
+							ug.selectUsersCollection.forEach(function(user){
+								ug.memberCollection.push({
+									user_id: user.sys_id,
+									name: user.name
+								});
+								
+								_.remove(ug.userCollection, {sys_id: user.sys_id});
+							});
+							
+							
+						}
+						
+						function removeUser(){
+							
+							ug.selectMemberCollection.forEach(function(removeUser){
+
+								ug.userCollection.push(removeUser);
+								
+								_.remove(ug.memberCollection, {user_id: removeUser.user_id});
+								
+								if(removeUser.sys_id){
+									deleteMemberCollection.push(removeUser);
+								}
+								
+							});
+						}
+						
+						function isDisabledName(){
+							return ug.isToc && ug.model.sys_id;
+						}
+
+						function isShowRoles(){
+							return ug.isToc && !ug.model.sys_id;
+						}
+						
+						function setModel($item, $model, $label, $event, field){
+							ug.model[field] = {
+								display_value: $item.name,
+								value: $item.sys_id
+							}
+						}
+						
+					},
+					controllerAs: "ug",
+					resolve: {
+						userGroups: isToc ? ReferenceBookFactory.userRoles({sysparm_query: 'sys_name=Dev Ops Support Group^ORsys_name=Support Group'}).$promise : null,
+						types: function (GroupFactory){
+							return GroupFactory.getTypes({sysparm_query: 'name=administrative^ORname=Agile Team'}).$promise
+						}
+						
+					}
+				});
+					
+			},
+			
+			createBusinessGroup: function(group, callback){
+				var modalInstance = $uibModal.open({
+					
+					templateUrl: '/x_wec_product_modal-create-business-group-tpl.do',
+					size: 'lg',
+					controller: function ($scope, $uibModalInstance) {
+						var bg = this;
+
+						bg.ok = ok;
+						bg.cancel = cancel;
+						bg.isInvalid = isInvalid;
+						bg.isValid = isValid;
+						bg.searchBusinessGroupByName = searchBusinessGroupByName;
+						bg.searchUserByName = searchUserByName;
+						bg.setModel = setModel;
+						bg.loadGroupDetails = loadGroupDetails;
+						bg.model = {};
+						bg.table = initTable();
+						bg.tableItemSelect = tableItemSelect;
+						
+						
+						if(group){
+							GroupFactory.getBusiness({id: group.value, sysparm_display_value: 'all'}).$promise.then(function(res){
+								loadGroupDetails(res.result);	
+								bg.mode = 'upsert';
+							});
+						}else{
+							bg.mode = 'search';
+						}
+						
+						function tableItemSelect(item){
+							
+							if(callback){
+								callback({
+									display_value: item.name.value,
+									value: item.sys_id.value 
+								});
+							}
+							$uibModalInstance.close();
+	
+						}
+						
+						setTimeout(function() { 
+							$('input').attr('autocomplete', 'off'); 
+						}, 1000);
+
+						function initTable() {
+							return new NgTableParams({
+								count: 10
+							}, {
+								counts: [25, 50, 100, 200],
+								getData: function(params) {
+
+									var filters = params.filter(),
+										filtersArr = [];
+
+									filtersArr.push('ORDERBYname');
+
+									if(filters.hasOwnProperty('name') && filters.name !== ""){
+										filtersArr.push('nameLIKE' + filters.name);
+									}
+									
+									return GroupFactory.fullBusinessGroupList({
+										sysparm_limit: params.count(),
+										sysparm_offset: (params.page() - 1) * params.count(),
+										sysparm_query: filtersArr.join('^'),
+										sysparm_display_value: 'all',
+										preloader: false
+									}).$promise.then(function(res) {
+										params.total(res.headers['x-total-count']);
+										return res.data.result;
+									});
+								}
+							});
+
+						}
+						
+						
+						function searchBusinessGroupByName(name){
+							return ReferenceBookFactory.businessGroupSearch({sysparm_query: 'nameLIKE' + name, sysparm_limit: 20, sysparm_display_value: 'all'}).$promise.then(function(res){
+								return res.result;
+							});
+						}
+						
+						function searchUserByName(name){
+							return UserFactory.search({sysparm_query: 'nameLIKE' + name + '^' + 'ORemailLIKE' + name + '^active=true^sys_class_name=sys_user', sysparm_limit: 20, sysparm_display_value: 'all'}).$promise.then(function(res){
+								return res.result;
+							});
+						}
+						
+						function ok () {
+							if(bg.model.sys_id && bg.model.sys_id.value){
+
+								GroupFactory.updateBusiness({id: bg.model.sys_id.value}, getModel()).$promise.then(function(res){
+									
+									if(callback){
+										callback({
+											display_value: res.result.name,
+											value: res.result.sys_id 
+										});
+									}
+									$uibModalInstance.close();
+									
+								});									
+								
+							}else{
+								
+								GroupFactory.createBusiness(getModel()).$promise.then(function(res){
+									
+									if(callback){
+										callback({
+											display_value: res.result.name,
+											value: res.result.sys_id 
+										});
+									}
+									$uibModalInstance.close();
+									
+								});									
+								
+							}
+							
+						}
+
+						function cancel() {
+							$uibModalInstance.dismiss('cancel');
+						}
+
+
+						function isInvalid(field){
+							return field.$invalid && field.$dirty;
+						}
+
+						function isValid(field){
+							return field.$valid && field.$dirty;
+						}
+						
+						function loadGroupDetails($item){
+							bg.model = $item;
+							bg.mode = 'upsert';
+						}
+
+						function setModel($item, $model, $label, $event, field){
+							bg.model[field] = {
+								display_value: $item.name.display_value,
+								value: $item.sys_id.value
+							}
+						}
+
+						function getModel(){
+							return {
+								name: bg.model.name.value,
+								owned_by: bg.model.owned_by.value,
+								short_description: (bg.model.short_description && bg.model.short_description.value) ? bg.model.short_description.value : ''
+							}
+						}
+						
+
+					},
+					controllerAs: "bg"
+				});
+					
+			},
+			
+			createServiceGroup: function(businessGroup, group, callback){
+				
+				var modalInstance = $uibModal.open({
+					
+					templateUrl: '/x_wec_product_modal-create-service-group-tpl.do',
+					size: 'lg',
+					controller: function ($scope, $uibModalInstance) {
+						var sg = this;
+
+						sg.ok = ok;
+						sg.cancel = cancel;
+						sg.isInvalid = isInvalid;
+						sg.isValid = isValid;
+						sg.searchBusinessServiceByName = searchBusinessServiceByName;
+						sg.searchUserByName = searchUserByName;
+						sg.setModel = setModel;
+						sg.loadGroupDetails = loadGroupDetails;
+						sg.model = {};
+						sg.table = initTable();
+						sg.tableItemSelect = tableItemSelect;
+						sg.modelPrepared = modelPrepared;
+						
+						setTimeout(function() { 
+							$('input').attr('autocomplete', 'off'); 
+						}, 1000);
+						
+						if(group){
+							
+							RelationshipsFactory.get({sysparm_query: 'parent=' + businessGroup.value + '^child=' + group.value, sysparm_display_value: 'all'}).$promise.then(function(res){
+								if(res.result.length){
+									sg.relId = res.result[0].sys_id.value;
+								}
+								
+								return GroupFactory.getService({id: group.value, sysparm_display_value: 'all'}).$promise;
+							}).then(function(res){
+								modelPrepared(res.result);
+								sg.mode = 'upsert';
+							});
+						}else{
+							modelPrepared({});
+							sg.mode = 'search';
+						}
+						
+						function searchBusinessServiceByName(name){
+							return RelationshipsFactory.get({sysparm_query: 'parent=' + businessGroup.value + '^childLIKE' + name, sysparm_limit: 20, sysparm_display_value: 'all'}).$promise.then(function(res){
+								return res.result;
+							});
+						}
+						
+						function searchUserByName(name){
+							return UserFactory.search({sysparm_query: 'nameLIKE' + name + '^' + 'ORemailLIKE' + name + '^active=true^sys_class_name=sys_user', sysparm_limit: 20, sysparm_display_value: 'all'}).$promise.then(function(res){
+								return res.result;
+							});
+						}
+
+						function tableItemSelect(item){
+							
+							if(callback){
+								
+								callback({
+									display_value: item.child.display_value,
+									value: item.child.value
+								});
+								
+							}
+							$uibModalInstance.close();
+	
+						}
+						
+						function initTable() {
+							return new NgTableParams({
+								count: 10
+							}, {
+								counts: [25, 50, 100, 200],
+								getData: function(params) {
+
+									var filters = params.filter(),
+										filtersArr = [];
+
+									filtersArr.push('ORDERBYchild');
+									filtersArr.push('parent=' + businessGroup.value);
+
+									if(filters.hasOwnProperty('child') && filters.child !== ""){
+										filtersArr.push('childLIKE' + filters.child);
+									}
+									
+									return GroupFactory.fullBusinessServiceList({
+										sysparm_limit: params.count(),
+										sysparm_offset: (params.page() - 1) * params.count(),
+										sysparm_query: filtersArr.join('^'),
+										sysparm_display_value: 'all',
+										preloader: false
+									}).$promise.then(function(res) {
+										params.total(res.headers['x-total-count']);
+										return res.data.result;
+									});
+								}
+							});
+
+						}
+						
+						
+						function ok () {
+							
+							if(sg.model.sys_id && sg.model.sys_id.value){
+
+								GroupFactory.updateService({id: sg.model.sys_id.value}, getModel()).$promise.then(function(res){
+									
+									if(!sg.relId){
+										RelationshipsFactory.insert({parent: businessGroup.value, child: res.result.sys_id, type: 'Provides::Provided by'});
+									}
+									
+									if(callback){
+										callback({
+											display_value: res.result.name,
+											value: res.result.sys_id 
+										});
+									}
+									$uibModalInstance.close();
+									
+								});									
+								
+							}else{
+								
+								GroupFactory.createService(getModel()).$promise.then(function(res){
+									
+									RelationshipsFactory.insert({parent: businessGroup.value, child: res.result.sys_id, type: 'Provides::Provided by'}).$promise.then(function(){
+
+										if(callback){
+											callback({
+												display_value: res.result.name,
+												value: res.result.sys_id 
+											});
+										}
+										$uibModalInstance.close();
+										
+									});
+									
+									
+								});									
+								
+							}
+							
+						}
+
+						function cancel() {
+							$uibModalInstance.dismiss('cancel');
+						}
+
+
+						function isInvalid(field){
+							return field.$invalid && field.$dirty;
+						}
+
+						function isValid(field){
+							return field.$valid && field.$dirty;
+						}
+						
+						function loadGroupDetails($item){
+							sg.relId = $item.sys_id.value;
+							GroupFactory.getService({id: $item.child.value, sysparm_display_value: 'all'}).$promise.then(function(res){
+								modelPrepared(res.result);
+								sg.mode = 'upsert';
+							});
+							
+							
+						}
+
+						function setModel($item, $model, $label, $event, field){
+							sg.model[field] = {
+								display_value: $item.name.display_value,
+								value: $item.sys_id.value
+							}
+						}
+
+						function getModel(){
+							return {
+								name: businessGroup.display_value + ' - ' + sg.model.name.value,
+								owned_by: sg.model.owned_by.value,
+								short_description: (sg.model.short_description && sg.model.short_description.value) ? sg.model.short_description.value : ''
+							}
+						}
+						
+						function modelPrepared(item){
+							sg.model = item;
+							sg.model.prefix = businessGroup.display_value;
+							
+							if(sg.model.name && sg.model.name.value){
+								sg.model.name.value = sg.model.name.value.replace(businessGroup.display_value + ' - ', '');
+							}
+						}
+						
+
+					},
+					controllerAs: "sg"
+				});
+					
+			},
+		}
+    }
+
+})();]]></script>
+        <script_name>GroupsService</script_name>
+        <sys_class_name>sys_ui_script</sys_class_name>
+        <sys_created_by>andrey.zlatin@weather.com</sys_created_by>
+        <sys_created_on>2016-07-12 13:37:22</sys_created_on>
+        <sys_customer_update>true</sys_customer_update>
+        <sys_id>bccc98ce0f24260034457d4ce1050ea9</sys_id>
+        <sys_mod_count>126</sys_mod_count>
+        <sys_name>x_wec_product.GroupsService</sys_name>
+        <sys_package display_value="Product" source="x_wec_product">daa7dccd0f44220034457d4ce1050e47</sys_package>
+        <sys_policy/>
+        <sys_replace_on_upgrade>false</sys_replace_on_upgrade>
+        <sys_scope display_value="Product">daa7dccd0f44220034457d4ce1050e47</sys_scope>
+        <sys_update_name>sys_ui_script_bccc98ce0f24260034457d4ce1050ea9</sys_update_name>
+        <sys_updated_by>anton.sychikov.contractor@weather.com</sys_updated_by>
+        <sys_updated_on>2016-10-20 08:35:10</sys_updated_on>
+        <use_scoped_format>false</use_scoped_format>
+    </sys_ui_script>
+</record_update>
