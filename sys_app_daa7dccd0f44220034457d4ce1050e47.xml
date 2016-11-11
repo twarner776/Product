@@ -22,14 +22,14 @@
         <sys_created_by>jason.lindsey@weather.com</sys_created_by>
         <sys_created_on>2016-06-14 14:08:51</sys_created_on>
         <sys_id>daa7dccd0f44220034457d4ce1050e47</sys_id>
-        <sys_mod_count>7</sys_mod_count>
-        <sys_updated_by>travis.warner@weather.com</sys_updated_by>
-        <sys_updated_on>2016-11-11 15:30:32</sys_updated_on>
+        <sys_mod_count>8</sys_mod_count>
+        <sys_updated_by>Courtney.Richards@weather.com</sys_updated_by>
+        <sys_updated_on>2016-11-11 17:04:50</sys_updated_on>
         <template/>
         <trackable>true</trackable>
         <user_role display_value="x_wec_product.user" name="x_wec_product.user">2aa79c010f84220034457d4ce1050e45</user_role>
         <vendor/>
         <vendor_prefix/>
-        <version>1.0.3</version>
+        <version>1.0.4</version>
     </sys_app>
 </record_update>
